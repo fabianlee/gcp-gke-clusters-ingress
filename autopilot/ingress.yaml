@@ -1,0 +1,36 @@
+# https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
+# We can use global static IP with Ingress object
+# in contrast to setting LoadBalancerIP in istio-ingressgateway of type LoadBalancer, which does not take name and can only use regional static IP
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: asm-gateways
+  annotations:
+    # If the class annotation is not specified it defaults to "gce".
+    kubernetes.io/ingress.class: gce
+    # name of global static IP
+    kubernetes.io/ingress.global-static-ip-name: istio-ingressgateway-global
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  #defaultBackend:
+  #  service:
+  #    name: istio-ingressgateway
+  #    port:
+  #      number: 80
+
+  tls:
+  - secretName: my-tls-credential
+
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: istio-ingressgateway
+            port:
+              number: 443
+              # served up http good
+              #number: 80

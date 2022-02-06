@@ -1,0 +1,6 @@
+.terraform
+*.backup
+terraform.tfstate
+id_rsa*
+*.lock.hcl
+*.json
