@@ -2,13 +2,20 @@
 #
 # Creates GKE cluster and registers with Anthos hub
 #
-# Usage: clusterType=autopilot|standard
+# Usage: clusterType=autopilot|standard exposedAs=public|private
 #
 
 # by default creates AutoPilot GKE cluster
 cluster_type="${1:-autopilot}"
-[[ "autopilot standard " =~ $cluster_type[[:space:]] ]] || { echo "ERROR only valid types are standard|autopilot"; exit 3; }
+[[ "autopilot standard " =~ $cluster_type[[:space:]] ]] || { echo "ERROR only valid cluster types are standard|autopilot"; exit 3; }
 
+# whether cluster is public or private
+# https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
+# private means nodes have only internal IP, which means isolation from internet without CloudNAT
+exposed_as="${2:-public}"
+[[ "public private " =~ $exposed_as[[:space:]] ]] || { echo "ERROR only valid exposed types are public|private"; exit 3; }
+
+# determine name of cluster
 [ $cluster_type = "autopilot" ] && cluster_name="autopilot-cluster1" || cluster_name="cluster1"
 
 region=us-east1
@@ -26,6 +33,10 @@ fi
 
 # prefix for selfLink values coming back from gcloud
 googleapi="https://www.googleapis.com/compute/v1/"
+
+network_name=mynetwork
+subnetwork_name=mysubnet-private
+
 
 # check for gcloud login context
 gcloud projects list > /dev/null 2>&1
@@ -53,21 +64,21 @@ gcloud services enable --project=$projectId \
    gkeconnect.googleapis.com \
    gkehub.googleapis.com \
    cloudresourcemanager.googleapis.com \
-   iam.googleapis.com
+   iam.googleapis.com \
+   anthos.googleapis.com
 
-# use 'default' network
-default_network_count=$(gcloud compute networks list --filter=name~default | wc -l)
-[ $default_network_count -gt 0 ] || { echo "ERROR did not find 'default' network"; exit 5; }
+network_count=$(gcloud compute networks list --filter="name=$network_name" | wc -l)
+[ $network_count -gt 0 ] || { echo "ERROR did not find '$network_name' network"; exit 5; }
 
 # get qualified link to network
-default_network_qual=$(gcloud compute networks describe default --format="value(selfLink)" | sed  "s#$googleapi##")
-[ -n "$default_network_qual" ] || { echo "ERROR could not describe default network"; exit 5; }
-echo "default network: $default_network_qual"
+network_qual=$(gcloud compute networks describe $network_name --format="value(selfLink)" | sed  "s#$googleapi##")
+[ -n "$network_qual" ] || { echo "ERROR could not describe $network_name network"; exit 5; }
+echo "network: $network_qual"
 
 # get qualified link to subnetwork
-default_subnetwork_qual=$(gcloud compute networks subnets list --filter="region:($region)" --format="value(selfLink)" | head -n1 | sed  "s#$googleapi##")
-[ -n "$default_subnetwork_qual" ] || { echo "ERROR could not list default subnetwork"; exit 5; }
-echo "default subnetwork: $default_subnetwork_qual"
+subnetwork_qual=$(gcloud compute networks subnets list --filter="network~$network_name AND name~$subnetwork_name" --format="value(selfLink)" | head -n1 | sed  "s#$googleapi##")
+#[ -n "$subnetwork_qual" ] || { echo "ERROR could not list subnetwork"; exit 5; }
+echo "subnetwork: $subnetwork_qual"
 
 
 # create autopilot cluster
@@ -78,23 +89,43 @@ if [ $cluster_count -eq 0 ]; then
   rm -f kubeconfig-$cluster_name
 
   if [ $cluster_type = "autopilot" ]; then
+
+    private_flags=""
+    if [ "$exposed_as" = "private" ]; then 
+      private_flags="--enable-master-authorized-networks --enable-private-nodes --enable-private-endpoint"
+    fi
+   
     set -ex
-    gcloud container --project $projectId clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$default_network_qual" --subnetwork "$default_subnetwork_qual" --cluster-ipv4-cidr "/17" --services-ipv4-cidr "/22" --scopes="$cluster_scopes"
+    gcloud container --project $projectId clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_qual" --subnetwork "$subnetwork_qual" --cluster-secondary-range-name=pods --services-secondary-range-name=services --master-authorized-networks=10.99.0.0/24,10.100.0.0/24 --scopes="$cluster_scopes" $private_flags
     set +ex
   elif [ $cluster_type = "standard" ]; then
 
-    private_flags="--create-subnetwork name=private-subnet,range=10.0.0.0/16 --disable-default-snat --enable-ip-alias --enable-private-nodes --cluster-ipv4-cidr 10.1.0.0/17 --services-ipv4-cidr 10.2.0.0/19 --enable-master-global-access --enable-intra-node-visibility  --master-ipv4-cidr 10.99.0.0/28"
+    
+    # if private GKE cluster, you can have gcloud create subnets for you OR you can precreate and reference
+    # --create-subnetwork name=$subnetwork_name,range=10.99.0.0/24 OR --subnetwork=$subnetwork_name
+    # --cluster-ipv4-cidr 10.0.0.0/17 OR --cluster-secondary-range-name=pods
+    # --services-ipv4-cidr 10.0.128.0/17 OR --services-secondary-range-name=services
+    private_flags=""
+    if [ "$exposed_as" = "private" ]; then 
+      private_flags="--disable-default-snat --enable-ip-alias --enable-private-nodes --enable-master-global-access --enable-intra-node-visibility --enable-private-endpoint --enable-master-authorized-networks --master-authorized-networks=10.99.0.0/24,10.100.0.0/24"
+    else
+      private_flags="--no-enable-master-authorized-networks"
+    fi
 
     # for zonal with 1 node, use e2-standard-2 (2vcpu,8Gb)
     set -ex
-    gcloud beta container --project $projectId clusters create $cluster_name $location_flag --num-nodes 1 --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "e2-standard-2" --image-type "UBUNTU" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$default_network_qual" --subnetwork "$default_subntwork_qual" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --no-enable-master-authorized-networks --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $projectId.svc.id.goog $private_flags
+    gcloud beta container --project $projectId clusters create $cluster_name $location_flag --num-nodes 1 --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "e2-standard-2" --image-type "UBUNTU" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$network_qual" --subnetwork "$subnetwork_qual" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $projectId.svc.id.goog --cluster-secondary-range-name=pods --services-secondary-range-name=services --master-ipv4-cidr 10.1.0.0/28 $private_flags
     set +ex
   fi
+
+  # if master auth networks needed to be set post-creation
+  # gcloud container clusters update cluster1 --region=us-east1 --enable-master-authorized-networks --master-authorized-networks=10.99.0.0/24,10.100.0.0/24
 
   # update to set maintenance window flags
   gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
 
-  # register cluster with Anthos hub
+  # register cluster with Anthos hub, delete any old registration first
+  gcloud container hub memberships delete $cluster_name --quiet
   gcloud container hub memberships list
   gcloud container hub memberships register $cluster_name --gke-cluster=$region/$cluster_name --enable-workload-identity
 
@@ -119,15 +150,16 @@ else
 fi
 
 # https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-notifications#enable-notifications-existing
+set -x
 gcloud container clusters update $cluster_name $location_flag \
     --notification-config=pubsub=ENABLED,pubsub-topic=projects/$projectId/topics/$cluster_name
 
 # make sure HttpLoadBalacing add-on is enabled for cluster
 # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress#gcloud
-gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED
+gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED $location_flag
 
-# for private GKE clusters, must create Cloud NAT so that worker nodes can reach public images
-# https://cloud.google.com/sdk/gcloud/reference/compute/routers/nats/create?hl=nb
-gcloud compute routers create router1 --network=$default_network_qual --region=$region
-gcloud compute routers nats create nat-gateway1 --router=router1 --auto-allocate-nat-external-ips --nat-all-subnet-ip-ranges --region=$region 
-
+# show IP of worker nodes
+timeout 10 kubectl get nodes -o wide
+if [ $? -ne 0 ]; then
+  echo "kubectl failed. If this is a private GKE cluster with '--enable-private-endpoint' that makes sense because it would mean you cannot manage remotely"
+fi
