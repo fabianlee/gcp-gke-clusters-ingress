@@ -211,7 +211,7 @@ while [ 1 == 1 ]; do
     delvm)
       set -x
       retVal=0
-      for subnet in pub-10-0-90-0 pub-10-0-91- prv-10-0-100-0 prv-10-0-101-0; do
+      for subnet in pub-10-0-90-0 pub-10-0-91-0 prv-10-0-100-0 prv-10-0-101-0; do
         gcloud/delete-vm-instance.sh $project_id vm-$subnet $region
         [ $? -eq 0 ] || retVal=$?
       done
