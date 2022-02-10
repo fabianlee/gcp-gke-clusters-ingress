@@ -17,17 +17,19 @@ menu_items=(
   "network,Create network and subnets"
   ""
   "metadata,Load ssh key into project metadata"
-  "vm,Create VM instances in subnets"
+  "vms,Create VM instances in subnets"
   "showssh,Show public IP and bastion config"
   ""
   "gke,Create public standard GKE cluster"
-  "privgke,Create private standard GKE cluster"
   "autopilot,Create public AutoGKE cluster"
+  "privgke,Create private standard GKE cluster"
   "privautopilot,Create private AutoGKE cluster"
   ""
-  "delcluster,Delete GKE standard cluster"
-  "delauto,Delete GKE Autopilot cluster"
-  "delvm,Delete VM instances"
+  "delgke,Delete GKE public standard cluster"
+  "delautopilot,Delete GKE public Autopilot cluster"
+  "delprivgke,Delete GKE private standard cluster"
+  "delprivautopilot,Delete GKE private Autopilot cluster"
+  "delvms,Delete VM instances"
   "delnetwork,Delete network and Cloud NAT"
 )
 
@@ -159,7 +161,7 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    vm)
+    vms)
       set -x
       retVal=0
       for subnet in pub-10-0-90-0 pub-10-0-91-0; do
@@ -184,7 +186,57 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    delcluster)
+
+    gke)
+      subnet=pub-10-0-90-0
+      master_cidr="10.1.0.0/28"
+      additional_authorized_cidr=""
+      set -x
+      gcloud/create-gke-cluster.sh standard public $subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      retVal=$?
+      set +x
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+ 
+    autopilot)
+      subnet=pub-10-0-91-0
+      master_cidr="10.1.0.16/28"
+      additional_authorized_cidr=""
+      set -x
+      gcloud/create-gke-cluster.sh autopilot public ap-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    privgke)
+      subnet=prv-10-0-100-0
+      master_cidr="10.1.0.32/28"
+      additional_authorized_cidr="10.0.90.0/24"
+      set -x
+      gcloud/create-gke-cluster.sh standard private $subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      retVal=$?
+      set +x
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    privautopilot)
+      subnet=prv-10-0-101-0
+      master_cidr="10.1.0.48/28"
+      additional_authorized_cidr="10.0.91.0/24"
+      set -x
+      gcloud/create-gke-cluster.sh autopilor private ap-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      retVal=$?
+      set +x
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+
+    delgke)
       set -x
       gcloud/delete-gke-cluster.sh $project_id standard
       retVal=$?
@@ -192,7 +244,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    delauto)
+    delautopilot)
       set -x
       gcloud/delete_gke_cluster.sh $project_id autopilot
       retVal=$?
@@ -200,6 +252,24 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
+    delprivgke)
+      set -x
+      gcloud/delete-gke-cluster.sh $project_id standard
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    delprivautopilot)
+      set -x
+      gcloud/delete_gke_cluster.sh $project_id autopilot
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+
     delnetwork)
       set -x
       gcloud/delete-network.sh $project_id $network_name $region
@@ -208,7 +278,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    delvm)
+    delvms)
       set -x
       retVal=0
       for subnet in pub-10-0-90-0 pub-10-0-91-0 prv-10-0-100-0 prv-10-0-101-0; do
