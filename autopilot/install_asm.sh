@@ -26,10 +26,14 @@ asm_release_channel=rapid # regular|rapid for GKE Autopilot (cannot use stable)
 
 KUBECONFIG="kubeconfig-${cluster_name}"
 
-# most current
+# ASM downloads
+# Most current
 #[ -f asmcli ] || curl https://storage.googleapis.com/csm-artifacts/asm/asmcli > asmcli
+# latest <major>.<minor> version
+# curl -LO https://storage.googleapis.com/csm-artifacts/asm/asmcli_1.11
 #
-# exact <major>.<minor>.<revision>, https://cloud.google.com/service-mesh/docs/release-notes
+# ISTIO downloads
+# exact <major>.<minor>.<revision>, listed here https://cloud.google.com/service-mesh/docs/release-notes
 # curl -LO https://storage.googleapis.com/gke-release/asm/istio-1.12.0-asm.4-linux-amd64.tar.gz
 #
 # latest minor version

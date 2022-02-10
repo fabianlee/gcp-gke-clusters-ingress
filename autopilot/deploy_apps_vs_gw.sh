@@ -56,6 +56,10 @@ exit 0
 
 # there are no annotations on Service or operator control ingress that can properly have GCP LB auto created
 # https://github.com/istio/istio/issues/1024
+#
+# also check into 'purpose' flag to make sure sure internal LB can use 
+# gcloud compute addresses create my-internal-lb --region europe-west3 --addresses 10.223.0.192 --subnet <subnet_name> --purpose SHARED_LOADBALANCER_VIP
+#
 gcloud compute addresses create istio-ingressgateway-regional --project=$projectId --region=$region
 static_ip=$(gcloud compute addresses describe istio-ingressgateway-regional --region=$region --format="value(address)")
 [ -n "$static_ip" ] || { echo "ERROR did not find static IP 'istio-ingressgateway-regional'"; exit 5; }

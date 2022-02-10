@@ -14,7 +14,9 @@ metadata:
     cloud.google.com/neg: '{"ingress": true}'
     #cloud.google.com/app-protocols: '{"http":"HTTP2","https":"HTTPS"}' # HTTP/2 with TLS encryption
     cloud.google.com/app-protocols: '{"https":"HTTPS"}' # HTTP/2 with TLS encryption
-    cloud.google.com/load-balancer-type: "Internal"
+
+    cloud.google.com/load-balancer-type: "Internal" # what about 'networking.gke.io/load-balancer-type' ? (which is legacy)
+
     networking.gke.io/suppress-firewall-xpn-error: "true"
     # need backend config for implementing health check;  otherwise front-facing GCP L7 LB will not be healthy
     cloud.google.com/backend-config: '{"default": "ingress-backendconfig"}'

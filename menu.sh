@@ -14,21 +14,20 @@ declare -A done_status
 menu_items=(
   "project,Create gcp project as self"
   "svcaccount,Create service account for provisioning"
-  "network,Create public network and subnet"
-  "privsubnet,Create private subnet and Cloud NAT"
+  "network,Create network and subnets"
+  ""
+  "metadata,Load ssh key into project metadata"
+  "vm,Create VM instances in subnets"
+  "ssh,Show public IP and bastion config"
   ""
   "gke,Create public standard GKE cluster"
   "privgke,Create private standard GKE cluster"
   "autopilot,Create public AutoGKE cluster"
   "privautopilot,Create private AutoGKE cluster"
   ""
-  "pubvm,Create VM instance in public network"
-  "privvm,Create VM instance in private network"
-  ""
   "delcluster,Delete GKE standard cluster"
   "delauto,Delete GKE Autopilot cluster"
-  "delpubvm,Delete public VM instance"
-  "delprivvm,Delete private VM instance"
+  "delvm,Delete VM instances"
   "delnetwork,Delete network and Cloud NAT"
 )
 
@@ -144,33 +143,41 @@ while [ 1 == 1 ]; do
 
     network)
       set -x
-      gcloud/create-network-and-subnet.sh $project_id $network_name $subnetwork_name_public $subnetwork_cidr_public $firewall_internal_allow_cidr $region
+      gcloud/create-network-and-subnets.sh $project_id $network_name $region
       retVal=$?
       set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    privsubnet)
+    metadata)
       set -x
-      gcloud/create-private-subnet.sh $project_id $network_name $subnetwork_name_private $subnetwork_cidr_private $subnetwork_secondary_cidr_pods $subnetwork_secondary_cidr_services $region
+      gcloud/add-gcp-metadata-ssh-key.sh $project_id
       retVal=$?
       set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    pubvm)
+    vm)
       set -x
-      gcloud/create-vm-instance.sh public $project_id $network_name $subnetwork_name_public $region
-      retVal=$?
+      retVal=0
+      for subnet in pub-10-0-90-0 pub-10-0-91-0; do
+        gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region
+        [ $? -eq 0 ] || retVal=$?
+      done
+      for subnet in prv-10-0-100-0 prv-10-0-101-0; do
+        gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region
+        [ $? -eq 0 ] || retVal=$?
+      done
       set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    privvm)
+
+    ssh)
       set -x
-      gcloud/create-vm-instance.sh private $project_id $network_name $subnetwork_name_private $region
+      gcloud/show-ssh.sh $project_id
       retVal=$?
       set +x 
 
@@ -201,10 +208,14 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    delpubvm)
+    delvm)
       set -x
-      gcloud/delete-vm.sh $project_id vm-public $region
-      retVal=$?
+      retVal=0
+      for subnet in pub-10-0-90-0 pub-10-0-91- prv-10-0-100-0 prv-10-0-101-0; do
+        gcloud/delete-vm-instance.sh $project_id vm-$subnet $region
+        [ $? -eq 0 ] || retVal=$?
+      done
+
       set +x 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
