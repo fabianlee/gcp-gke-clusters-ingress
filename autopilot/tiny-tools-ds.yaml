@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: Deployment #Deployment
 metadata:
   name: tiny-tools
   # allow for override: kubectl -n <ns> apply ...
@@ -12,7 +12,7 @@ spec:
     matchLabels:
       app: tiny-tools
   # kubectl scale --replicas=x deployment/tiny-tools
-  replicas: 1
+  #replicas: 1
   template:
     metadata:
       labels:
@@ -21,19 +21,26 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - tiny-tools
-            topologyKey: "kubernetes.io/hostname"
+#      affinity:
+#        podAntiAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#          - labelSelector:
+#              matchExpressions:
+#              - key: app
+#                operator: In
+#                values:
+#                - tiny-tools
+#            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: tiny-tools
         image: giantswarm/tiny-tools:3.12
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "1"
+          limits:
+            memory: "1024Mi"
+            cpu: "2"
         args:
         - /bin/sh
         - -c

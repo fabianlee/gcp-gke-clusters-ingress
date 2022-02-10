@@ -27,7 +27,7 @@ image_flags="--image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud"
 # os login explanation: https://medium.com/@0d6e/options-for-managing-ssh-access-on-google-compute-engine-e629b3203664
 
 set -x
-echo gcloud compute instances create $vm_name $image_flags \
+gcloud compute instances create $vm_name $image_flags \
 --zone=$region-b \
 --machine-type=e2-small \
 --subnet=$subnet_name \

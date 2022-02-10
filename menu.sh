@@ -192,7 +192,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.0/28"
       additional_authorized_cidr=""
       set -x
-      gcloud/create-gke-cluster.sh standard public $subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh standard public std-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
@@ -216,7 +216,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.32/28"
       additional_authorized_cidr="10.0.90.0/24"
       set -x
-      gcloud/create-gke-cluster.sh standard private $subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh standard private std-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
@@ -238,7 +238,7 @@ while [ 1 == 1 ]; do
 
     delgke)
       set -x
-      gcloud/delete-gke-cluster.sh $project_id standard
+      gcloud/delete-gke-cluster.sh $project_id std-pub-10-0-90-0 $region $is_regional_cluster
       retVal=$?
       set +x 
 
@@ -246,7 +246,7 @@ while [ 1 == 1 ]; do
       ;;
     delautopilot)
       set -x
-      gcloud/delete_gke_cluster.sh $project_id autopilot
+      gcloud/delete-gke-cluster.sh $project_id ap-pub-10-0-91-0 $region 1
       retVal=$?
       set +x 
 
@@ -254,7 +254,7 @@ while [ 1 == 1 ]; do
       ;;
     delprivgke)
       set -x
-      gcloud/delete-gke-cluster.sh $project_id standard
+      gcloud/delete-gke-cluster.sh $project_id std-prv-10-0-100-0 $region $is_regional_cluster
       retVal=$?
       set +x 
 
@@ -262,7 +262,7 @@ while [ 1 == 1 ]; do
       ;;
     delprivautopilot)
       set -x
-      gcloud/delete_gke_cluster.sh $project_id autopilot
+      gcloud/delete-gke-cluster.sh $project_id ap-prv-10-0-101-0 $region 1
       retVal=$?
       set +x 
 

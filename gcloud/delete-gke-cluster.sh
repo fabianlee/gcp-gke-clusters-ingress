@@ -1,19 +1,20 @@
 #!/bin/bash
 
-project_id="${1}"
-
-cluster_type="${2:-autopilot}"
-[[ "autopilot standard " =~ $cluster_type[[:space:]] ]] || { echo "ERROR only valid types are standard|autopilot"; exit 3; }
-
-if [[ -z "$project_id" || -z "$cluster_type" ]]; then
-  echo "Usage: projectId clusterType=autopilot|standard"
+project_id="$1"
+cluster_name="$2"
+region="$3"
+is_regional_cluster="$4"
+if [[ -z "$project_id" || -z "$cluster_name" || -z "$region" || -z "$is_regional_cluster" ]]; then
+  echo "Usage: projectId clusterName region is_regional_cluster=0|1"
   exit 3
 fi
 
-[ $cluster_type = "autopilot" ] && cluster_name="autopilot-cluster1" || cluster_name="cluster1"
 
-region="us-east1"
-location_flag="--region $region"
+if [ $is_regional_cluster -eq 1 ]; then
+  location_flag="--region $region"
+else
+  location_flag="--zone $region-b"
+fi
 
 
 set -x

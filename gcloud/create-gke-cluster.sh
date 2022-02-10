@@ -54,7 +54,7 @@ cluster_release_channel="regular" # regular|rapid is mandatory if using Google m
 # gcloud container get-server-config --region=us-east1 (lists GKE versions and OS types)
 cluster_version="1.21.5-gke.1802" # 1.21.6-gke.1500 is next version
 cluster_scopes="gke-default,cloud-source-repos-ro"
-KUBECONFIG="kubeconfig-${cluster_name}"
+KUBECONFIG="../kubeconfig-${cluster_name}"
 
 if [ $cluster_type = "standard" ]; then
   cluster_scopes="https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append"
@@ -91,19 +91,21 @@ gcloud services enable --project=$projectId \
 cluster_count=$(gcloud container clusters list --filter=name~$cluster_name $location_flag | wc -l)
 if [ $cluster_count -eq 0 ]; then
 
-  # get rid of old kubeconfig
-  rm -f kubeconfig-$cluster_name
+  # get rid of any old kubeconfig
+  rm -f $KUBECONFIG
 
   if [ $cluster_type = "autopilot" ]; then
 
     extra_flags=""
     if [ "$exposed_as" = "private" ]; then 
-      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-nodes --enable-private-endpoint"
+      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-nodes --enable-private-endpoint --disable-default-snat" # not sure if disable-default-snat is available on autopilot create
     fi
  
     # Autopilot clusters MUST be regional 
     set -ex
     gcloud container --project $projectId clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" $extra_flags
+
+    #gcloud container clusters update $cluster_name --project $projectId --disable-default-snat
     set +ex
 
   elif [ $cluster_type = "standard" ]; then
@@ -116,8 +118,8 @@ if [ $cluster_count -eq 0 ]; then
       extra_flags="--no-enable-master-authorized-networks"
     fi
 
-    # for zonal with 1 node, use e2-standard-2 (2vcpu,8Gb)
     set -ex
+    # even with public, we choose private nodes so nodes have unreachable internal IP but have public kubeapi endpoint
     gcloud beta container --project $projectId clusters create $cluster_name $location_flag --num-nodes $num_nodes --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "$machine_type" --image-type "$image_type" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$network_name" --subnetwork "$subnet_name" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $projectId.svc.id.goog --cluster-secondary-range-name=pods --services-secondary-range-name=services --enable-private-nodes --master-ipv4-cidr $master_cidr $extra_flags
     set +ex
   fi
