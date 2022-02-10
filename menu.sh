@@ -18,7 +18,7 @@ menu_items=(
   ""
   "metadata,Load ssh key into project metadata"
   "vm,Create VM instances in subnets"
-  "ssh,Show public IP and bastion config"
+  "showssh,Show public IP and bastion config"
   ""
   "gke,Create public standard GKE cluster"
   "privgke,Create private standard GKE cluster"
@@ -175,9 +175,9 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    ssh)
+    showssh)
       set -x
-      gcloud/show-ssh.sh $project_id
+      gcloud/show-ssh.sh $project_id $region
       retVal=$?
       set +x 
 
