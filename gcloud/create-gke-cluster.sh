@@ -103,7 +103,7 @@ if [ $cluster_count -eq 0 ]; then
  
     # Autopilot clusters MUST be regional 
     set -ex
-    gcloud container --project $projectId clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" $extra_flags
+    gcloud container --project $projectId clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" --master-ipv4-cidr $master_cidr $extra_flags
 
     #gcloud container clusters update $cluster_name --project $projectId --disable-default-snat
     set +ex

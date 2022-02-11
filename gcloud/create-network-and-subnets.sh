@@ -54,9 +54,3 @@ gcloud compute firewall-rules create ${network_name}-allow-internal --project=$p
 echo "allow ssh into vms with 'pubjumpbox' network tag"
 gcloud compute firewall-rules create ${network_name}-ext-ssh-allow --project=$project_id --network $network_name --action=ALLOW --rules=icmp,tcp:22 --source-ranges=0.0.0.0/0 --direction=INGRESS --target-tags=pubjumpbox
 
-
-# Cloud NAT for egress in private subnet
-# https://cloud.google.com/sdk/gcloud/reference/compute/routers/nats/create?hl=nb
-gcloud compute routers create ${network_name}-router1 --network=$network_name --region=$region
-
-gcloud compute routers nats create ${network_name}-nat-gateway1 --router=${network_name}-router1 --auto-allocate-nat-external-ips --nat-all-subnet-ip-ranges --region=$region 

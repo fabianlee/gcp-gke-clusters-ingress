@@ -12,9 +12,10 @@ declare -A done_status
 # 1st column = action
 # 2nd column = description
 menu_items=(
-  "project,Create gcp project as self"
+  "project,Create gcp project"
   "svcaccount,Create service account for provisioning"
-  "network,Create network and subnets"
+  "network,Create network, subnets, and firewall"
+  "cloudnat,Create Cloud NAT for public egress of private IP"
   ""
   "metadata,Load ssh key into project metadata"
   "vms,Create VM instances in subnets"
@@ -147,6 +148,15 @@ while [ 1 == 1 ]; do
     network)
       set -x
       gcloud/create-network-and-subnets.sh $project_id $network_name $region
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    cloudnat)
+      set -x
+      gcloud/create-cloud-nat.sh $project_id $network_name $region
       retVal=$?
       set +x 
 
