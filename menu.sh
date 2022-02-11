@@ -29,6 +29,7 @@ menu_items=(
   "delautopilot,Delete GKE public Autopilot cluster"
   "delprivgke,Delete GKE private standard cluster"
   "delprivautopilot,Delete GKE private Autopilot cluster"
+  ""
   "delvms,Delete VM instances"
   "delnetwork,Delete network and Cloud NAT"
 )
