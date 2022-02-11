@@ -128,7 +128,8 @@ if [ $cluster_count -eq 0 ]; then
   # gcloud container clusters update cluster1 --region=us-east1 --enable-master-authorized-networks --master-authorized-networks=10.99.0.0/24,10.100.0.0/24
 
   # update to set maintenance window flags
-  gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+  # TODO put back in
+  #gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
 
   # register cluster with Anthos hub, delete any old registration first
   gcloud container hub memberships delete $cluster_name --quiet
@@ -138,7 +139,8 @@ if [ $cluster_count -eq 0 ]; then
   # make sure HttpLoadBalacing add-on is enabled for cluster, only editable on standard clusters
   # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress#gcloud
   gcloud container clusters describe $cluster_name $location_flag | yq ".addonsConfig"
-  gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED $location_flag
+  # TODO put back in
+  #gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED $location_flag
 
 else
   echo "cluster $cluster_name already created"

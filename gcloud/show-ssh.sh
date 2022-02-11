@@ -19,10 +19,30 @@ gcloud config set project $project_id
 pub1=$(gcloud compute instances describe vm-pub-10-0-90-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
 pub2=$(gcloud compute instances describe vm-pub-10-0-91-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
 
-priv1=$(gcloud compute instances describe vm-prv-10-0-100-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
-priv2=$(gcloud compute instances describe vm-prv-10-0-101-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
+#priv1=$(gcloud compute instances describe vm-prv-10-0-100-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
+#priv2=$(gcloud compute instances describe vm-prv-10-0-101-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
+
 
 ssh_key="$(cd ..;pwd)/gcp-ssh"
+
+# add public vms as bastion to ~/.ssh/config
+touch ~/.ssh/config
+for bastion in $pub1 $pub2; do
+  if grep -qe "Host $bastion" ~/.ssh/config; then
+    echo "bastion $bastion already in ssh config"
+  else
+
+    echo "need to add bastion $bastion to ssh config"
+    cat << EOF >> ~/.ssh/config
+Host $bastion
+  ForwardAgent Yes
+  IdentityFile $ssh_key
+EOF
+
+  fi
+done
+exit 0
+
 
 cat <<EOL
 ==============================

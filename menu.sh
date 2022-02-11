@@ -19,7 +19,7 @@ menu_items=(
   ""
   "metadata,Load ssh key into project metadata"
   "vms,Create VM instances in subnets"
-  "showssh,Show public IP and bastion config"
+  "ssh,Show commands to ssh into VM"
   ""
   "gke,Create public standard GKE cluster"
   "autopilot,Create public AutoGKE cluster"
@@ -188,7 +188,7 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    showssh)
+    ssh)
       set -x
       gcloud/show-ssh.sh $project_id $region
       retVal=$?
@@ -246,6 +246,36 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    kubeconfig)
+      retVal=0
+      echo "1. std-pub-10-0-90-0"
+      echo "2. ap-pub-10-0-91-0"
+      echo "3. std-prv-10-0-100-0"
+      echo "4. ap-prv-10-0-101-0"
+      echo ""
+      read -p "Which kubectl ? " which_kubectl
+
+      case $which_kubectl in
+        1) KUBECONFIG=std-pub-10-0-90-0
+        ;;
+        2) KUBECONFIG=std-pub-10-0-90-0
+        ;;
+        3) KUBECONFIG=std-pub-10-0-90-0
+        ;;
+        4) KUBECONFIG=std-pub-10-0-90-0
+        ;;
+        *)
+          echo "did not recognize which $which_kubectl, valid choices 1-4"
+          retVal=1
+        ;;
+      esac
+
+      if [ $retVal -eq 0 ]; then
+        echo "KUBECONFIG = $KUBECONFIG"
+      fi
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
 
     delgke)
       set -x
