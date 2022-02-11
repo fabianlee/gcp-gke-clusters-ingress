@@ -98,7 +98,7 @@ if [ $cluster_count -eq 0 ]; then
 
     extra_flags=""
     if [ "$exposed_as" = "private" ]; then 
-      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-nodes --enable-private-endpoint --disable-default-snat" # not sure if disable-default-snat is available on autopilot create
+      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-nodes --enable-private-endpoint"
     fi
  
     # Autopilot clusters MUST be regional 
@@ -135,6 +135,11 @@ if [ $cluster_count -eq 0 ]; then
   gcloud container hub memberships list
   gcloud container hub memberships register $cluster_name --gke-cluster=$region/$cluster_name --enable-workload-identity
 
+  # make sure HttpLoadBalacing add-on is enabled for cluster, only editable on standard clusters
+  # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress#gcloud
+  gcloud container clusters describe $cluster_name $location_flag | yq ".addonsConfig"
+  gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED $location_flag
+
 else
   echo "cluster $cluster_name already created"
 fi
@@ -159,10 +164,6 @@ fi
 set -x
 gcloud container clusters update $cluster_name $location_flag \
     --notification-config=pubsub=ENABLED,pubsub-topic=projects/$projectId/topics/$cluster_name
-
-# make sure HttpLoadBalacing add-on is enabled for cluster
-# https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress#gcloud
-gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED $location_flag
 
 # show IP of worker nodes
 timeout 10 kubectl get nodes -o wide

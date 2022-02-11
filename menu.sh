@@ -228,7 +228,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.48/28"
       additional_authorized_cidr="10.0.91.0/24"
       set -x
-      gcloud/create-gke-cluster.sh autopilor private ap-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh autopilot private ap-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
