@@ -20,6 +20,7 @@ menu_items=(
   "metadata,Load ssh key into project metadata"
   "vms,Create VM instances in subnets"
   "enablessh,Setup ssh config for bastions and ansible inventory"
+  "ssh,SSH into jumpbox"
   ""
   "ansibleping,Test ansible connection to public and private vms"
   "ansibleplay,Apply ansible playbook of minimal pkgs/utils for vms"
@@ -200,6 +201,40 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    ssh)
+      retVal=0
+      echo "1. vm-pub-10-0-90-0"
+      echo "2. vm-pub-10-0-91-0"
+      echo "3. vm-prv-10-0-100-0"
+      echo "4. vm-prv-10-0-101-0"
+      echo ""
+      read -p "ssh into which jumpbox ? " which_jumpbox
+
+      case $which_jumpbox in
+        1) jumpbox=vm-pub-10-0-90-0
+        ;;
+        2) jumpbox=vm-pub-10-0-91-0
+        ;;
+        3) jumpbox=vm-prv-10-0-100-0
+        ;;
+        4) jumpbox=vm-prv-10-0-101-0
+        ;;
+        *)
+          echo "ERROR did not recognize which $which_jumpbox, valid choices 1-4"
+          retVal=1
+        ;;
+      esac
+
+      if [ $retVal -eq 0 ]; then
+        set -x
+        gcloud/ssh-into-jumpbox.sh $project_id $jumpbox $region
+        retVal=$?
+        set +x
+      fi
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
     ansibleping)
       set -x
       ansible -m ping all
@@ -284,11 +319,11 @@ while [ 1 == 1 ]; do
       case $which_kubectl in
         1) KUBECONFIG=std-pub-10-0-90-0
         ;;
-        2) KUBECONFIG=std-pub-10-0-90-0
+        2) KUBECONFIG=ap-pub-10-0-91-0
         ;;
-        3) KUBECONFIG=std-pub-10-0-90-0
+        3) KUBECONFIG=std-prv-10-0-100-0
         ;;
-        4) KUBECONFIG=std-pub-10-0-90-0
+        4) KUBECONFIG=ap-prv-10-0-101-0
         ;;
         *)
           echo "did not recognize which $which_kubectl, valid choices 1-4"
