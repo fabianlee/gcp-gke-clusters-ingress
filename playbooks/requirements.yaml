@@ -1,0 +1,6 @@
+---
+collections:
+  # https://galaxy.ansible.com/community/kubernetes
+  # https://github.com/ansible-collections/community.kubernetes
+  - name: community.kubernetes
+    version: 2.0.1

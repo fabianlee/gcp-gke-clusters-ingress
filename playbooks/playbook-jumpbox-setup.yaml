@@ -3,6 +3,8 @@
 - hosts: jumpboxes
   become: yes
   roles:
-    - role: k9s
+    - role: minimal-jumpbox
+    - role: gcloud-apt
     - role: kubectl-apt
+    - role: k9s
 

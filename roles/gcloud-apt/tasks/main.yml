@@ -1,0 +1,33 @@
+---
+
+# https://cloud.google.com/sdk/docs/install#deb
+
+- name: prereq packages
+  package:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - curl
+    state: present
+    update_cache: yes
+
+- name: get google key
+  shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+- name: add google repository
+  apt_repository:
+    repo: "deb https://packages.cloud.google.com/apt cloud-sdk main"
+    state: present
+    filename: google-cloud-sdk
+    update_cache: yes
+    mode: 0644
+    validate_certs: no
+
+- name: install gcloud package
+  package:
+    name:
+      - google-cloud-sdk
+    state: present
+    update_cache: yes
+

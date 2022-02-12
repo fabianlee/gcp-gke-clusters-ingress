@@ -1,0 +1,15 @@
+#
+# DEPRECTED use 'requirements.yaml' instead !!!!
+#
+# prereq needed for ansible playbooks
+---
+
+- hosts: localhost
+  become: no
+  tasks:
+
+    # https://galaxy.ansible.com/community/kubernetes
+    - name: get community.kubernetes collection from ansible galaxy, be patient can take 5 minutes
+      command:
+        cmd: ansible-galaxy collection install community.kubernetes:2.0.1
+

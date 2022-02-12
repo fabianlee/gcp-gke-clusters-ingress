@@ -255,6 +255,10 @@ while [ 1 == 1 ]; do
 
     ansibleplay)
       set -x
+
+      #DEPRECATED ansible-playbook playbooks/install_dependencies.yml
+      ansible-galaxy collection install -r playbooks/requirements.yaml
+
       ansible-playbook playbooks/playbook-jumpbox-setup.yaml -l jumpboxes
       retVal=$?
       set +x 
