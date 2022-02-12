@@ -36,26 +36,26 @@ gcloud compute instances create $vm_name $image_flags \
 $extra_flags \
 --async
 
-cat <<EOL
-
-You can login to VM instances with public IP:
-ssh ubuntu@<privateIP> -i gcp-ssh
-
-
-You can login to private VM instance via public bastion by adding the following to ~/.ssh/config
-
-Host <bastionIP>
-  ForwardAgent Yes
-  IdentityFile $(cd ..; pwd)/gcp-ssh
-
-Then invoking:
-ssh -J ubuntu@<bastionIP> ubuntu@<privateIP> -i gcp-ssh
-
-EOL
+#cat <<EOL
+#
+#You can login to VM instances with public IP:
+#ssh ubuntu@<privateIP> -i gcp-ssh
+#
+#
+#You can login to private VM instance via public bastion by adding the following to ~/.ssh/config
+#
+#Host <bastionIP>
+#  ForwardAgent Yes
+#  IdentityFile $(cd ..; pwd)/gcp-ssh
+#
+#Then invoking:
+#ssh -J ubuntu@<bastionIP> ubuntu@<privateIP> -i gcp-ssh
+#
+#EOL
 
 # setting scope post-creation requires stop of instance first
+# setting to 'cloud-platform' provides gcloud auth as engine acct
 # gcloud beta compute instances set-scopes vm-$vm_type --scopes=cloud-platform --zone=$region-b
-
 
 # ssh into VM
 #gcloud compute ssh $vm_name --zone=$region-b
@@ -65,14 +65,4 @@ EOL
 # gcloud container clusters list
 # export KUBECONFIG=kubeconfig-cluster1
 # gcloud container clusters get-credentials cluster1 --region=us-east1 (--internal-ip)
-
-# install
-# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
-# sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates curl
-# sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-# echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-# sudo apt-get update && sudo apt-get install -y kubectl
-# 
-# kubectl get nodes -o wide
-
 

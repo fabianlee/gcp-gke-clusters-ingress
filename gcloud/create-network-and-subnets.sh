@@ -8,7 +8,8 @@ cd $BIN_DIR
 project_id="$1"
 network_name="$2"
 region="$3"
-if [[ -z "$project_id" || -z "$network_name" || -z "$region" ]]; then
+firewall_internal_allow_cidr="$4"
+if [[ -z "$project_id" || -z "$network_name" || -z "$region" || -z "$firewall_internal_allow_cidr" ]]; then
   echo "Usage: projectid networkName region"
   exit 1
 fi
@@ -24,7 +25,7 @@ function create_gke_subnet() {
 
   gcloud compute networks subnets create $subnet_name --project $project_id --network $network_name --range="$cidr" --region=$region --secondary-range pods=$pods_cidr --secondary-range services=$services_cidr
 
-  # updating with secondary ranges after creation
+  # if wanting to update with secondary ranges after creation
   #gcloud compute networks subnets update $subnet_name --region=$region --add-secondary-ranges pods=$pods_cidr --add-secondary-ranges services=$services_cidr
  
 
@@ -49,7 +50,7 @@ create_gke_subnet $project_id $network_name "prv-10-0-101-0" 10.0.101.0/24 10.12
 
 echo "minimal firewall rule for allowing all internal traffic"
 # OR --rules=all
-gcloud compute firewall-rules create ${network_name}-allow-internal --project=$project_id --direction=INGRESS --priority=1000 --network=mynetwork --action=ALLOW --rules=tcp:0-65535,udp:0-65535 --source-ranges=10.0.0.0/8
+gcloud compute firewall-rules create ${network_name}-allow-internal --project=$project_id --direction=INGRESS --priority=1000 --network=mynetwork --action=ALLOW --rules=tcp:0-65535,udp:0-65535 --source-ranges=$firewall_internal_allow_cidr
 
 echo "allow ssh into vms with 'pubjumpbox' network tag"
 gcloud compute firewall-rules create ${network_name}-ext-ssh-allow --project=$project_id --network $network_name --action=ALLOW --rules=icmp,tcp:22 --source-ranges=0.0.0.0/0 --direction=INGRESS --target-tags=pubjumpbox

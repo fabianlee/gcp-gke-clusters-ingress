@@ -4,5 +4,5 @@
   become: yes
   roles:
     - role: k9s
-    - role: kubectl-gcloud-apt
+    - role: kubectl-apt
 

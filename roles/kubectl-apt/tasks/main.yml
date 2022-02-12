@@ -1,5 +1,7 @@
 ---
+
 # https://cloud.google.com/sdk/docs/install#deb
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
 
 - name: prereq packages
   package:
@@ -7,25 +9,21 @@
       - apt-transport-https
       - ca-certificates
       - gnupg
+      - curl
     state: present
     update_cache: yes
-
-- name: is google key already loaded into keyring
-  command: apt-key list --list-signatures
-  register: google_key
 
 - name: get google key
   shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-  when: not '6A030B21BA07F4FB' in google_key.stdout and not apt_proxy is defined
 
 - name: add google repository
   apt_repository:
-    repo: "deb https://packages.cloud.google.com/apt cloud-sdk main"
+    repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
-    filename: google-cloud-sdk
+    filename: kubernetes
     update_cache: yes
     mode: 0644
-    #validate_certs: no
+    validate_certs: no
 
 - name: install kubectl package
   package:

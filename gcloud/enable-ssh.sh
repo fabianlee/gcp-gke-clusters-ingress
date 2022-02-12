@@ -25,6 +25,10 @@ export priv2=$(gcloud compute instances describe vm-prv-10-0-101-0 --format='get
 
 ssh_key="$(cd ..;pwd)/gcp-ssh"
 
+# remove any saved ssh thumbprints from previous builds
+ssh-keygen -f ~/.ssh/known_hosts -R $pub1 2>/dev/null
+ssh-keygen -f ~/.ssh/known_hosts -R $pub2 2>/dev/null
+
 # add public vms as bastion to ~/.ssh/config
 touch ~/.ssh/config
 for bastion in $pub1 $pub2; do

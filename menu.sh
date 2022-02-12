@@ -160,7 +160,7 @@ while [ 1 == 1 ]; do
 
     network)
       set -x
-      gcloud/create-network-and-subnets.sh $project_id $network_name $region
+      gcloud/create-network-and-subnets.sh $project_id $network_name $region $firewall_internal_allow_cidr
       retVal=$?
       set +x 
 
@@ -254,14 +254,9 @@ while [ 1 == 1 ]; do
       ;;
 
     ansibleplay)
-      retVal=0
       set -x
-      ansible-playbook playbook-jumpbox.yaml -l jumpboxes_public 
-      [ $? -eq 0 ] || retVal=$?
-      ansible-playbook playbook-jumpbox.yaml -l jumpboxes_private100
-      [ $? -eq 0 ] || retVal=$?
-      ansible-playbook playbook-jumpbox.yaml -l jumpboxes_private101
-      [ $? -eq 0 ] || retVal=$?
+      ansible-playbook playbook-jumpbox.yaml -l jumpboxes
+      retVal=$?
       set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
@@ -273,7 +268,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.0/28"
       additional_authorized_cidr=""
       set -x
-      gcloud/create-gke-cluster.sh standard public std-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh standard public std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
@@ -285,7 +280,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.16/28"
       additional_authorized_cidr=""
       set -x
-      gcloud/create-gke-cluster.sh autopilot public ap-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh autopilot public ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x 
 
@@ -297,7 +292,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.32/28"
       additional_authorized_cidr="10.0.90.0/24"
       set -x
-      gcloud/create-gke-cluster.sh standard private std-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh standard private std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
@@ -309,7 +304,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.48/28"
       additional_authorized_cidr="10.0.91.0/24"
       set -x
-      gcloud/create-gke-cluster.sh autopilot private ap-$subnet $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-gke-cluster.sh autopilot private ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 

@@ -10,15 +10,18 @@ cd $BIN_DIR
 cluster_type="$1"
 exposed_as="$2"
 cluster_name="$3"
-project_id="$4"
-network_name="$5"
-subnet_name="$6"
-master_cidr="$7"
-additional_authorized_cidr="$8"
-region="$9"
-is_regional_cluster="${10:-0}" # 1=is regional multi-zonal
-if [[ -z "$cluster_type" || -z "$exposed_as" || -z "$cluster_name" || -z "$project_id" || -z "$network_name" || -z "$subnet_name" || -z "$master_cidr" || -z "$region" ]]; then
-  echo "Usage: clusterType=standard|autopilot exposedAs=public|private clusterName projectId networkName subnetName masterCIDR=a.b.c.d/28 additional_authorized_cidr=a.b.c.d/x regionprojectid networkName region isRegionalCluster=0|1"
+cluster_version="$4"
+cluster_release_channel="$5"
+image_type="$6"
+project_id="$7"
+network_name="$8"
+subnet_name="$9"
+master_cidr="${10}"
+additional_authorized_cidr="${11}"
+region="${12}"
+is_regional_cluster="${14:-0}" # 1=is regional multi-zonal
+if [[ -z "$cluster_type" || -z "$exposed_as" || -z "$cluster_name" || -z "$cluster_version" || -z "$cluster_release_channel" || -z "$image_type" || -z "$project_id" || -z "$network_name" || -z "$subnet_name" || -z "$master_cidr" || -z "$region" ]]; then
+  echo "Usage: clusterType=standard|autopilot exposedAs=public|private clusterName clusterVersion clusterReleaseChannel imageType project_id networkName subnetName masterCIDR=a.b.c.d/28 additional_authorized_cidr=a.b.c.d/x regionprojectid networkName region isRegionalCluster=0|1"
   exit 1
 fi
 
@@ -46,22 +49,12 @@ if [ $cluster_type = "autopilot" ]; then
 fi
 
 num_nodes=1 # means 1 in each zone (3 total) if regional cluster type
-image_type="UBUNTU_CONTAINERD" # UBUNTU | COS_CONTAINERD
-
-cluster_release_channel="regular" # regular|rapid is mandatory if using Google managed ASM (cannot be 'stable')
-
-# must be 1.21.3+ for managed ASM
-# gcloud container get-server-config --region=us-east1 (lists GKE versions and OS types)
-cluster_version="1.21.5-gke.1802" # 1.21.6-gke.1500 is next version
-cluster_scopes="gke-default,cloud-source-repos-ro"
 KUBECONFIG="../kubeconfig-${cluster_name}"
 
+cluster_scopes="gke-default,cloud-source-repos-ro"
 if [ $cluster_type = "standard" ]; then
   cluster_scopes="https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append"
 fi
-
-# prefix for selfLink values coming back from gcloud
-googleapi="https://www.googleapis.com/compute/v1/"
 
 # check for gcloud login context
 gcloud projects list > /dev/null 2>&1
@@ -72,14 +65,10 @@ gcloud auth list
 # on apt, can be upgraded with 'sudo apt install --only-upgrade google-cloud-sdk -y'
 gcloud --version | grep 'Google Cloud SDK'
 
-# gcp project id should already be set before calling script
-projectId=$(gcloud config get-value project)
-[ -n "$projectId" ] || { echo "ERROR need to set project 'gcloud config set project' OR specify as param"; exit 4; }
-echo "project id: $projectId"
-gcloud config set project $projectId
+gcloud config set project $project_id
 
 # enable apis for fleet workload identity
-gcloud services enable --project=$projectId \
+gcloud services enable --project=$project_id \
    container.googleapis.com \
    gkeconnect.googleapis.com \
    gkehub.googleapis.com \
@@ -87,7 +76,7 @@ gcloud services enable --project=$projectId \
    iam.googleapis.com \
    anthos.googleapis.com
 
-# create autopilot cluster
+# check for cluster existence
 cluster_count=$(gcloud container clusters list --filter=name~$cluster_name $location_flag | wc -l)
 if [ $cluster_count -eq 0 ]; then
 
@@ -101,11 +90,11 @@ if [ $cluster_count -eq 0 ]; then
       extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-nodes --enable-private-endpoint"
     fi
  
-    # Autopilot clusters MUST be regional 
     set -ex
-    gcloud container --project $projectId clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" --master-ipv4-cidr $master_cidr $extra_flags
+    gcloud container --project $project_id clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" --master-ipv4-cidr $master_cidr $extra_flags
 
-    #gcloud container clusters update $cluster_name --project $projectId --disable-default-snat
+    # TODO see if private AP can pull tiny-tools without this
+    #gcloud container clusters update $cluster_name --project $project_id --disable-default-snat
     set +ex
 
   elif [ $cluster_type = "standard" ]; then
@@ -120,7 +109,7 @@ if [ $cluster_count -eq 0 ]; then
 
     set -ex
     # even with public, we choose private nodes so nodes have unreachable internal IP but have public kubeapi endpoint
-    gcloud beta container --project $projectId clusters create $cluster_name $location_flag --num-nodes $num_nodes --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "$machine_type" --image-type "$image_type" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$network_name" --subnetwork "$subnet_name" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $projectId.svc.id.goog --cluster-secondary-range-name=pods --services-secondary-range-name=services --enable-private-nodes --master-ipv4-cidr $master_cidr $extra_flags
+    gcloud beta container --project $project_id clusters create $cluster_name $location_flag --num-nodes $num_nodes --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "$machine_type" --image-type "$image_type" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$network_name" --subnetwork "$subnet_name" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $project_id.svc.id.goog --cluster-secondary-range-name=pods --services-secondary-range-name=services --enable-private-nodes --master-ipv4-cidr $master_cidr $extra_flags
     set +ex
   fi
 
@@ -165,10 +154,11 @@ fi
 # https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-notifications#enable-notifications-existing
 set -x
 gcloud container clusters update $cluster_name $location_flag \
-    --notification-config=pubsub=ENABLED,pubsub-topic=projects/$projectId/topics/$cluster_name
+    --notification-config=pubsub=ENABLED,pubsub-topic=projects/$project_id/topics/$cluster_name
 
-# show IP of worker nodes
+# show cluster, either using kubectl if public or gcloud if private
 timeout 10 kubectl get nodes -o wide
 if [ $? -ne 0 ]; then
   echo "kubectl failed. If this is a private GKE cluster with '--enable-private-endpoint' that makes sense because it would mean you cannot manage remotely and need to ssh into a jumpbox instead"
+  gcloud container clusters list $location_flag
 fi
