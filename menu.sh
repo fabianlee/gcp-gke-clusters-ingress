@@ -59,9 +59,9 @@ function showMenu() {
     # skip empty lines
     [ -n "$menu_item" ] || { printf "\n"; continue; }
 
-    menu_id=$(echo $menu_item | awk -F, '{print $1}')
+    menu_id=$(echo $menu_item | cut -d, -f1)
     # eval done so that embedded variables get evaluated (e.g. MYKUBECONFIG)
-    label=$(eval echo $menu_item | awk -F, '{print $2}')
+    label=$(eval echo $menu_item | cut -d, -f2-)
     printf "%-16s %-50s %-12s\n" "$menu_id" "$label" "${done_status[$menu_id]}"
 
   done
