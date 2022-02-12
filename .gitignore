@@ -1,3 +1,4 @@
 tf-creator.json
 gcp-ssh*
 kubeconfig-*
+ansible_inventory.ini

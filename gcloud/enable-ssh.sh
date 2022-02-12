@@ -16,11 +16,11 @@ fi
 gcloud config set project $project_id
 
 
-pub1=$(gcloud compute instances describe vm-pub-10-0-90-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
-pub2=$(gcloud compute instances describe vm-pub-10-0-91-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
+export pub1=$(gcloud compute instances describe vm-pub-10-0-90-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
+export pub2=$(gcloud compute instances describe vm-pub-10-0-91-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
 
-priv1=$(gcloud compute instances describe vm-prv-10-0-100-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
-priv2=$(gcloud compute instances describe vm-prv-10-0-101-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
+export priv1=$(gcloud compute instances describe vm-prv-10-0-100-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
+export priv2=$(gcloud compute instances describe vm-prv-10-0-101-0 --format='get(networkInterfaces.networkIP)' --zone=$region-b)
 
 
 ssh_key="$(cd ..;pwd)/gcp-ssh"
@@ -42,6 +42,10 @@ EOF
   fi
 done
 
+echo ""
+echo "Writing ansible_inventory.ini configured for jumpbox and bastion usage"
+cat ../ansible_inventory.ini.template | envsubst > ../ansible_inventory.ini
+
 
 cat <<EOL
 
@@ -52,10 +56,10 @@ ssh into public vm-pub-10-0-90-0
 ssh into public vm-pub-10-0-91-0
   ssh ubuntu@${pub2} -i $ssh_key
 
-ssh into private vm-prv-10-0-100-0
+ssh into private vm-prv-10-0-100-0 using bastion
   ssh -J ubuntu@${pub1} ubuntu@$priv1 -i $ssh_key
 
-ssh into private vm-prv-10-0-101-0
+ssh into private vm-prv-10-0-101-0 using bastion
   ssh -J ubuntu@${pub2} ubuntu@$priv2 -i $ssh_key
 ==============================
 EOL

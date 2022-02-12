@@ -1,0 +1,32 @@
+# show all vars for host: ansible -m debug -a var=hostvars[inventory_hostname] vm-prv-10-0-100-0
+# test ping to all: ansible -m ping all
+# if issues with key exchange, try clearing: ssh-keygen -f ~/.ssh/known_hosts -R <IP>
+#
+
+[jumpboxes_public]
+vm-pub-10-0-90-0 ansible_host=$pub1
+vm-pub-10-0-91-0 ansible_host=$pub2
+
+[jumpboxes_private100]
+vm-prv-10-0-100-0 ansible_host=$priv1
+
+[jumpboxes_private101]
+vm-prv-10-0-101-0 ansible_host=$priv2
+
+[jumpboxes:children]
+jumpboxes_public
+jumpboxes_private100
+jumpboxes_private101
+
+[jumpboxes:vars]
+ansible_ssh_private_key_file=./gcp-ssh
+ansible_user=ubuntu
+
+[jumpboxes_private100:vars]
+ansible_ssh_common_args="-o ProxyCommand=\"ssh -q ubuntu@${pub1} -o IdentityFile=./gcp-ssh -o Port=22 -W %h:%p\""
+
+[jumpboxes_private101:vars]
+ansible_ssh_common_args="-o ProxyCommand=\"ssh -q ubuntu@${pub2} -o IdentityFile=./gcp-ssh -o Port=22 -W %h:%p\""
+
+[all:vars]
+forall=yes

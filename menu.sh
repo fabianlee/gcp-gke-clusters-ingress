@@ -19,7 +19,7 @@ menu_items=(
   ""
   "metadata,Load ssh key into project metadata"
   "vms,Create VM instances in subnets"
-  "ssh,Show commands to ssh into VM"
+  "enablessh,Setup ssh config for bastions and ansible"
   ""
   "gke,Create public standard GKE cluster"
   "autopilot,Create public AutoGKE cluster"
@@ -188,9 +188,9 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    ssh)
+    enablessh)
       set -x
-      gcloud/show-ssh.sh $project_id $region
+      gcloud/enable-ssh.sh $project_id $region
       retVal=$?
       set +x 
 
