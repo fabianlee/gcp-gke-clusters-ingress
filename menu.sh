@@ -30,8 +30,8 @@ menu_items=(
   "privgke,Create private standard GKE cluster"
   "privautopilot,Create private AutoGKE cluster"
   ""
-  "kubeconfig,Choose KUBECONFIG \$MYKUBECONFIG"
   "kubeconfigcopy,Copy kubeconfig to remote jumpboxes"
+  "kubeconfig,Select KUBECONFIG \$MYKUBECONFIG"
   "k8s-tinytools,Apply tiny-tools Daemonset to cluster"
   "k8s-ASM,Install ASM on cluster"
   "k8s-ASM-IGW,Install ASM Ingress Gateways on cluster"
@@ -255,7 +255,7 @@ while [ 1 == 1 ]; do
 
     ansibleplay)
       set -x
-      ansible-playbook playbook-jumpbox.yaml -l jumpboxes
+      ansible-playbook playbooks/playbook-jumpbox-setup.yaml -l jumpboxes
       retVal=$?
       set +x 
 
@@ -307,6 +307,15 @@ while [ 1 == 1 ]; do
       gcloud/create-gke-cluster.sh autopilot private ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    kubeconfigcopy)
+      set -x
+      ansible-playbook playbooks/playbook-copy-kubeconfig-remotely.yaml -l jumpboxes
+      retVal=$?
+      set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;

@@ -28,4 +28,5 @@ gcloud pubsub topics delete $cluster_name --project=$project_id --quiet
 
 gcloud container clusters delete $cluster_name $location_flag --project=$project_id --quiet
 
-
+# get rid of local file
+rm -f kubeconfig-$cluster_name
