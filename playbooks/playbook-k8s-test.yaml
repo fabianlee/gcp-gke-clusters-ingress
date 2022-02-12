@@ -1,4 +1,5 @@
-# ansible-playbook playbooks/playbook-k8s-test.yaml -l vm-prv-10-0-101-0
+# ansible-galaxy collection install -r requirements.yaml
+# ansible-playbook playbooks/playbook-k8s-test.yaml -l vm-prv-10-0-101-0 --extra-vars remote_kubeconfig=kubeconfig-ap-prv-10-0-101-0
 ---
 # installed on orchestrator
 # ansible-galaxy collection install community.kubernetes:2.0.1
@@ -6,39 +7,30 @@
 # https://docs.ansible.com/ansible/latest/collections/kubernetes/core/kubectl_connection.html
 
 - hosts: jumpboxes
-  #gather_facts: false
+  gather_facts: false
 
   collections:
     - kubernetes.core
-    #- community.kubernetes
 
   tasks:
     - name: Ensure the default Namespace exists.
       k8s:
-        kubeconfig: kubeconfig-remote
+        kubeconfig: "{{remote_kubeconfig}}"
         api_version: v1
         kind: Namespace
         name: default
         state: present
 
-    - name: copy tiny-tools DS file remote
+    - name: copy tiny-tools DS file to remote host
       copy:
         src: "{{playbook_dir}}/../roles/tiny-tools-all-nodes/files/tiny-tools-daemonset.yaml"
         dest: .
         owner: ubuntu
         group: ubuntu
-    - name: tiny tools daemonset
+    - name: apply tiny-tools daemonset
       k8s:
-        kubeconfig: kubeconfig-remote
+        kubeconfig: "{{remote_kubeconfig}}"
         state: present
         src: "tiny-tools-daemonset.yaml"
         namespace: default
-
-    - name: Ensure the myapp Namespace exists.
-      k8s:
-        kubeconfig: /home/ubuntu/kubeconfig-remote
-        api_version: v1
-        kind: Namespace
-        name: myapp
-        state: present
 

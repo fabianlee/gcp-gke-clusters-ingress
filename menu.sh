@@ -51,7 +51,7 @@ function showMenu() {
   echo ""
   echo ""
   echo "==========================================================================="
-  echo " MAIN MENU $MYKUBECONFIG"
+  echo " MAIN MENU"
   echo "==========================================================================="
   echo ""
   
@@ -255,11 +255,18 @@ while [ 1 == 1 ]; do
 
     ansibleplay)
       set -x
-
-      #DEPRECATED ansible-playbook playbooks/install_dependencies.yml
       ansible-galaxy collection install -r playbooks/requirements.yaml
-
       ansible-playbook playbooks/playbook-jumpbox-setup.yaml -l jumpboxes
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    k8s-tinytools)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-test.yaml -l vm-prv-10-0-101-0 --extra-vars remote_kubeconfig=$MYKUBECONFIG
       retVal=$?
       set +x 
 
