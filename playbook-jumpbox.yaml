@@ -1,0 +1,8 @@
+---
+
+- hosts: jumpboxes
+  become: yes
+  roles:
+    - role: k9s
+    - role: kubectl-gcloud-apt
+

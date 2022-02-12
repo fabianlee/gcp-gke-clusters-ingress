@@ -1,0 +1,21 @@
+---
+
+- name: is google key already loaded into keyring
+  command: apt-key list --list-signatures
+  register: google_key
+
+# another way to fix public key errors
+# https://askubuntu.com/questions/13065/how-do-i-fix-the-gpg-error-no-pubkey
+# gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv 9BDB3D89CE49EC21
+# gpg --export --armor 9BDB3D89CE49EC21 | sudo apt-key add -
+#
+# https://launchpad.net/~cloud-images/+archive/ubuntu/docker1903-k8s
+- name: get google key because pubkey not found in apt-key list
+  shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  when: not item in google_key.stdout and not apt_proxy is defined
+  loop:
+    - 6A030B21BA07F4FB
+    - 5E700FE3D36CFC37
+    - FEEA9169307EA071
+    - 8B57C5C2836F4BEB
+

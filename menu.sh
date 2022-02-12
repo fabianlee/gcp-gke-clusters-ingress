@@ -19,7 +19,10 @@ menu_items=(
   ""
   "metadata,Load ssh key into project metadata"
   "vms,Create VM instances in subnets"
-  "enablessh,Setup ssh config for bastions and ansible"
+  "enablessh,Setup ssh config for bastions and ansible inventory"
+  ""
+  "ansibleping,Test ansible connection to public and private vms"
+  "ansibleplay,Apply ansible playbook of minimal pkgs/utils for vms"
   ""
   "gke,Create public standard GKE cluster"
   "autopilot,Create public AutoGKE cluster"
@@ -192,6 +195,29 @@ while [ 1 == 1 ]; do
       set -x
       gcloud/enable-ssh.sh $project_id $region
       retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    ansibleping)
+      set -x
+      ansible -m ping all
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    ansibleplay)
+      retVal=0
+      set -x
+      ansible-playbook playbook-jumpbox.yaml -l jumpboxes_public 
+      [ $? -eq 0 ] || retVal=$?
+      ansible-playbook playbook-jumpbox.yaml -l jumpboxes_private100
+      [ $? -eq 0 ] || retVal=$?
+      ansible-playbook playbook-jumpbox.yaml -l jumpboxes_private101
+      [ $? -eq 0 ] || retVal=$?
       set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
