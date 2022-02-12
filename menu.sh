@@ -30,6 +30,9 @@ menu_items=(
   "privgke,Create private standard GKE cluster"
   "privautopilot,Create private AutoGKE cluster"
   ""
+  "kubeconfig,Choose KUBECONFIG \$MYKUBECONFIG"
+  "k8s-tinytools,Apply tiny-tools Daemonset"
+  ""
   "delgke,Delete GKE public standard cluster"
   "delautopilot,Delete GKE public Autopilot cluster"
   "delprivgke,Delete GKE private standard cluster"
@@ -43,7 +46,7 @@ function showMenu() {
   echo ""
   echo ""
   echo "==========================================================================="
-  echo " MAIN MENU"
+  echo " MAIN MENU $MYKUBECONFIG"
   echo "==========================================================================="
   echo ""
   
@@ -52,7 +55,8 @@ function showMenu() {
     [ -n "$menu_item" ] || { printf "\n"; continue; }
 
     menu_id=$(echo $menu_item | awk -F, '{print $1}')
-    label=$(echo $menu_item | awk -F, '{print $2}')
+    # eval done so that embedded variables get evaluated (e.g. MYKUBECONFIG)
+    label=$(eval echo $menu_item | awk -F, '{print $2}')
     printf "%-16s %-50s %-12s\n" "$menu_id" "$label" "${done_status[$menu_id]}"
 
   done
@@ -317,13 +321,13 @@ while [ 1 == 1 ]; do
       read -p "Which kubectl ? " which_kubectl
 
       case $which_kubectl in
-        1) KUBECONFIG=std-pub-10-0-90-0
+        1) kfile=kubeconfig-std-pub-10-0-90-0
         ;;
-        2) KUBECONFIG=ap-pub-10-0-91-0
+        2) kfile=kubeconfig-ap-pub-10-0-91-0
         ;;
-        3) KUBECONFIG=std-prv-10-0-100-0
+        3) kfile=kubeconfig-std-prv-10-0-100-0
         ;;
-        4) KUBECONFIG=ap-prv-10-0-101-0
+        4) kfile=kubeconfig-ap-prv-10-0-101-0
         ;;
         *)
           echo "did not recognize which $which_kubectl, valid choices 1-4"
@@ -332,7 +336,12 @@ while [ 1 == 1 ]; do
       esac
 
       if [ $retVal -eq 0 ]; then
-        echo "KUBECONFIG = $KUBECONFIG"
+        if [ -f $kfile ]; then
+          export MYKUBECONFIG=$kfile
+          echo "MYKUBECONFIG = $MYKUBECONFIG"
+        else
+          echo "ERROR selecting $kfile because the file does not exist"
+        fi
       fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
