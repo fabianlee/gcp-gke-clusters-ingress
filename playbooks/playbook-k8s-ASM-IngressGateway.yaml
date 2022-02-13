@@ -1,0 +1,9 @@
+---
+
+- hosts: jumpboxes
+  gather_facts: false
+
+  roles:
+    # independent ASM Ingress Gateways as recommended
+    - ASM-IngressGateway
+

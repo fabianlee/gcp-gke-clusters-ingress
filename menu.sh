@@ -34,8 +34,9 @@ menu_items=(
   "kubeconfig,Select KUBECONFIG \$MYKUBECONFIG"
   "k8s-tinytools,Apply tiny-tools Daemonset to cluster"
   "k8s-ASM,Install ASM on cluster"
+  "k8s-certs,Create and load TLS certificates"
   "k8s-ASM-IGW,Install ASM Ingress Gateways on cluster"
-  "k8s-ingress,Install ASM HTTPS LB"
+  "k8s-gcp-lb,Deploy GCP HTTPS Loadbalancer using Ingress"
   "k8s-testapp,Install test service, /hello"
   ""
   "delgke,Delete GKE public standard cluster"
@@ -119,6 +120,14 @@ function check_prerequisites() {
 
 ###### MAIN ###########################################
 
+
+# if kubeconfig optionally specified on command line
+MYKUBECONFIG="$1"
+if [[ -n "$MYKUBECONFIG" && -f $MYKUBECONFIG ]]; then
+  MYJUMPBOX="vm-$(echo $MYKUBECONFIG | cut -d- -f3-)"
+  echo "MYKUBECONFIG = $MYKUBECONFIG"
+  echo "MYJUMPBOX = $MYJUMPBOX"
+fi
 
 check_prerequisites "$@"
 
@@ -263,17 +272,6 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    k8s-tinytools)
-      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
-      set -x
-      ansible-playbook playbooks/playbook-k8s-test.yaml -l vm-prv-10-0-101-0 --extra-vars remote_kubeconfig=$MYKUBECONFIG
-      retVal=$?
-      set +x 
-
-      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
-      ;;
-
-
     gke)
       subnet=pub-10-0-90-0
       master_cidr="10.1.0.0/28"
@@ -357,12 +355,69 @@ while [ 1 == 1 ]; do
 
       if [ $retVal -eq 0 ]; then
         if [ -f $kfile ]; then
-          export MYKUBECONFIG=$kfile
+          MYKUBECONFIG=$kfile
+          MYJUMPBOX="vm-$(echo $MYKUBECONFIG | cut -d- -f3-)"
           echo "MYKUBECONFIG = $MYKUBECONFIG"
+          echo "MYJUMPBOX = $MYJUMPBOX"
         else
           echo "ERROR selecting $kfile because the file does not exist"
         fi
       fi
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    k8s-tinytools)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-tinytools.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-ASM)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-ASM.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-certs)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-certs.yaml -l $MYJUMPBOX
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-ASM-IGW)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-ASM-IngressGateway.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-gcp-lb)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-GCP-loadbalancer.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-testapp)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-testapp.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;

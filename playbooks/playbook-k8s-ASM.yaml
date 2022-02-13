@@ -1,0 +1,8 @@
+---
+
+- hosts: jumpboxes
+  gather_facts: false
+
+  roles:
+    - ASM
+

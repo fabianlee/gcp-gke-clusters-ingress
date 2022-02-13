@@ -1,0 +1,4 @@
+# for SAN certificate with custom CA
+cert_CA: myCA.prv-10-0-100-0.local
+cert_domains_primary_ingress: ['my-primary.prv-10-0-100-0.local','my-primary-alt.prv-10-0-100-0.local']
+cert_domains_secondary_ingress: ['my-secondary.prv-10-0-100-0.local']

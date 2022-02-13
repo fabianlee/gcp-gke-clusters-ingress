@@ -3,8 +3,10 @@
 - hosts: jumpboxes
   become: yes
   roles:
-    - role: minimal-jumpbox
-    - role: gcloud-apt
-    - role: kubectl-apt
-    - role: k9s
+    - minimal-jumpbox
+    - kubectl-apt
+    - k9s
+    - helm3-apt
+    # gcloud is already on GCP VM instances
+    #- gcloud-apt
 

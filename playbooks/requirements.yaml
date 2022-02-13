@@ -1,6 +1,13 @@
 ---
 collections:
+
   # https://galaxy.ansible.com/community/kubernetes
   # https://github.com/ansible-collections/community.kubernetes
   - name: community.kubernetes
     version: 2.0.1
+
+  # for creating CA and certificates
+  # https://galaxy.ansible.com/community/crypto
+  - name: community.crypto
+    #version: 1.9.11
+    version: 2.2.1
