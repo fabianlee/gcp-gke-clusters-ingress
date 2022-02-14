@@ -6,3 +6,6 @@
     # create a public and private certificate
     - cert-with-ca
 
+    # add TLS secrets to cluster
+    - k8s-load-tls-secrets
+

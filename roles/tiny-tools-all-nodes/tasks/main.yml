@@ -2,7 +2,7 @@
 
 - name: tiny tools daemonset
   k8s:
-    kubeconfig: /home/ubuntu/kubeconfig-remote
+    kubeconfig: "{{remote_kubeconfig}}"
     state: present
     src: tiny-tools-daemonset.yaml
 

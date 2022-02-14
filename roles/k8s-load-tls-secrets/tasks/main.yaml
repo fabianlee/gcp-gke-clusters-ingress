@@ -1,0 +1,31 @@
+---
+
+- name: get content of key
+  slurp:
+    src: /tmp/my-primary.{{cluster_name}}.local.key
+  register: KEY_BASE64
+
+- name: get content of cert
+  slurp:
+    src: /tmp/my-primary.{{cluster_name}}.local.crt
+  register: CERT_BASE64
+
+- set_fact:
+    secret_name: "{{cluster_name}}-tls-secret"
+
+- name: create secret yaml
+  template:
+    src: secret.yaml
+    dest: /tmp/{{cluster_name}}/tls-secret.yaml
+    owner: ubuntu
+    mode: 0550
+
+- name: load tls secret for ingress into namespaces
+  k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: /tmp/{{cluster_name}}/tls-secret.yaml
+    namespace: "{{item}}"
+  loop:
+    - default
+    - asm-gateways

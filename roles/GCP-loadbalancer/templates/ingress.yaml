@@ -18,7 +18,7 @@ spec:
   #      number: 80
 
   tls:
-  - secretName: {{cluster_name}}-credential
+  - secretName: {{cluster_name}}-tls-secret
 
   rules:
   - http:

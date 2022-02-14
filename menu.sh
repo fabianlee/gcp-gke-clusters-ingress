@@ -398,7 +398,7 @@ while [ 1 == 1 ]; do
     k8s-certs)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
-      ansible-playbook playbooks/playbook-certs.yaml -l $MYJUMPBOX
+      ansible-playbook playbooks/playbook-certs.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
       retVal=$?
       set +x 
 
