@@ -86,7 +86,8 @@ set +ex
 
 # namespace where ASM is installed
 kubectl create ns istio-system
-kubectl create ns asm-system
+# ns where our ingress gateways will get placed in future steps, but need to apply istio.io/rev
+kubectl create ns asm-gateways
 
 # make sure GKE cluster meets requirements of 1.21.3+ for GKE Autopilot
 cluster_min_allowed_version="v1.21.3"
@@ -195,11 +196,10 @@ if [ "incluster" = $asm_type ]; then
   output-$cluster_name/istioctl x revision list
   set +x
 
-  # show current ns labels
   # set ASM revision label for namespace
-  if [ -z "$asm_rev_label_from_ns" ]; then
-    kubectl label namespace default istio-injection- istio.io/rev=my-${asm_release_channel} --overwrite
-  fi
+  for ns in default asm-gateways; do
+    kubectl label namespace $ns istio-injection- istio.io/rev=my-${asm_release_channel} --overwrite
+  done
   kubectl get ns default --show-labels
 
 
@@ -225,7 +225,9 @@ elif [ "managed" = $asm_type ]; then
   # if kubectl get dataplanecontrols -o custom-columns=REV:.spec.revision,STATUS:.status.state | grep rapid | grep -v none > /dev/null; then echo "Managed Data Plane is ready."; else echo "Managed Data Plane is NOT ready."; fi
   
   # set revision label for namespace
-  kubectl label namespace default istio-injection- istio.io/rev=asm-managed-$asm_release_channel --overwrite
+  for ns in default asm-gateways; do
+    kubectl label namespace $ns istio-injection- istio.io/rev=asm-managed-$asm_release_channel --overwrite
+  done
   kubectl get ns istio-system --show-labels
 
 fi
