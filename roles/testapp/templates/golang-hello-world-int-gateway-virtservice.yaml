@@ -27,7 +27,7 @@ spec:
     - "*"
     tls:
       mode: SIMPLE
-      credentialName: {{cluster_name}}-int-tls-secret
+      credentialName: {{cluster_name}}-tls-secret-int
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService

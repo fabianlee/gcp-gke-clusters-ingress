@@ -18,16 +18,18 @@ metadata:
   labels:
     app: istio-ingressgateway-int
     istio: ingressgateway-int
-  #annotations:
-  #  cloud.google.com/load-balancer-type: "Internal"
+  annotations:
+    cloud.google.com/load-balancer-type: "Internal"
   #  networking.gke.io/suppress-firewall-xpn-error: "true"
 spec:
+  loadBalancerIP: {{subnet_prefix}}.199
+  loadBalancerSourceRanges: [ 10.0.0.0/8 ]
   ports:
   # status-port exposes a /healthz/ready endpoint that can be used with GKE Ingress health checks
   - name: status-port
-    port: 15021
+    port: 15022
     protocol: TCP
-    targetPort: 15021
+    targetPort: 15022
   # Any ports exposed in Gateway resources should be exposed here.
   - name: http2
     port: 80

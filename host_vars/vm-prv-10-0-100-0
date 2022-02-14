@@ -4,6 +4,6 @@ is_regional_cluster: 0
 subnet_prefix: 10.0.100
 
 # for SAN certificate with custom CA
-cert_CA: myCA.prv-10-0-100-0.local
+cert_CA: myCA.{{cluster_name}}.local
 cert_domains_primary_ingress: ["my-primary.{{cluster_name}}.local","my-primary-alt.{{cluster_name}}.local"]
 cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]

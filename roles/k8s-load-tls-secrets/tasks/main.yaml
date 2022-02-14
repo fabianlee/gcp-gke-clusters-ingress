@@ -63,12 +63,12 @@
   register: CERT_BASE64
 
 - set_fact:
-    secret_name: "{{cluster_name}}-int-tls-secret"
+    secret_name: "{{cluster_name}}-tls-secret-int"
 
 - name: create secret yaml
   template:
     src: secret.yaml
-    dest: /tmp/{{cluster_name}}/int-tls-secret.yaml
+    dest: /tmp/{{cluster_name}}/tls-secret-int.yaml
     owner: ubuntu
     mode: 0550
 
@@ -76,7 +76,7 @@
   k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
-    src: /tmp/{{cluster_name}}/int-tls-secret.yaml
+    src: /tmp/{{cluster_name}}/tls-secret-int.yaml
     namespace: "{{item}}"
   loop:
     - default

@@ -20,6 +20,7 @@
   community.crypto.openssl_privatekey:
     path: "{{TMPDIR}}/{{cert_domains_list | first}}.key"
     force: "{{cert_overwrite}}"
+    size: "{{private_key_size}}"
   register: cert_key
 
 - name: Generate an OpenSSL Certificate Signing Request

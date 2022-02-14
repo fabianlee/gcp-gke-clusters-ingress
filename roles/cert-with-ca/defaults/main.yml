@@ -1,6 +1,10 @@
 TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
 LOCALDIR: "/tmp"
 
+# key size of private RSA key
+# 4096 was too large for Istio/ASM to handle
+private_key_size: 2048
+
 # default name for CA
 cert_CA: myCA
 

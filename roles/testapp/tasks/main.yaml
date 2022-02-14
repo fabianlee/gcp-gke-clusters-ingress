@@ -23,8 +23,13 @@
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
     src: "{{item.path}}"
-    namespace: asm-gateways
+    namespace: default
   loop: "{{yaml_list.files}}"
 
 
-
+- name: create test curl script
+  template:
+    src: test-curl.sh
+    dest: test-curl.sh
+    owner: ubuntu
+    mode: 0775
