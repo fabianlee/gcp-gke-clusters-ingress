@@ -407,7 +407,7 @@ while [ 1 == 1 ]; do
     k8s-ASM-IGW)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
-      ansible-playbook playbooks/playbook-k8s-ASM-IngressGateway.yaml -l $MYJUMPBOX --extra-vars "remote_kubeconfig=$MYKUBECONFIG asm_version=$asm_version asm_type=$asm_type"
+      ansible-playbook playbooks/playbook-k8s-ASM-IngressGateway.yaml -l $MYJUMPBOX --extra-vars "remote_kubeconfig=$MYKUBECONFIG"
       retVal=$?
       set +x 
 

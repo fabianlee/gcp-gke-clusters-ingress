@@ -1,6 +1,7 @@
 cluster_type: autopilot
 cluster_name: ap-pub-10-0-91-0
 is_regional_cluster: 1
+subnet_prefix: 10.0.91
 
 # for SAN certificate with custom CA
 cert_CA: myCA.pub-10-0-91-0.local

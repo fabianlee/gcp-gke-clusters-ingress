@@ -1,0 +1,68 @@
+---
+
+- name: create dest dir for files
+  file:
+    path: /tmp/{{cluster_name}}
+    state: directory
+
+- name: copy dirs
+  copy:
+    src: "{{role_path}}/templates/{{item}}"
+    dest: /tmp/{{cluster_name}}
+  loop:
+    - istio-ingressgateway
+    - istio-ingressgateway-int
+
+- name: create templates
+  template:
+    src: "{{item}}"
+    dest: /tmp/{{cluster_name}}/istio-ingressgateway
+  loop:
+    - istio-ingressgateway/service.yaml
+- name: create templates
+  template:
+    src: "{{item}}"
+    dest: /tmp/{{cluster_name}}/istio-ingressgateway-int
+  loop:
+    - istio-ingressgateway-int/service.yaml
+
+
+- name: Ensure the default Namespace exists.
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    api_version: v1
+    kind: Namespace
+    name: asm-gateways
+    state: present
+
+- name: get files in istio-ingressgateway
+  find:
+    paths: /tmp/{{cluster_name}}/istio-ingressgateway
+    file_type: file
+    patterns: '*.yaml,*.yml'
+  register: yaml_list
+- name: apply yaml manifests
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: "{{item.path}}"
+    namespace: asm-gateways
+  loop: "{{yaml_list.files}}"
+
+- name: get files in istio-ingressgateway-int
+  find:
+    paths: /tmp/{{cluster_name}}/istio-ingressgateway-int
+    file_type: file
+    patterns: '*.yaml,*.yml'
+  register: yaml_list
+- name: apply yaml manifests
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: "{{item.path}}"
+    namespace: asm-gateways
+  loop: "{{yaml_list.files}}"
+
+
+
+
