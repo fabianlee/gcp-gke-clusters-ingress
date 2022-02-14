@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Creates GKE cluster and registers with Anthos hub
+# Creates GKE cluster
 #
 # Usage: clusterType=autopilot|standard exposedAs=public|private
 #
@@ -92,9 +92,6 @@ if [ $cluster_count -eq 0 ]; then
  
     set -ex
     gcloud container --project $project_id clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" --master-ipv4-cidr $master_cidr $extra_flags
-
-    # TODO see if private AP can pull tiny-tools without this
-    #gcloud container clusters update $cluster_name --project $project_id --disable-default-snat
     set +ex
 
   elif [ $cluster_type = "standard" ]; then
@@ -113,17 +110,14 @@ if [ $cluster_count -eq 0 ]; then
     set +ex
   fi
 
-  # if master auth networks needed to be set post-creation
-  # gcloud container clusters update cluster1 --region=us-east1 --enable-master-authorized-networks --master-authorized-networks=10.99.0.0/24,10.100.0.0/24
-
   # update to set maintenance window flags
   # TODO put back in
   #gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
 
-  # register cluster with Anthos hub, delete any old registration first
+  # delete any old hub registrations, registration will be done later
+  # not going to register here, because registering with fleet enablement uses kubeconfig connection
+  # which is not possible for private GKE clusters
   gcloud container hub memberships delete $cluster_name --quiet
-  gcloud container hub memberships list
-  gcloud container hub memberships register $cluster_name --gke-cluster=$region/$cluster_name --enable-workload-identity
 
   # make sure HttpLoadBalacing add-on is enabled for cluster, only editable on standard clusters
   # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress#gcloud
@@ -155,6 +149,7 @@ fi
 set -x
 gcloud container clusters update $cluster_name $location_flag \
     --notification-config=pubsub=ENABLED,pubsub-topic=projects/$project_id/topics/$cluster_name
+set +x
 
 # show cluster, either using kubectl if public or gcloud if private
 timeout 10 kubectl get nodes -o wide

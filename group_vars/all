@@ -1,7 +1,23 @@
+---
+ansible_python_interpreter: python3
 
+# general GCP project
+project_id: mygke-proj1
+project_name: mygke-proj1
+region: us-east1
 
-# for SAN certificate with custom CA
-cert_CA: myCA.local
-cert_domains_primary_ingress: ['my-primary.local','my-primary-alt.local']
-cert_domains_secondary_ingress: ['my-secondary.local']
+# custom VPC network
+network_name: mynetwork
+
+# GKE clusters
+cluster_version: "1.21.5-gke.1802" # 1.21.6-gke.1500 is next version
+cluster_release_channel: regular
+is_regional_cluster: 0 # 1=multi-regional zonal
+node_image_type: UBUNTU_CONTAINERD # COS_CONTAINERD
+
+# ASM Anthos Service Mesh
+asm_version: "1.11" # 1.12
+asm_type: "incluster" # 'managed' if you want Google Managed ASM control plane
+asm_release_channel: "rapid" # must be regular|rapid for GKE Autopilot (cannot use stable)
+
 

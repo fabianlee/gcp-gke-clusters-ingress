@@ -41,3 +41,15 @@ gcloud services enable --project=$project_id \
    iam.googleapis.com \
    anthos.googleapis.com
 
+# IAM roles for registering cluster
+# not required for project owner who has all permissions
+# but would be required if asmcli install with --enable-all done using gcloud logged in as default compute engine
+#gcloud projects add-iam-policy-binding $project_id \
+#   --member user:$current_user \
+#   --role=roles/gkehub.admin \
+#   --role=roles/iam.serviceAccountAdmin \
+#   --role=roles/iam.serviceAccountKeyAdmin \
+#   --role=roles/resourcemanager.projectIamAdmin \
+#   --role=roles/container.admin
+
+

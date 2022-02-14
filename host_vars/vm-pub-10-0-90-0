@@ -1,3 +1,7 @@
+cluster_type: standard
+cluster_name: std-pub-10-0-90-0
+is_regional_cluster: 0
+
 # for SAN certificate with custom CA
 cert_CA: myCA.pub-10-0-90-0.local
 cert_domains_primary_ingress: ['my-primary.pub-10-0-90-0.local','my-primary-alt.pub-10-0-90-0.local']

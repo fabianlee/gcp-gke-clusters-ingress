@@ -1,0 +1,36 @@
+---
+
+############ local commands
+
+- name: (local) get project number
+  connection: local
+  command:
+    cmd: gcloud projects describe {{project_id}} --format="value(projectNumber)"
+  register: project_number_register
+
+- set_fact:
+    project_number: "{{project_number_register.stdout}}"
+- debug:
+    msg: project_number is {{project_number}}
+
+- name: (local) use gcloud to add IAM roles for default compute engine sevice account, required for ASM registration
+  connection: local
+  command:
+    cmd: gcloud projects add-iam-policy-binding {{project_id}} --member serviceAccount:{{project_number}}-compute@developer.gserviceaccount.com --role=roles/gkehub.admin --role=roles/iam.serviceAccountAdmin --role=roles/iam.serviceAccountKeyAdmin --role=roles/resourcemanager.projectIamAdmin --role=roles/container.admin
+  register: gcloud_add_iam
+#- debug: msg="{{gcloud_add_iam.stdout_lines}}"
+
+
+############ remote commands
+
+- name: copy ASM installer script
+  copy:
+    src: install_asm.sh
+    dest: .
+    mode: 0755
+
+- name: run ASM install script
+  command:
+    cmd: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+  register: asm_install
+- debug: msg="{{asm_install}}"

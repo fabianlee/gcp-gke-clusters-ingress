@@ -32,6 +32,7 @@ menu_items=(
   ""
   "kubeconfigcopy,Copy kubeconfig to remote jumpboxes"
   "kubeconfig,Select KUBECONFIG \$MYKUBECONFIG"
+  "k8s-register,Register with hub and get fleet identity"
   "k8s-tinytools,Apply tiny-tools Daemonset to cluster"
   "k8s-ASM,Install ASM on cluster"
   "k8s-certs,Create and load TLS certificates"
@@ -63,7 +64,7 @@ function showMenu() {
     menu_id=$(echo $menu_item | cut -d, -f1)
     # eval done so that embedded variables get evaluated (e.g. MYKUBECONFIG)
     label=$(eval echo $menu_item | cut -d, -f2-)
-    printf "%-16s %-50s %-12s\n" "$menu_id" "$label" "${done_status[$menu_id]}"
+    printf "%-16s %-60s %-12s\n" "$menu_id" "$label" "${done_status[$menu_id]}"
 
   done
   echo ""
@@ -322,7 +323,7 @@ while [ 1 == 1 ]; do
 
     kubeconfigcopy)
       set -x
-      ansible-playbook playbooks/playbook-copy-kubeconfig-remotely.yaml -l jumpboxes
+      ansible-playbook playbooks/playbook-copy-kubeconfig-remotely.yaml -l localhost,jumpboxes
       retVal=$?
       set +x 
 
@@ -367,6 +368,15 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    k8s-register)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-gcloud-register-fleet.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
     k8s-tinytools)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
@@ -397,7 +407,7 @@ while [ 1 == 1 ]; do
     k8s-ASM-IGW)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
-      ansible-playbook playbooks/playbook-k8s-ASM-IngressGateway.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      ansible-playbook playbooks/playbook-k8s-ASM-IngressGateway.yaml -l $MYJUMPBOX --extra-vars "remote_kubeconfig=$MYKUBECONFIG asm_version=$asm_version asm_type=$asm_type"
       retVal=$?
       set +x 
 

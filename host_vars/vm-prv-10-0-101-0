@@ -1,3 +1,7 @@
+cluster_type: autopilot
+cluster_name: ap-prv-10-0-101-0
+is_regional_cluster: 1
+
 # for SAN certificate with custom CA
 cert_CA: myCA.prv-10-0-101-0.local
 cert_domains_primary_ingress: ['my-primary.prv-10-0-101-0.local','my-primary-alt.prv-10-0-101-0.local']
