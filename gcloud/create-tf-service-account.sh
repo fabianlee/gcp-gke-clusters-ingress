@@ -93,13 +93,13 @@ create_svc_account $project_id "tf-creator" "terraform user"
 # ADDITIONAL ROLES for Anthos Service Mesh
 # https://cloud.google.com/service-mesh/docs/installation-permissions
 # roles/gkehub.admin
-# roles/container.admin
 # roles/meshconfig.admin
 # roles/resourcemanager.projectIamAdmin
 # roles/iam.serviceAccountAdmin
 # roles/servicemanagement.admin
 # roles/serviceusage.serviceUsageAdmin
 # roles/privateca.admin
+# roles/container.admin (provides RBAC as cluster-admin)
 assign_role $project_id "tf-creator" "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin"
 
 
