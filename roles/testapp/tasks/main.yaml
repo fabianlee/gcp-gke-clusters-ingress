@@ -1,5 +1,30 @@
 ---
 
-- name: test
-  command:
-    cmd: echo hello
+- name: create dest dir for files
+  file:
+    path: /tmp/{{cluster_name}}/testapp
+    state: directory
+
+- name: create templates
+  template:
+    src: "{{item}}"
+    dest: /tmp/{{cluster_name}}/testapp
+  with_fileglob: "{{role_path}}/templates/*.yaml"
+
+- name: get files in testapp
+  find:
+    paths: /tmp/{{cluster_name}}/testapp
+    file_type: file
+    patterns: '*.yaml,*.yml'
+  register: yaml_list
+
+- name: apply yaml manifests
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: "{{item.path}}"
+    namespace: asm-gateways
+  loop: "{{yaml_list.files}}"
+
+
+

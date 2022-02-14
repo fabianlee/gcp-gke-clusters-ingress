@@ -1,0 +1,49 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: hello-world-gateway
+  # annotion will not control regional IP assigned, ephemeral will be assigned and must patch after the fact.
+  #
+  # Create regional static IP and patch to ingress gateway
+  # gcloud compute addresses create gke-ingress-regional --project=<project> --region=<region>
+  # gcloud compute addresses list --regions=<region> --filter=name=gke-ingress-regional --format="value(address)"
+  # kubectl patch service istio-ingressgateway --patch '{"spec":{"loadBalancerIP": "<IP>"}}' --namespace <ns>
+  #
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "*"
+    tls:
+      mode: SIMPLE
+      credentialName: {{cluster_name}}-tls-secret
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: golang-hello-world-web-service 
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - hello-world-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /myhello/
+    route:
+    - destination:
+        host: golang-hello-world-web-service
+        port:
+          number: 8080

@@ -1,5 +1,23 @@
 ---
 
+- name: make sure dir exists
+  file:
+    path: /tmp/{{cluster_name}}
+    state: directory
+
+- name: Ensure the Namespaces for certs exists.
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    api_version: v1
+    kind: Namespace
+    name: "{{item}}"
+    state: present
+  loop:
+    - asm-gateways
+
+####################
+# primary ingress cert
+###################
 - name: get content of key
   slurp:
     src: /tmp/my-primary.{{cluster_name}}.local.key
@@ -25,6 +43,40 @@
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
     src: /tmp/{{cluster_name}}/tls-secret.yaml
+    namespace: "{{item}}"
+  loop:
+    - default
+    - asm-gateways
+
+####################
+# secondary ingress cert
+###################
+
+- name: get content of key
+  slurp:
+    src: /tmp/my-secondary.{{cluster_name}}.local.key
+  register: KEY_BASE64
+
+- name: get content of cert
+  slurp:
+    src: /tmp/my-secondary.{{cluster_name}}.local.crt
+  register: CERT_BASE64
+
+- set_fact:
+    secret_name: "{{cluster_name}}-int-tls-secret"
+
+- name: create secret yaml
+  template:
+    src: secret.yaml
+    dest: /tmp/{{cluster_name}}/int-tls-secret.yaml
+    owner: ubuntu
+    mode: 0550
+
+- name: load tls secret for ingress into namespaces
+  k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: /tmp/{{cluster_name}}/int-tls-secret.yaml
     namespace: "{{item}}"
   loop:
     - default
