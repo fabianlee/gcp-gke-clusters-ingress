@@ -1,6 +1,10 @@
 ---
 
 ############ local commands
+#
+# make sure default compute engine account (login context of cloud scoped vm instances)
+# has enough privileges to do ASM registration
+#
 
 - name: (local) get project number
   connection: local

@@ -52,12 +52,12 @@
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 #- debug: msg="{{command_result}}"
 
-#- name: update python preferences, Ubuntu
-#  command: update-alternatives --install /usr/bin/python python /usr/bin/python3 20
-#  register: command_result
-#  changed_when: "command_result.stdout != ''"
-#  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-#- debug: msg="{{command_result}}"
+- name: update python preferences, Ubuntu
+  command: update-alternatives --install /usr/bin/python python /usr/bin/python3 20
+  register: command_result
+  changed_when: "command_result.stdout != ''"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+- debug: msg="{{command_result}}"
 
 - name: vimrc skeleton
   copy:
@@ -84,3 +84,4 @@
       alias lsl='ls -latr'
       export EDITOR=vim
       export VISUAL=vim
+      export KUBECONFIG=kubeconfig-{{cluster_name}}

@@ -44,12 +44,14 @@ gcloud services enable --project=$project_id \
 # IAM roles for registering cluster
 # not required for project owner who has all permissions
 # but would be required if asmcli install with --enable-all done using gcloud logged in as default compute engine
-#gcloud projects add-iam-policy-binding $project_id \
-#   --member user:$current_user \
-#   --role=roles/gkehub.admin \
-#   --role=roles/iam.serviceAccountAdmin \
-#   --role=roles/iam.serviceAccountKeyAdmin \
-#   --role=roles/resourcemanager.projectIamAdmin \
-#   --role=roles/container.admin
+# default auth on gcp VM instances in cloud scope is default compute engine
+project_number=$(gcloud projects describe $project_id --format="value(projectNumber)")
+gcloud projects add-iam-policy-binding $project_id \
+   --member serviceAccount:${project_number}-compute@developer.gserviceaccount.com \
+   --role=roles/gkehub.admin \
+   --role=roles/iam.serviceAccountAdmin \
+   --role=roles/iam.serviceAccountKeyAdmin \
+   --role=roles/resourcemanager.projectIamAdmin \
+   --role=roles/container.admin
 
 
