@@ -29,7 +29,11 @@
 
 - name: create test curl script
   template:
-    src: test-curl.sh
-    dest: test-curl.sh
+    src: "{{item}}"
+    dest: .
     owner: ubuntu
     mode: 0775
+  loop:
+    - test-curl.sh
+    - test-curl-public.sh
+

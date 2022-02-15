@@ -30,7 +30,7 @@ spec:
     matchLabels:
       app: golang-hello-world-web
   # kubectl scale --replicas=x deployment/golang-hello-world-web
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
