@@ -101,11 +101,13 @@ function check_prerequisites() {
   ensure_binary gcloud
   ensure_binary kubectl
   ensure_binary terraform
+  ensure_binary ansible
 
   # show binary versions
   # on apt, can be upgraded with 'sudo apt install --only-upgrade google-cloud-sdk -y'
   gcloud --version | grep 'Google Cloud SDK'
   terraform --version | head -n 1
+  ansible --version | head -n1
 
   # check for gcloud login context
   gcloud projects list > /dev/null 2>&1
