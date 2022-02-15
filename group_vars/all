@@ -16,8 +16,6 @@ is_regional_cluster: 0 # 1=multi-regional zonal
 node_image_type: UBUNTU_CONTAINERD # COS_CONTAINERD
 
 # ASM Anthos Service Mesh
-asm_version: "1.11" # 1.12
-asm_type: "incluster" # 'managed' if you want Google Managed ASM control plane
 asm_release_channel: "rapid" # must be regular|rapid for GKE Autopilot (cannot use stable)
 
 # to recreate certs

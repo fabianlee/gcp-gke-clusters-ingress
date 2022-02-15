@@ -41,4 +41,6 @@
   copy:
     src: openssl_key_cert_check.sh
     dest: .
+    owner: ubuntu
+    mode: 0775
 

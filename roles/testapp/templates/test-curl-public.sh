@@ -8,6 +8,10 @@ publicIP=$(kubectl get ingress -n asm-gateways my-ingress -o=jsonpath="{.status.
 echo "========== PUBLIC ===================="
 domain=my-primary.{{cluster_name}}.local
 resolveStr="--resolve $domain:443:$publicIP"
+
+# Host header not required, using SNI
+#curl --header "Host: $domain" $caStr $resolveStr https://$domain/myhello/
+
 set -x
 curl $caStr $resolveStr https://$domain/myhello/
 set +x

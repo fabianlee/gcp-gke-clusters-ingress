@@ -60,9 +60,3 @@ $extra_flags \
 # ssh into VM
 #gcloud compute ssh $vm_name --zone=$region-b
 
-# vm with 'cloud-platform' scope, already have auth based on metadata
-# gcloud config set project mygke-proj1
-# gcloud container clusters list
-# export KUBECONFIG=kubeconfig-cluster1
-# gcloud container clusters get-credentials cluster1 --region=us-east1 (--internal-ip)
-

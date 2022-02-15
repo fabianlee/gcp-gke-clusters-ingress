@@ -9,3 +9,4 @@ cert_domains_primary_ingress: ["my-primary.{{cluster_name}}.local","my-primary-a
 cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
 
 asm_type: incluster
+asm_version: "1.11" # leaves room for upgrade testing

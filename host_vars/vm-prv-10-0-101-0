@@ -13,3 +13,4 @@ balloon_replicas: 5
 
 # Autopilot does not allow cert signing requests done by incluster control plane
 asm_type: managed
+asm_version: "1.12" # managed available starting at 1.12

@@ -7,7 +7,8 @@
 # Google managed control plane
 # https://cloud.google.com/service-mesh/docs/managed/service-mesh#download_the_installation_tool
 #
-# Autopilot does not allow certificate signing requests, which is action taken by istio-system/istiod-asm-1115-3
+# Autopilot only supported starting at ASM 1.12+ and requires 'managed' (not incluster) control plane
+# because Autopilot does not allow certificate signing requests, which is action taken by istio-system/istiod-asm-1115-3
 # https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#certificate_signing_requests
 #
 BIN_DIR=$(dirname ${BASH_SOURCE[0]})
@@ -124,10 +125,19 @@ workload_identity=$(gcloud container clusters describe $cluster_name --format="v
 [ -n "$workload_identity" ] || { echo "ERROR workload identity must not be enabled for this cluster, see 'gcloud container clusters describe $cluster_name $location_flag'"; exit 5; }
 echo "workload identity: $workload_identity"
 
+# check for type that indicates ASM installation has been done
+if [ "incluster" = $asm_type ]; then
+  kubectl get IstioOperator this -n istio-system 1>/dev/null 2>&1
+elif [ "managed" = "$asm_type" ]; then
+  kubectl get Controlplanerevisions -n istio-system 1>/dev/null 2>&1
+fi
 
-kubectl get IstioOperator this -n istio-system 1>/dev/null 2>&1
 if [ $? -eq 0 ]; then
-  echo "IstioOperator is already installed, therefore no need to run asmcli install"
+  if [ "incluster" = $asm_type ]; then
+    echo "IstioOperator is already installed, therefore no need to run asmcli install"
+  elif [ "managed" = "$asm_type" ]; then
+    echo "Controlplanerevisions is already installed, therefore no need to run asmcli install"
+  fi
 else
   mkdir -p output-$cluster_name
   echo "asm_type is $asm_type"
@@ -214,19 +224,26 @@ elif [ "managed" = $asm_type ]; then
     echo "ASM already installed into istio-system"
     kubectl get controlplanerevision asm-managed-$asm_release_channel -n istio-system
     echo ""
-    reconciled_status=$(kubectl get controlplanerevision asm-managed-stable -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Reconciled')].status}")
-    stalled_status=$(kubectl get controlplanerevision asm-managed-stable -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Stalled')].status}")
+    reconciled_status=$(kubectl get controlplanerevision asm-managed-$asm_release_channel -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Reconciled')].status}")
+    stalled_status=$(kubectl get controlplanerevision asm-managed-$asm_release_channel -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Stalled')].status}")
     echo "ASM control plan reconciled status: $reconciled_status (You want True)"
     echo "ASM control plan stalled status: $stalled_status (You want False)"
   fi
   
   # https://cloud.google.com/service-mesh/docs/managed/service-mesh#managed-data-plane
-  # skipping the google-managed data plane which would recycle pods when ASM upgrade is done
-  # kubectl annotate --overwrite namespace NAMESPACE mesh.cloud.google.com/proxy='{"managed":"true"}'
-  # if kubectl get dataplanecontrols -o custom-columns=REV:.spec.revision,STATUS:.status.state | grep rapid | grep -v none > /dev/null; then echo "Managed Data Plane is ready."; else echo "Managed Data Plane is NOT ready."; fi
+  echo "creating 'gmanaged-sidecar' namespace where upgraded sidecar are automatically applied"
+  kubectl create ns gmanaged-sidecar
+  kubectl annotate --overwrite namespace gmanaged-sidecar mesh.cloud.google.com/proxy='{"managed":"true"}'
+  if kubectl get dataplanecontrols -o custom-columns=REV:.spec.revision,STATUS:.status.state | grep rapid | grep -v none > /dev/null; then 
+    echo "Managed Data Plane is ready."
+  else 
+    echo "Managed Data Plane is NOT ready."
+  fi
+  kubectl create deployment nginx-gmanaged -n gmanaged-sidecar --image=nginx:1.21.6
+  
   
   # set revision label for namespace
-  for ns in default asm-gateways; do
+  for ns in default asm-gateways gmanaged-sidecar; do
     kubectl label namespace $ns istio-injection- istio.io/rev=asm-managed-$asm_release_channel --overwrite
   done
   kubectl get ns istio-system --show-labels

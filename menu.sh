@@ -40,7 +40,7 @@ menu_items=(
   "k8s-ASM-IGW,Install ASM Ingress Gateways on cluster"
   "k8s-gcp-lb,Deploy GCP HTTPS Loadbalancer using Ingress"
   "k8s-testapp,Install test service at /hello"
-  "k8s-curl,Use curl to test /hello"
+  "k8s-curl,Run curl to test /hello"
   ""
   "delgke,Delete GKE public standard cluster"
   "delautopilot,Delete GKE public Autopilot cluster"

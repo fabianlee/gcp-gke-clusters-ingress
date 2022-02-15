@@ -19,8 +19,9 @@ metadata:
     app: istio-ingressgateway-int
     istio: ingressgateway-int
   annotations:
-    cloud.google.com/neg: '{"ingress": true}'
-    cloud.google.com/app-protocols: '{"https":"HTTPS"}'
+    # try internal TCP LB without NEG
+    #cloud.google.com/neg: '{"ingress": true}'
+    #cloud.google.com/app-protocols: '{"https":"HTTPS"}'
     cloud.google.com/load-balancer-type: "Internal"
     networking.gke.io/suppress-firewall-xpn-error: "true"
 spec:
