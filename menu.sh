@@ -88,9 +88,11 @@ function echoYellow() {
 
 function ensure_binary() {
   binary="$1"
+  install_instructions="$2"
   binpath=$(which $binary)
   if [ -z "$binpath" ]; then
     echo "ERROR you must install $binary before running this wizard"
+    echo "$install_instructions"
     exit 1
   fi
 }
@@ -98,16 +100,20 @@ function ensure_binary() {
 function check_prerequisites() {
 
   # make sure binaries are installed 
-  ensure_binary gcloud
-  ensure_binary kubectl
-  ensure_binary terraform
-  ensure_binary ansible
+  ensure_binary gcloud "install https://cloud.google.com/sdk/docs/install"
+  ensure_binary kubectl "install https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/"
+  ensure_binary terraform "install https://fabianlee.org/2021/05/30/terraform-installing-terraform-manually-on-ubuntu/"
+  ensure_binary ansible "install https://fabianlee.org/2021/05/31/ansible-installing-the-latest-ansible-on-ubuntu/"
+  ensure_binary yq "download from https://github.com/mikefarah/yq/releases"
+  ensure_binary jq "run 'sudo apt install jq'"
 
   # show binary versions
   # on apt, can be upgraded with 'sudo apt install --only-upgrade google-cloud-sdk -y'
   gcloud --version | grep 'Google Cloud SDK'
   terraform --version | head -n 1
   ansible --version | head -n1
+  yq --version
+  jq --version
 
   # check for gcloud login context
   gcloud projects list > /dev/null 2>&1
