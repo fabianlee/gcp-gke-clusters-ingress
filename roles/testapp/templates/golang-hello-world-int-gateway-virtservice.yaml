@@ -34,8 +34,7 @@ kind: VirtualService
 metadata:
   name: golang-hello-world-web-int-service 
 spec:
-  hosts:
-  - "*"
+  hosts: {{cert_domains_secondary_ingress}}
   gateways:
   - hello-world-int-gateway
   http:

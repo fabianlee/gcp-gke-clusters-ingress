@@ -8,7 +8,7 @@ metadata:
     # If the class annotation is not specified it defaults to "gce".
     kubernetes.io/ingress.class: gce
     # name of global static IP, will default to using public ephemeral if this does not exist
-    kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
+    #kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
     kubernetes.io/ingress.allow-http: "false"
 spec:
   #defaultBackend:

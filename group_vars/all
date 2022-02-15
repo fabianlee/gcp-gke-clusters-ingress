@@ -21,7 +21,7 @@ asm_type: "incluster" # 'managed' if you want Google Managed ASM control plane
 asm_release_channel: "rapid" # must be regular|rapid for GKE Autopilot (cannot use stable)
 
 # to recreate certs
-cert_overwrite: yes
-ca_overwrite: true
+#cert_overwrite: yes
+#ca_overwrite: true
 
 
