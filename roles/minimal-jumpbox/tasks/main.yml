@@ -84,4 +84,4 @@
       alias lsl='ls -latr'
       export EDITOR=vim
       export VISUAL=vim
-      export KUBECONFIG=kubeconfig-{{cluster_name}}
+      export KUBECONFIG=/home/ubuntu/kubeconfig-{{cluster_name}}
