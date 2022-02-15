@@ -20,10 +20,11 @@ metadata:
     istio: ingressgateway-int
   annotations:
     # try internal TCP LB without NEG
-    #cloud.google.com/neg: '{"ingress": true}'
-    #cloud.google.com/app-protocols: '{"https":"HTTPS"}'
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/app-protocols: '{"https":"HTTPS"}'
     cloud.google.com/load-balancer-type: "Internal"
     networking.gke.io/suppress-firewall-xpn-error: "true"
+    kubernetes.io/ingress.class: istio-int
 spec:
   loadBalancerIP: {{subnet_prefix}}.199
   loadBalancerSourceRanges: [ 10.0.0.0/8 ]

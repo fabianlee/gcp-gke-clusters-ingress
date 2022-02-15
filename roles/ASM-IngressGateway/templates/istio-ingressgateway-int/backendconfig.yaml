@@ -1,14 +1,10 @@
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: ingress-backendconfig
+  name: ingress-backendconfig-int
   #namespace: asm-gateways
 spec:
   healthCheck:
     requestPath: /healthz/ready
-    port: 15021
+    port: 15022
     type: HTTP
-  # Cloud Armor policy
-  securityPolicy:
-    name: "{{cluster_name}}-security-policy"
-

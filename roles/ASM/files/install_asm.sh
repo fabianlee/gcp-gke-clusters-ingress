@@ -127,7 +127,11 @@ echo "workload identity: $workload_identity"
 
 # check for type that indicates ASM installation has been done
 if [ "incluster" = $asm_type ]; then
-  kubectl get IstioOperator this -n istio-system 1>/dev/null 2>&1
+  kubectl get IstioOperator -n istio-system >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo "IstioOperator CRD type existed, but we also need to check if one starting with 'installed-state-asm' exists"
+    kubectl get IstioOperator -n istio-system -o=jsonpath="{.items[].metadata.name}" | grep -q installed-state-asm-
+  fi
 elif [ "managed" = "$asm_type" ]; then
   kubectl get Controlplanerevisions -n istio-system 1>/dev/null 2>&1
 fi

@@ -10,7 +10,7 @@ metadata:
   annotations:
     # https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress#install_an_ingress_gateway
     # trying without NEG for autopilot
-    #cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/neg: '{"ingress": true}'
     cloud.google.com/app-protocols: '{"https":"HTTPS"}'
 
     cloud.google.com/load-balancer-type: "Internal" # what about 'networking.gke.io/load-balancer-type' ? (which is legacy)

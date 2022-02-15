@@ -1,5 +1,31 @@
 ---
 
+- name: create security-policy for Cloud Armor
+  command:
+    cmd: "gcloud compute security-policies create {{cluster_name}}-security-policy --description \"Cloud Armor security policy\""
+  register: create_secpol
+  failed_when: create_secpol.rc!=0 and not "already exists" in create_secpol.stderr
+
+- debug: msg="{{create_secpol}}"
+
+- name: set logging for rule
+  command:
+    cmd: "gcloud compute security-policies update {{cluster_name}}-security-policy --log-level=VERBOSE"
+
+- name: update security rule with XSS
+  command:
+    cmd: "gcloud compute security-policies rules create 1000 --security-policy {{cluster_name}}-security-policy --expression \"evaluatePreconfiguredExpr('xss-stable')\" --action deny-403 --description \"XSS attack filtering\""
+  register: update_output
+  failed_when: false
+- debug: msg="{{update_output}}"
+
+- name: update security rule with DDOS
+  command:
+    cmd: "gcloud beta compute security-policies update {{cluster_name}}-security-policy --enable-layer7-ddos-defense"
+  register: update_output
+- debug: msg="{{update_output}}"
+
+
 - name: create dest dir for files
   file:
     path: /tmp/{{cluster_name}}

@@ -19,12 +19,14 @@
     dest: /tmp/{{cluster_name}}/istio-ingressgateway
   loop:
     - istio-ingressgateway/service.yaml
+    - istio-ingressgateway/backendconfig.yaml
 - name: create templates
   template:
     src: "{{item}}"
     dest: /tmp/{{cluster_name}}/istio-ingressgateway-int
   loop:
     - istio-ingressgateway-int/service.yaml
+    - istio-ingressgateway-int/backendconfig.yaml
 
 
 - name: Ensure the default Namespace exists.
