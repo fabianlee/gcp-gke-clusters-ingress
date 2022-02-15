@@ -1,0 +1,26 @@
+# https://wdenniss.com/gke-autopilot-spare-capacity
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: balloon-deploy
+spec:
+  replicas: {{balloon_replicas}}
+  selector:
+    matchLabels:
+      app: balloon
+  template:
+    metadata:
+      labels:
+        app: balloon
+    spec:
+      priorityClassName: balloon-priority
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: ubuntu
+        image: ubuntu
+        command: ["sleep"]
+        args: ["infinity"]
+        resources:
+            requests:
+              cpu: {{balloon_cpu}}
+              memory: {{balloon_memory}}

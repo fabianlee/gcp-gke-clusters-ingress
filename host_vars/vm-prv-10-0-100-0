@@ -7,3 +7,5 @@ subnet_prefix: 10.0.100
 cert_CA: myCA.{{cluster_name}}.local
 cert_domains_primary_ingress: ["my-primary.{{cluster_name}}.local","my-primary-alt.{{cluster_name}}.local"]
 cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
+
+asm_type: incluster

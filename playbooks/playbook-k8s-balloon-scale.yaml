@@ -1,0 +1,7 @@
+---
+
+- hosts: jumpboxes
+  gather_facts: false
+
+  roles:
+    - balloon-scale

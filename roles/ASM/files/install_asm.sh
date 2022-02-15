@@ -7,6 +7,8 @@
 # Google managed control plane
 # https://cloud.google.com/service-mesh/docs/managed/service-mesh#download_the_installation_tool
 #
+# Autopilot does not allow certificate signing requests, which is action taken by istio-system/istiod-asm-1115-3
+# https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#certificate_signing_requests
 #
 BIN_DIR=$(dirname ${BASH_SOURCE[0]})
 cd $BIN_DIR
@@ -123,7 +125,7 @@ workload_identity=$(gcloud container clusters describe $cluster_name --format="v
 echo "workload identity: $workload_identity"
 
 
-kubectl get IstioOperator -n istio-system 1>/dev/null 2>&1
+kubectl get IstioOperator this -n istio-system 1>/dev/null 2>&1
 if [ $? -eq 0 ]; then
   echo "IstioOperator is already installed, therefore no need to run asmcli install"
 else
@@ -142,7 +144,6 @@ else
         --cluster_location $cluster_location_isolated \
         --context $kubecontext \
         --managed \
-        --verbose \
         --output_dir output-$cluster_name \
         --use_managed_cni \
         --channel $asm_release_channel \

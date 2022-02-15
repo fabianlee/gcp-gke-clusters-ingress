@@ -7,3 +7,9 @@ subnet_prefix: 10.0.101
 cert_CA: myCA.{{cluster_name}}.local
 cert_domains_primary_ingress: ["my-primary.{{cluster_name}}.local","my-primary-alt.{{cluster_name}}.local"]
 cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
+
+# 5 takes Autopilot from 2->7 nodes
+balloon_replicas: 5
+
+# Autopilot does not allow cert signing requests done by incluster control plane
+asm_type: managed

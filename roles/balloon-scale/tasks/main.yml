@@ -1,0 +1,24 @@
+---
+
+- name: mkdir for balloon yaml
+  file:
+    state: directory
+    path: /tmp/{{cluster_name}}/balloon
+
+- name: create templates
+  template:
+    src: "{{item}}"
+    dest: /tmp/{{cluster_name}}/balloon
+  loop:
+    - balloon-priority.yaml
+    - balloon.yaml
+
+- name: apply yaml manifests
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: /tmp/{{cluster_name}}/balloon/{{item}}
+    namespace: default
+  loop:
+    - balloon-priority.yaml
+    - balloon.yaml

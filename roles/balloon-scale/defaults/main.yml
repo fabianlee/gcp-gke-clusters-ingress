@@ -1,0 +1,9 @@
+TMPDIR: "{{ lookup('env','TMPDIR') | default('/tmp',true)  }}"
+
+# by default, only run 1
+# AutoPilot will need to override so they scale up
+balloon_replicas: 1
+
+balloon_cpu: 500m
+balloon_memory: 500Mi
+

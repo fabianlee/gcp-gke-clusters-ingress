@@ -33,12 +33,14 @@ menu_items=(
   "kubeconfigcopy,Copy kubeconfig to remote jumpboxes"
   "kubeconfig,Select KUBECONFIG \$MYKUBECONFIG"
   "k8s-register,Register with hub and get fleet identity"
+  "k8s-scale,Apply balloon pod to warm up cluster"
   "k8s-tinytools,Apply tiny-tools Daemonset to cluster"
   "k8s-ASM,Install ASM on cluster"
   "k8s-certs,Create and load TLS certificates"
   "k8s-ASM-IGW,Install ASM Ingress Gateways on cluster"
   "k8s-gcp-lb,Deploy GCP HTTPS Loadbalancer using Ingress"
-  "k8s-testapp,Install test service, /hello"
+  "k8s-testapp,Install test service at /hello"
+  "k8s-curl,Use curl to test /hello"
   ""
   "delgke,Delete GKE public standard cluster"
   "delautopilot,Delete GKE public Autopilot cluster"
@@ -391,6 +393,14 @@ while [ 1 == 1 ]; do
       ansible-playbook playbooks/playbook-k8s-tinytools.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
       retVal=$?
       set +x 
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-scale)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-balloon-scale.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -434,6 +444,15 @@ while [ 1 == 1 ]; do
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
       ansible-playbook playbooks/playbook-k8s-testapp.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-curl)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-k8s-curl.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
       retVal=$?
       set +x 
 

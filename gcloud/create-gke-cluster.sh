@@ -87,11 +87,12 @@ if [ $cluster_count -eq 0 ]; then
 
     extra_flags=""
     if [ "$exposed_as" = "private" ]; then 
-      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-nodes --enable-private-endpoint"
+      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-endpoint"
     fi
  
     set -ex
-    gcloud container --project $project_id clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" --master-ipv4-cidr $master_cidr $extra_flags
+    # even with public, we choose private nodes so nodes have unreachable internal IP but have public kubeapi endpoint
+    gcloud container --project $project_id clusters create-auto $cluster_name $location_flag --release-channel "$cluster_release_channel" --cluster-version="$cluster_version" --network "$network_name" --subnetwork "$subnet_name" --cluster-secondary-range-name=pods --services-secondary-range-name=services --scopes="$cluster_scopes" --enable-private-nodes --master-ipv4-cidr $master_cidr $extra_flags
     set +ex
 
   elif [ $cluster_type = "standard" ]; then
