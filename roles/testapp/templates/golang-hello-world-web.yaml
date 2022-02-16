@@ -1,4 +1,16 @@
 ---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: golang-hello-world-web-service-backendconfig
+spec:
+  # https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#direct_hc
+  healthCheck:
+    checkIntervalSec: 15
+    port: 8080
+    type: HTTP
+    requestPath: /healthz
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,6 +18,9 @@ metadata:
   #namespace: default
   labels:
     app: golang-hello-world-web
+  annotations:
+    # https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-features#same_backendconfig_for_all_service_ports
+    cloud.google.com/backend-config: '{"default": "golang-hello-world-web-service-backendconfig"}'
 spec:
   ports:
   # port=available to other containers

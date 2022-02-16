@@ -2,8 +2,8 @@
 apiVersion: networking.gke.io/v1beta1
 kind: FrontendConfig
 metadata:
-  name: lb-http-to-https
-  namespace: asm-gateways
+  name: ap-lb-http-to-https
+  namespace: default #asm-gateways
 spec:
   redirectToHttps:
     enabled: true
@@ -14,21 +14,21 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-ingress
-  namespace: asm-gateways
+  name: ap-my-ingress
+  namespace: default #asm-gateways
   annotations:
     # If the class annotation is not specified it defaults to "gce".
     kubernetes.io/ingress.class: gce
     # name of global static IP, will default to using public ephemeral if this does not exist
     #kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
-    kubernetes.io/ingress.allow-http: "true"
-    networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
+    kubernetes.io/ingress.allow-http: "false"
+    #networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
 spec:
-  #defaultBackend:
-  #  service:
-  #    name: istio-ingressgateway
-  #    port:
-  #      number: 80
+#  defaultBackend:
+#    service:
+#      name: golang-hello-world-web-service
+#      port:
+#        number: 8080
 
   tls:
   - secretName: {{cluster_name}}-tls-secret
@@ -36,12 +36,30 @@ spec:
   rules:
   - http:
       paths:
-      - path: /*
+      - path: /myhello/*
         pathType: ImplementationSpecific
         backend:
           service:
-            name: istio-ingressgateway
+            name: golang-hello-world-web-service
             port:
-              number: 443
+              number: 8080
+#      - path: /myint/*
+#        pathType: ImplementationSpecific
+#        backend:
+#          service:
+#            name: golang-hello-world-web-int-service
+#            port:
+#              number: 8080
+
+#  rules:
+#  - http:
+#      paths:
+#      - path: /*
+#        pathType: ImplementationSpecific
+#        backend:
+#          service:
+#            name: istio-ingressgateway
+#            port:
+#              number: 443
               # served up http good
               #number: 80

@@ -5,9 +5,17 @@
     path: /tmp/{{cluster_name}}
     state: directory
 
+# use different directories depending on if managed or incluster
+- set_fact:
+    dir_prefix: ""
+  when: asm_type != "managed"
+- set_fact:
+    dir_prefix: "ap-"
+  when: asm_type == "managed"
+
 - name: copy dirs
   copy:
-    src: "{{role_path}}/templates/{{item}}"
+    src: "{{role_path}}/templates/{{dir_prefix}}{{item}}"
     dest: /tmp/{{cluster_name}}
   loop:
     - istio-ingressgateway
@@ -18,15 +26,15 @@
     src: "{{item}}"
     dest: /tmp/{{cluster_name}}/istio-ingressgateway
   loop:
-    - istio-ingressgateway/service.yaml
-    - istio-ingressgateway/backendconfig.yaml
+    - "{{dir_prefix}}istio-ingressgateway/service.yaml"
+    - "{{dir_prefix}}istio-ingressgateway/backendconfig.yaml"
 - name: create templates
   template:
     src: "{{item}}"
     dest: /tmp/{{cluster_name}}/istio-ingressgateway-int
   loop:
-    - istio-ingressgateway-int/service.yaml
-    - istio-ingressgateway-int/backendconfig.yaml
+    - "{{dir_prefix}}istio-ingressgateway-int/service.yaml"
+    - "{{dir_prefix}}istio-ingressgateway-int/backendconfig.yaml"
 
 
 - name: Ensure the default Namespace exists.

@@ -112,8 +112,7 @@ if [ $cluster_count -eq 0 ]; then
   fi
 
   # update to set maintenance window flags
-  # TODO put back in
-  #gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+  gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
 
   # delete any old hub registrations, registration will be done later
   # not going to register here, because registering with fleet enablement uses kubeconfig connection
@@ -123,7 +122,7 @@ if [ $cluster_count -eq 0 ]; then
   # make sure HttpLoadBalacing add-on is enabled for cluster, only editable on standard clusters
   # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress#gcloud
   gcloud container clusters describe $cluster_name $location_flag | yq ".addonsConfig"
-  # TODO put back in
+  # TODO put back in, even though web console says 'HTTP Load Balancing = enabled'
   #gcloud container clusters update $cluster_name --update-addons=HttpLoadBalancing=ENABLED $location_flag
 
 else
