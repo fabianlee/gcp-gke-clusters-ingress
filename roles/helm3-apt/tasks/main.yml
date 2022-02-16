@@ -20,8 +20,15 @@
     - helm
     state: present
 
-- name: create symlink for helm3
+- name: create Debian/Ubuntu alternative for helm
+  command: update-alternatives --install /usr/sbin/helm helm /usr/local/bin/helm 20
+  register: command_result
+  changed_when: "command_result.stdout != ''"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: create symlink for helm in PATH location for non Debian systems
   file:
     src: /usr/sbin/helm
-    dest: /usr/local/bin/helm3
+    dest: /usr/local/bin/helm
     state: link
+  when: not (ansible_distribution == 'Debian' and ansible_distribution == 'Ubuntu')

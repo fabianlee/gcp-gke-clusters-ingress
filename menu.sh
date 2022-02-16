@@ -39,8 +39,8 @@ menu_items=(
   "k8s-certs,Create and load TLS certificates"
   "k8s-ASM-IGW,Install ASM Ingress Gateways on cluster"
   "k8s-gcp-lb,Deploy GCP HTTPS Loadbalancer using Ingress"
-  "k8s-testapp,Install test service at /hello"
-  "k8s-curl,Run curl to test /hello"
+  "k8s-helloapp,Install hello apps"
+  "k8s-curl,Run curl to test exposure of hello apps"
   ""
   "delgke,Delete GKE public standard cluster"
   "delautopilot,Delete GKE public Autopilot cluster"
@@ -440,10 +440,10 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    k8s-testapp)
+    k8s-helloapp)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
-      ansible-playbook playbooks/playbook-k8s-testapp.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      ansible-playbook playbooks/playbook-k8s-helloapp.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
       retVal=$?
       set +x 
 
