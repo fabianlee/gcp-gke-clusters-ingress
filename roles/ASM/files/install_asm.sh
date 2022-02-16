@@ -131,6 +131,9 @@ if [ "incluster" = $asm_type ]; then
   if [ $? -eq 0 ]; then
     echo "IstioOperator CRD type existed, but we also need to check if one starting with 'installed-state-asm' exists"
     kubectl get IstioOperator -n istio-system -o=jsonpath="{.items[].metadata.name}" | grep -q installed-state-asm-
+  else
+    echo "error when trying to read IstioOperator CRD, setting non-zero code for next step"
+    $(exit 99)
   fi
 elif [ "managed" = "$asm_type" ]; then
   kubectl get Controlplanerevisions -n istio-system 1>/dev/null 2>&1
