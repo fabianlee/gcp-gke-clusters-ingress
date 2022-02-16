@@ -209,11 +209,11 @@ while [ 1 == 1 ]; do
       set -x
       retVal=0
       for subnet in pub-10-0-90-0 pub-10-0-91-0; do
-        gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region
+        gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region $preemptable
         [ $? -eq 0 ] || retVal=$?
       done
       for subnet in prv-10-0-100-0 prv-10-0-101-0; do
-        gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region
+        gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region $preemptable
         [ $? -eq 0 ] || retVal=$?
       done
       set +x 

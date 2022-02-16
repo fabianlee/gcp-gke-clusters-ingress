@@ -11,8 +11,9 @@ project_id="$3"
 network_name="$4"
 subnet_name="$5"
 region="$6"
+preemptible="$7"
 if [[ -z "$vm_type" || -z "$vm_name" || -z "$project_id" || -z "$network_name" || -z "$subnet_name" || -z "$region" ]]; then
-  echo "Usage: vmType=public|private vmName projectid networkName subnetName region"
+  echo "Usage: vmType=public|private vmName projectid networkName subnetName region [preemtible=0]"
   exit 1
 fi
 
@@ -21,8 +22,13 @@ gcloud config set project $project_id
 
 # gcloud compute images list
 image_flags="--image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud"
+
+extra_flags=""
+if [ "$preemptible" -eq 1 ]; then
+  extra_flags="--preemptible"
+fi
 # 'pubjumpbox' is network tag for firewall rule that allows ssh
-[ "public" = "$vm_type" ] && extra_flags="--tags=pubjumpbox" || extra_flags="--no-address"
+[ "public" = "$vm_type" ] && extra_flags="$extra_flags --tags=pubjumpbox" || extra_flags="$extra_flags --no-address"
 
 # os login explanation: https://medium.com/@0d6e/options-for-managing-ssh-access-on-google-compute-engine-e629b3203664
 
