@@ -13,7 +13,7 @@
   command:
     cmd: "gcloud compute ssl-policies create {{cluster_name}}-ssl-policy --min-tls-version=1.2 --profile=MODERN"
   register: create_sslpolicy
-  failed_when: false
+  failed_when: create_sslpolicy.rc!=0 and not "already exists" in create_sslpolicy.stderr
 - debug: msg="{{create_sslpolicy}}"
 
 - name: create security-policy for Cloud Armor
@@ -32,7 +32,7 @@
   command:
     cmd: "gcloud compute security-policies rules create 1000 --security-policy {{cluster_name}}-security-policy --expression \"evaluatePreconfiguredExpr('xss-stable')\" --action deny-403 --description \"XSS attack filtering\""
   register: update_output
-  failed_when: false
+  failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
 - debug: msg="{{update_output}}"
 
 - name: update security rule with DDOS
@@ -72,14 +72,5 @@
     state: present
     src: /tmp/{{cluster_name}}/lb/{{file_prefix}}ingress.yaml
     namespace: "{{ ingress_namespace }}"
-
-- name: create test curl script for public Ingress
-  template:
-    src: "{{item}}"
-    dest: .
-    owner: ubuntu
-    mode: 0775
-  loop:
-    - test-curl-public.sh
 
 
