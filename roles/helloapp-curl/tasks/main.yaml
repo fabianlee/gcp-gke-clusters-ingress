@@ -7,7 +7,7 @@
     owner: ubuntu
     mode: 0775
   loop:
-    - test-curl.sh
+    - test-curl-internal.sh
     - test-curl-public.sh
 
 - name: copy key and cert pairing check
@@ -16,4 +16,19 @@
     dest: .
     owner: ubuntu
     mode: 0775
+
+- name: test primary and secondary internal IP ingress
+  command:
+    cmd: ./test-curl-internal.sh
+  register: internal_results
+- debug: msg="{{internal_results}}"
+
+- name: test primary public static IP ingress
+  command:
+    cmd: ./test-curl-public.sh
+  register: public_results
+  environment:
+    KUBECONFIG: "{{remote_kubeconfig}}"
+- debug: msg="{{public_results}}"
+
 

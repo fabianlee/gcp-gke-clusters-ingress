@@ -449,7 +449,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    helloapp)
+    k8s-helloapp)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
       ansible-playbook playbooks/playbook-k8s-helloapp.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
