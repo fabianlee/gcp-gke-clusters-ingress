@@ -1,0 +1,19 @@
+---
+
+- name: create test curl script for public HTPPS LB and private TCP LB
+  template:
+    src: "{{item}}"
+    dest: .
+    owner: ubuntu
+    mode: 0775
+  loop:
+    - test-curl.sh
+    - test-curl-public.sh
+
+- name: copy key and cert pairing check
+  copy:
+    src: openssl_key_cert_check.sh
+    dest: .
+    owner: ubuntu
+    mode: 0775
+
