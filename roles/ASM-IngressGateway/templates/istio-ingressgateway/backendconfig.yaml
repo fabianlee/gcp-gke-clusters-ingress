@@ -2,7 +2,7 @@ apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: ingress-backendconfig
-  #namespace: asm-gateways
+  #namespace: default
 spec:
   healthCheck:
     requestPath: /healthz/ready
