@@ -38,10 +38,10 @@ menu_items=(
   "k8s-tinytools,Apply tiny-tools Daemonset to cluster"
   "k8s-ASM,Install ASM on cluster"
   "k8s-certs,Create and load TLS certificates"
-  "k8s-ASM-IGW,Install ASM Ingress Gateways on cluster"
-  "k8s-gcp-lb,Deploy GCP HTTPS Loadbalancer using Ingress"
+  "k8s-lb-tcp,Deploy Ingress Gateway for private TCP LB"
+  "k8s-lb-https,Deploy Ingress for public HTTPS LB"
   "k8s-helloapp,Install hello apps"
-  "k8s-curl,Run curl to test exposure of hello apps"
+  "k8s-curl,Run curl to test public and private hello apps"
   ""
   "delgke,Delete GKE public standard cluster"
   "delautopilot,Delete GKE public Autopilot cluster"
@@ -431,7 +431,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    k8s-ASM-IGW)
+    k8s-lb-tcp)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
       ansible-playbook playbooks/playbook-k8s-ASM-IngressGateway.yaml -l $MYJUMPBOX --extra-vars "remote_kubeconfig=$MYKUBECONFIG"
@@ -440,7 +440,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    k8s-gcp-lb)
+    k8s-lb-https)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
       ansible-playbook playbooks/playbook-k8s-GCP-loadbalancer.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
@@ -449,7 +449,7 @@ while [ 1 == 1 ]; do
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
-    k8s-helloapp)
+    helloapp)
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
       ansible-playbook playbooks/playbook-k8s-helloapp.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG

@@ -34,22 +34,3 @@
     src: "{{item.path}}"
     namespace: default
   loop: "{{yaml_list.files}}"
-
-
-- name: create test curl script
-  template:
-    src: "{{item}}"
-    dest: .
-    owner: ubuntu
-    mode: 0775
-  loop:
-    - test-curl.sh
-    - test-curl-public.sh
-
-- name: copy key and cert pairing check
-  copy:
-    src: openssl_key_cert_check.sh
-    dest: .
-    owner: ubuntu
-    mode: 0775
-
