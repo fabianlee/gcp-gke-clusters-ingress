@@ -21,7 +21,7 @@
     state: present
 
 - name: create Debian/Ubuntu alternative for helm
-  command: update-alternatives --install /usr/sbin/helm helm /usr/local/bin/helm 20
+  command: update-alternatives --install /usr/local/bin/helm helm /usr/sbin/helm 20
   register: command_result
   changed_when: "command_result.stdout != ''"
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

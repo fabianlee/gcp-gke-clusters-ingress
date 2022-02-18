@@ -1,5 +1,14 @@
 ---
 
+- name: set tf-creator service accound for gcloud
+  command:
+    cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
+  register: activate_svc_account
+- name: set gcp project id
+  command:
+    cmd: gcloud config set project {{project_id}}
+
+
 - name: copy gcloud register installer script
   copy:
     src: gcloud_register_cluster.sh
@@ -10,4 +19,4 @@
   command:
     cmd: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
   register: register_cluster
-- debug: msg="{{register_cluster.stdout_lines}}"
+- debug: msg="{{register_cluster}}"

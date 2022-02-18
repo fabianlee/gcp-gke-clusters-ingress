@@ -2,6 +2,8 @@
 
 - hosts: jumpboxes
   gather_facts: false
+  roles:
+    - helloapp-curl
 
   tasks:
 
@@ -15,7 +17,5 @@
       command:
         cmd: ./test-curl-public.sh
       register: public_results 
-      environment:
-        KUBECONFIG: "{{remote_kubeconfig}}"
     - debug: msg="{{public_results}}"
 

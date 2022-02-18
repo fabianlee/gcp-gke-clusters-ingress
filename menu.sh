@@ -17,7 +17,7 @@ menu_items=(
   "network,Create network, subnets, and firewall"
   "cloudnat,Create Cloud NAT for public egress of private IP"
   ""
-  "metadata,Load ssh key into project metadata"
+  "sshmetadata,Load ssh key into project metadata"
   "vms,Create VM instances in subnets"
   "enablessh,Setup ssh config for bastions and ansible inventory"
   "ssh,SSH into jumpbox"
@@ -30,7 +30,8 @@ menu_items=(
   "privgke,Create private standard GKE cluster"
   "privautopilot,Create private AutoGKE cluster"
   ""
-  "kubeconfigcopy,Copy kubeconfig to remote jumpboxes"
+  "kubeconfigcopy,Copy kubeconfig and svc acct key to jumpboxes"
+  "svcaccountcopy,Copy service account json key to jumpboxes"
   "kubeconfig,Select KUBECONFIG \$MYKUBECONFIG"
   "k8s-register,Register with hub and get fleet identity"
   "k8s-scale,Apply balloon pod to warm up cluster"
@@ -46,7 +47,6 @@ menu_items=(
   "delautopilot,Delete GKE public Autopilot cluster"
   "delprivgke,Delete GKE private standard cluster"
   "delprivautopilot,Delete GKE private Autopilot cluster"
-  ""
   "delvms,Delete VM instances"
   "delnetwork,Delete network and Cloud NAT"
 )
@@ -118,12 +118,12 @@ function check_prerequisites() {
   jq --version
 
   # check for gcloud login context
-  gcloud projects list > /dev/null 2>&1
+  timeout 15 gcloud projects list > /dev/null 2>&1
   [ $? -eq 0 ] || gcloud auth login --no-launch-browser
   gcloud auth list
 
   # create personal credentials that terraform provider can use
-  gcloud auth application-default print-access-token >/dev/null 2>&1
+  timeout 15 gcloud auth application-default print-access-token >/dev/null 2>&1
   [ $? -eq 0 ] || gcloud auth application-default login
 
 } # check_prerequisites
@@ -144,7 +144,7 @@ check_prerequisites "$@"
 
 # bring in variables
 source ./global.properties
-echo "project_name is $project_name"
+echo "project_id/name is $project_id/$project_name"
 echo "cluster_version is $cluster_version"
 echo "cluster release channel is $cluster_release_channel"
 
@@ -171,7 +171,7 @@ while [ 1 == 1 ]; do
 
     svcaccount)
       set -x
-      gcloud/create-tf-service-account.sh $project_id $project_name
+      gcloud/create-tf-service-account.sh $project_id
       retVal=$?
       set +x 
 
@@ -196,7 +196,7 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    metadata)
+    sshmetadata)
       set -x
       gcloud/add-gcp-metadata-ssh-key.sh $project_id
       retVal=$?
@@ -209,11 +209,11 @@ while [ 1 == 1 ]; do
       set -x
       retVal=0
       for subnet in pub-10-0-90-0 pub-10-0-91-0; do
-        gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region $preemptable
+        gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region $vm_cloud_scope $vm_preemptable
         [ $? -eq 0 ] || retVal=$?
       done
       for subnet in prv-10-0-100-0 prv-10-0-101-0; do
-        gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region $preemptable
+        gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region $vm_cloud_scope $vm_preemptable
         [ $? -eq 0 ] || retVal=$?
       done
       set +x 
@@ -334,6 +334,15 @@ while [ 1 == 1 ]; do
     kubeconfigcopy)
       set -x
       ansible-playbook playbooks/playbook-copy-kubeconfig-remotely.yaml -l localhost,jumpboxes
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
+    svcaccountcopy)
+      set -x
+      ansible-playbook playbooks/playbook-config-gcloud-remotely.yaml -l localhost,jumpboxes
       retVal=$?
       set +x 
 

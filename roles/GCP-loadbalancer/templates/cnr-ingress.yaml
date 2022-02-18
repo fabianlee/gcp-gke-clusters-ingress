@@ -1,28 +1,46 @@
 ---
+# frontend that defines redirector for http->https and TLS 1.2+ policy
 apiVersion: networking.gke.io/v1beta1
 kind: FrontendConfig
 metadata:
-  name: ap-lb-http-to-https
-  namespace: default #asm-gateways
+  name: cnr-lb-http-to-https
+  #namespace: "{{ingress_namespace}}"
 spec:
   redirectToHttps:
     enabled: true
   # need to create ssl-policies, https://cloud.google.com/load-balancing/docs/use-ssl-policies#creating_ssl_policies
-  #sslPolicy: gke-ingress-ssl-policy
+  # 'gcloud compute ssl-policies'
+  sslPolicy: {{cluster_name}}-ssl-policy
+---
+# backend for istiod that defines health check and Cloud Armor policy
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: cnr-ingress-backendconfig
+  #namespace: "{{ingress_namespace}}"
+spec:
+  healthCheck:
+    requestPath: /healthz
+    port: 80
+    type: HTTP
+  # https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress#apply_backend_service_settings
+  # for Cloud Armor policy, 'gcloud compute security-policies'
+  securityPolicy:
+    name: {{cluster_name}}-security-policy
 ---
 # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ap-my-ingress
-  namespace: default #asm-gateways
+  name: cnr-my-ingress
+  #namespace: "{{ingress_namespace}}"
   annotations:
     # If the class annotation is not specified it defaults to "gce".
     kubernetes.io/ingress.class: gce
     # name of global static IP, will default to using public ephemeral if this does not exist
     #kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
     kubernetes.io/ingress.allow-http: "false"
-    #networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
+    networking.gke.io/v1beta1.FrontendConfig: cnr-lb-http-to-https
 spec:
 #  defaultBackend:
 #    service:
@@ -43,6 +61,7 @@ spec:
             name: golang-hello-world-web-service
             port:
               number: 8080
+# ADDTITIONAL services could be added here
 #      - path: /myint/*
 #        pathType: ImplementationSpecific
 #        backend:
@@ -50,16 +69,3 @@ spec:
 #            name: golang-hello-world-web-int-service
 #            port:
 #              number: 8080
-
-#  rules:
-#  - http:
-#      paths:
-#      - path: /*
-#        pathType: ImplementationSpecific
-#        backend:
-#          service:
-#            name: istio-ingressgateway
-#            port:
-#              number: 443
-              # served up http good
-              #number: 80

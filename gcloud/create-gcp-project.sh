@@ -19,7 +19,12 @@ echo "billing_account for $current_user is $billing_account"
 
 project_count=$(gcloud projects list --filter="id=$project_id" --format="value(projectId)" | wc -l)
 if [ $project_count -eq 0 ]; then
+  gcloud config unset project
   gcloud projects create $project_id
+  if [ $? -ne 0 ]; then
+    echo "ERROR project could not be created, You might need to create a random project id. Run ./make_random_project_id.sh"
+    exit 3
+  fi
 else
   echo "gcp project $project_id already exists"
 fi

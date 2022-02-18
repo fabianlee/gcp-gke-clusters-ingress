@@ -1,31 +1,13 @@
 ---
 
-############ local commands
-#
-# make sure default compute engine account (login context of cloud scoped vm instances)
-# has enough privileges to do ASM registration
-#
-
-- name: (local) get project number
-  connection: local
+- name: set tf-creator service accound for gcloud
   command:
-    cmd: gcloud projects describe {{project_id}} --format="value(projectNumber)"
-  register: project_number_register
-
-- set_fact:
-    project_number: "{{project_number_register.stdout}}"
-- debug:
-    msg: project_number is {{project_number}}
-
-- name: (local) use gcloud to add IAM roles for default compute engine sevice account, required for ASM registration
-  connection: local
+    cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
+  register: activate_svc_account
+- name: set gcp project id
   command:
-    cmd: gcloud projects add-iam-policy-binding {{project_id}} --member serviceAccount:{{project_number}}-compute@developer.gserviceaccount.com --role=roles/gkehub.admin --role=roles/iam.serviceAccountAdmin --role=roles/iam.serviceAccountKeyAdmin --role=roles/resourcemanager.projectIamAdmin --role=roles/container.admin
-  register: gcloud_add_iam
-#- debug: msg="{{gcloud_add_iam.stdout_lines}}"
+    cmd: gcloud config set project {{project_id}}
 
-
-############ remote commands
 
 - name: copy ASM installer script
   copy:

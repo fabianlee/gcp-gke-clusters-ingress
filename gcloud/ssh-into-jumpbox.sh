@@ -13,6 +13,7 @@ if [[ -z "$project_id" || -z "$vm_name" || -z "$region" ]]; then
   exit 1
 fi
 
+set -x
 
 gcloud config set project $project_id
 

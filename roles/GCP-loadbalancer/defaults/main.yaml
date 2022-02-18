@@ -1,0 +1,4 @@
+---
+https_lb_container_native_routing: true
+ingress_namespace: default
+

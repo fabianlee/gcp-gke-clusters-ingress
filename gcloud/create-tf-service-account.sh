@@ -48,17 +48,17 @@ function create_svc_account() {
 
 function get_email() {
   project_id="$1"
-  name="$2"
-  svcEmail=$(gcloud iam service-accounts list --project=$project_id --filter="name ~ ${name}@" --format="value(email)")
+  account_name="$2"
+  svcEmail=$(gcloud iam service-accounts list --project=$project_id --filter="name ~ ${account_name}@" --format="value(email)")
   echo $svcEmail
 }
 
 function assign_role() {
   project_id="$1"
-  name="$2"
+  account_name="$2"
   roles="$3"
 
-  svcEmail=$(get_email $project_id $name)
+  svcEmail=$(get_email $project_id $account_name)
   echo "serviceAccountEmail: $svcEmail"
 
   savedIFS=$IFS
@@ -76,21 +76,25 @@ function assign_role() {
 
 
 project_id="$1"
-project_name="$2"
-if [[ -z "$project_id" || -z "$project_name" ]]; then
-  echo "Usage: projectid projectName"
+if [[ -z "$project_id" ]]; then
+  echo "Usage: projectid"
   exit 1
 fi
 echo "project id: $project_id"
-echo "project name: $project_name"
 gcloud config set project $project_id
 
-create_svc_account $project_id "tf-creator" "terraform user"
+account_name="tf-creator"
+
+echo "creating account for $account_name"
+create_svc_account $project_id $account_name "terraform user"
+
 # roles/iam.serviceAccountAdmin - to create other service accounts
 # roles/compute.securityAdmin - for compute.firewalls.* (create)
 # roles/compute.instanceAdmin - for compute.instances.* (create) and compute.disks.create
 # roles/compute.networkAdmin - for compute.networks.* (create)
-# ADDITIONAL ROLES for Anthos Service Mesh
+assign_role $project_id $account_name "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin"
+
+# ADDITIONAL ROLES for Anthos Service Mesh registration
 # https://cloud.google.com/service-mesh/docs/installation-permissions
 # roles/gkehub.admin
 # roles/meshconfig.admin
@@ -100,6 +104,10 @@ create_svc_account $project_id "tf-creator" "terraform user"
 # roles/serviceusage.serviceUsageAdmin
 # roles/privateca.admin
 # roles/container.admin (provides RBAC as cluster-admin)
-assign_role $project_id "tf-creator" "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin"
+assign_role $project_id $account_name "roles/gkehub.admin roles/meshconfig.admin roles/resourcemanager.projectIamAdmin roles/iam.serviceAccountAdmin roles/servicemanagement.admin roles/serviceusage.serviceUsageAdmin roles/privateca.admin roles/container.admin"
 
-
+# show all roles for this account
+sleep 10
+echo "Going to show all roles for $svcEmail"
+svcEmail=$(get_email $project_id $account_name)
+gcloud projects get-iam-policy $project_id --flatten="bindings[].members" --filter="bindings.members=serviceAccount:$svcEmail" --format="value(bindings.role)"

@@ -10,3 +10,10 @@ cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
 
 asm_type: incluster
 asm_version: "1.11" # leaves room for upgrade testing
+
+# for HTTPS LB public ingress
+https_lb_container_native_routing: true
+
+# for TCP LB private ingress
+ingressgateway_primary: false
+ingressgateway_secondary: true

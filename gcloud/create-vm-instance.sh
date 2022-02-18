@@ -11,9 +11,10 @@ project_id="$3"
 network_name="$4"
 subnet_name="$5"
 region="$6"
-preemptible="$7"
+cloud_scope="$7"
+preemptible="$8"
 if [[ -z "$vm_type" || -z "$vm_name" || -z "$project_id" || -z "$network_name" || -z "$subnet_name" || -z "$region" ]]; then
-  echo "Usage: vmType=public|private vmName projectid networkName subnetName region [preemtible=0]"
+  echo "Usage: vmType=public|private vmName projectid networkName subnetName region [cloudScope=0|1] [preemtible=0|1]"
   exit 1
 fi
 
@@ -24,6 +25,9 @@ gcloud config set project $project_id
 image_flags="--image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud"
 
 extra_flags=""
+if [ "$cloud_scope" -eq 1 ]; then
+  extra_flags="--scopes=cloud-platform"
+fi
 if [ "$preemptible" -eq 1 ]; then
   extra_flags="--preemptible"
 fi
@@ -37,7 +41,6 @@ gcloud compute instances create $vm_name $image_flags \
 --zone=$region-b \
 --machine-type=e2-small \
 --subnet=$subnet_name \
---scopes=cloud-platform \
 --metadata enable-oslogin=TRUE \
 $extra_flags \
 --async

@@ -1,5 +1,14 @@
 ---
 
+- name: set tf-creator service accound for gcloud
+  command:
+    cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
+  register: activate_svc_account
+- name: set gcp project id
+  command:
+    cmd: gcloud config set project {{project_id}}
+
+
 - name: create dest dir for files
   file:
     path: /tmp/{{cluster_name}}/testapp

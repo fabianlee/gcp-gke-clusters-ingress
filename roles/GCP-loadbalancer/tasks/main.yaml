@@ -1,5 +1,21 @@
 ---
 
+- name: set tf-creator service accound for gcloud
+  command:
+    cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
+  register: activate_svc_account
+- name: set gcp project id
+  command:
+    cmd: gcloud config set project {{project_id}}
+
+
+- name: create ssl policy for load balancer
+  command:
+    cmd: "gcloud compute ssl-policies create {{cluster_name}}-ssl-policy --min-tls-version=1.2 --profile=MODERN"
+  register: create_sslpolicy
+  failed_when: false
+- debug: msg="{{create_sslpolicy}}"
+
 - name: create security-policy for Cloud Armor
   command:
     cmd: "gcloud compute security-policies create {{cluster_name}}-security-policy --description \"Cloud Armor security policy\""
@@ -26,55 +42,44 @@
 - debug: msg="{{update_output}}"
 
 
-# use different files depending on if managed or incluster
+# use container native routing (cnr) direct to service OR send to istiod ingressgateway
 - set_fact:
-    dir_prefix: ""
-  when: asm_type != "managed"
-- set_fact:
-    dir_prefix: "ap-"
-  when: asm_type == "managed"
+    file_prefix: "{{ https_lb_container_native_routing | ternary('cnr-','') }}"
 
 - name: create dest dir for files
   file:
-    path: /tmp/{{cluster_name}}
+    path: /tmp/{{cluster_name}}/lb
     state: directory
 
-- name: copy files
-  copy:
-    src: "{{role_path}}/templates/{{item}}"
-    dest: /tmp/{{cluster_name}}
-  loop:
-    - "{{dir_prefix}}ingress-backendconfig.yaml"
-    - "{{dir_prefix}}ingress.yaml"
-
-- name: create templates
+- name: create ingress template
   template:
     src: "{{item}}"
-    dest: /tmp/{{cluster_name}}
+    dest: /tmp/{{cluster_name}}/lb
   loop:
-    - "{{dir_prefix}}ingress.yaml"
-    - "{{dir_prefix}}ingress-backendconfig.yaml"
+    - "{{file_prefix}}ingress.yaml"
 
-- name: Ensure the default Namespace exists.
+- name: Ensure the Namespace exists
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     api_version: v1
     kind: Namespace
-    name: asm-gateways
+    name: "{{ ingress_namespace }}"
     state: present
 
 - name: apply yaml manifests
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
-    src: /tmp/{{cluster_name}}/{{dir_prefix}}ingress.yaml
-    namespace: asm-gateways
+    src: /tmp/{{cluster_name}}/lb/{{file_prefix}}ingress.yaml
+    namespace: "{{ ingress_namespace }}"
 
-- name: apply yaml manifests
-  kubernetes.core.k8s:
-    kubeconfig: "{{remote_kubeconfig}}"
-    state: present
-    src: /tmp/{{cluster_name}}/{{dir_prefix}}ingress-backendconfig.yaml
-    namespace: asm-gateways
+- name: create test curl script for public Ingress
+  template:
+    src: "{{item}}"
+    dest: .
+    owner: ubuntu
+    mode: 0775
+  loop:
+    - test-curl-public.sh
 
 
