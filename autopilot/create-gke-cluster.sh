@@ -40,7 +40,7 @@ subnetwork_name=mysubnet-private
 
 # check for gcloud login context
 gcloud projects list > /dev/null 2>&1
-[ $? -eq 0 ] || gcloud auth login --no-launch-browser
+[ $? -eq 0 ] || gcloud auth login --no-browser
 gcloud auth list
 
 # check gcloud version

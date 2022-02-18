@@ -7,6 +7,9 @@
 BIN_DIR=$(dirname ${BASH_SOURCE[0]})
 cd $BIN_DIR
 
+trap "ERROR running gcloud commands, timed out" SIGINT
+
+
 cluster_type="$1"
 exposed_as="$2"
 cluster_name="$3"
@@ -24,6 +27,7 @@ if [[ -z "$cluster_type" || -z "$exposed_as" || -z "$cluster_name" || -z "$clust
   echo "Usage: clusterType=standard|autopilot exposedAs=public|private clusterName clusterVersion clusterReleaseChannel imageType project_id networkName subnetName masterCIDR=a.b.c.d/28 additional_authorized_cidr=a.b.c.d/x regionprojectid networkName region isRegionalCluster=0|1"
   exit 1
 fi
+
 
 [[ "autopilot standard " =~ $cluster_type[[:space:]] ]] || { echo "ERROR only valid cluster types are standard|autopilot"; exit 3; }
 
@@ -57,8 +61,8 @@ if [ $cluster_type = "standard" ]; then
 fi
 
 # check for gcloud login context
-gcloud projects list > /dev/null 2>&1
-[ $? -eq 0 ] || gcloud auth login --no-launch-browser
+timeout --signal=SIGINT 10 gcloud projects list > /dev/null 2>&1
+[ $? -eq 0 ] || gcloud auth login --no-browser
 gcloud auth list
 
 # check gcloud version
