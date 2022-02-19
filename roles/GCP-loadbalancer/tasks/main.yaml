@@ -1,12 +1,10 @@
 ---
 
-- name: set tf-creator service accound for gcloud
-  command:
-    cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
-  register: activate_svc_account
-- name: set gcp project id
-  command:
-    cmd: gcloud config set project {{project_id}}
+- name: set gcloud login context with service account
+  include_role:
+    name: gcloud-use-serviceaccount
+    tasks_from: main 
+
 
 
 - name: create ssl policy for load balancer

@@ -13,7 +13,7 @@ balloon_replicas: 5
 
 # Autopilot does not allow cert signing requests done by incluster control plane
 asm_type: managed
-asm_version: "1.12" # managed available starting at 1.12
+asm_version: "1.12" # managed ASM available starting at 1.12
 
 # for HTTPS LB public ingress
 https_lb_container_native_routing: true

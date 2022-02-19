@@ -8,7 +8,7 @@ cert_CA: myCA.{{cluster_name}}.local
 cert_domains_primary_ingress: ["my-primary.{{cluster_name}}.local","my-primary-alt.{{cluster_name}}.local"]
 cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
 
-# no need to scale non-Autopilot
+# no need to scale standard GKE cluster
 balloon_replicas: 0
 
 asm_type: incluster

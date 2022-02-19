@@ -31,3 +31,5 @@ gcloud pubsub topics delete $cluster_name --project=$project_id --quiet
 
 # get rid of local file
 rm -f kubeconfig-$cluster_name
+# extra file left over if cluster processing incomplete
+rm -f kubeconfig-cluster1
