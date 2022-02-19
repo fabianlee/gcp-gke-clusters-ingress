@@ -3,58 +3,59 @@
 - debug:
     msg: "ingressgateway_primary is {{ingressgateway_primary}}, ingressgateway_secondary is {{ingressgateway_secondary}}"
 
-- name: create dest dir for ingress gateway files
+- name: create dest dir for primary and secondary ingress gateway files
   file:
-    path: /tmp/{{cluster_name}}
+    path: "{{item}}"
     state: directory
   loop:
     - /tmp/{{cluster_name}}/istio-ingressgateway
     - /tmp/{{cluster_name}}/istio-ingressgateway-int
 
+
 - name: create templates for istio-ingressgateway
   template:
     src: "{{item}}"
-    dest: /tmp/{{cluster_name}}/istio-ingressgateway
+    dest: /tmp/{{cluster_name}}/istio-ingressgateway/.
   with_fileglob: "{{role_path}}/templates/istio-ingressgateway/*.yaml"
+
+- name: get remote file list in istio-ingressgateway
+  find:
+    paths: "/tmp/{{cluster_name}}/istio-ingressgateway"
+    file_type: file
+    patterns: '*.yaml,*.yml'
+  register: yaml_list
+#- debug: msg="{{yaml_list}}"
+
+- name: apply yaml manifests for istio-ingressgateway, when ingressgateway_primary is true
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: "{{item.path}}"
+    namespace: default
+  loop: "{{yaml_list.files | default([]) }}"
+  when: ingressgateway_primary
+
 
 - name: create templates for istio-ingressgateway-int
   template:
     src: "{{item}}"
-    dest: /tmp/{{cluster_name}}/istio-ingressgateway-int
+    dest: /tmp/{{cluster_name}}/istio-ingressgateway-int/.
   with_fileglob: "{{role_path}}/templates/istio-ingressgateway-int/*.yaml"
 
-
-- name: get files in istio-ingressgateway when ingressgateway_primary is true
+- name: get remote file list in istio-ingressgateway-int
   find:
-    paths: /tmp/{{cluster_name}}/istio-ingressgateway
+    paths: "/tmp/{{cluster_name}}/istio-ingressgateway-int"
     file_type: file
     patterns: '*.yaml,*.yml'
   register: yaml_list
-  when: ingressgateway_primary
+#- debug: msg="{{yaml_list}}"
 
-- name: apply yaml manifests for istio-ingressgateway
+- name: apply yaml manifests for istio-ingressgateway-int, when ingressgateway_secondary is true
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
     src: "{{item.path}}"
     namespace: default
   loop: "{{yaml_list.files | default([]) }}"
-
-
-
-- name: get files in istio-ingressgateway-int when ingressgateway_secondary is true
-  find:
-    paths: /tmp/{{cluster_name}}/istio-ingressgateway-int
-    file_type: file
-    patterns: '*.yaml,*.yml'
-  register: yaml_list
   when: ingressgateway_secondary
-
-- name: apply yaml manifests for istio-ingressgateway-int
-  kubernetes.core.k8s:
-    kubeconfig: "{{remote_kubeconfig}}"
-    state: present
-    src: "{{item.path}}"
-    namespace: default
-  loop: "{{yaml_list.files | default([]) }}"
 

@@ -1,6 +1,6 @@
 ---
 
-- name: create test curl script for public HTPPS LB and private TCP LB
+- name: create test curl script for public HTTPS LB and private TCP LB
   template:
     src: "{{item}}"
     dest: .
