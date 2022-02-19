@@ -55,16 +55,16 @@ spec:
       #  sidecar.istio.io/inject: "false"
     spec:
 
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - golang-hello-world-web-int
-            topologyKey: "kubernetes.io/hostname"
+#      affinity:
+#        podAntiAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#          - labelSelector:
+#              matchExpressions:
+#              - key: app
+#                operator: In
+#                values:
+#                - golang-hello-world-web-int
+#            topologyKey: "kubernetes.io/hostname"
 
       containers:
       - name: golang-hello-world-web

@@ -1,0 +1,3 @@
+---
+# anywhere you need TLS secret loaded
+cert_namespaces: [ 'default' ]
