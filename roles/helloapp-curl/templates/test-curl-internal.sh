@@ -15,7 +15,4 @@ echo "========== INTERNAL ===================="
 domain=my-secondary.{{cluster_name}}.local
 resolveStr="--resolve $domain:443:{{subnet_prefix}}.199"
 set -x
-curl $caStr $resolveStr https://$domain/myint/
-set +x
-
-
+curl $caStr $resolveStr --fail --connect-timeout 3 --retry 0 https://$domain/myint/

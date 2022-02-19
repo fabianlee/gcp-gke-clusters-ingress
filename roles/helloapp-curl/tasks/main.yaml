@@ -17,18 +17,23 @@
     owner: ubuntu
     mode: 0775
 
-- name: test primary and secondary internal IP ingress
-  command:
-    cmd: ./test-curl-internal.sh
-  register: internal_results
-- debug: msg="{{internal_results}}"
-
 - name: test primary public static IP ingress
   command:
     cmd: ./test-curl-public.sh
   register: public_results
   environment:
     KUBECONFIG: "{{remote_kubeconfig}}"
-- debug: msg="{{public_results}}"
+  ignore_errors: true
+- debug: 
+    msg: "{{ (public_results.rc|int == 0) | ternary(public_results.stdout_lines,public_results.stderr_lines) }}"
+
+- name: test primary and secondary internal IP ingress
+  command:
+    cmd: ./test-curl-internal.sh
+  register: internal_results
+  ignore_errors: true
+- debug:
+    msg: "{{ (internal_results.rc==0) | ternary(internal_results.stdout_lines,internal_results.stderr_lines) }}"
+
 
 

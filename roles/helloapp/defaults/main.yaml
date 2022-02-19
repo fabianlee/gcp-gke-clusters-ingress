@@ -1,0 +1,6 @@
+---
+# number of replicas for hello world deployment
+hello_world_replicas: 3
+
+# number of replicas in hello world int (internal) deployment
+hello_world_int_replicas: 2

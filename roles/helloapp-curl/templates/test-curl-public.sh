@@ -15,7 +15,4 @@ resolveStr="--resolve $domain:443:$publicIP"
 #curl --header "Host: $domain" $caStr $resolveStr https://$domain/myhello/
 
 set -x
-curl $caStr $resolveStr https://$domain/myhello/
-set +x
-
-
+curl $caStr $resolveStr --fail --connect-timeout 3 --retry 0 https://$domain/myhello/
