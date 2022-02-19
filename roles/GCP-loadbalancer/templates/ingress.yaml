@@ -13,6 +13,7 @@ spec:
   sslPolicy: {{cluster_name}}-ssl-policy
 ---
 # backend for istiod that defines health check and Cloud Armor policy
+# referenced in: roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
@@ -21,7 +22,7 @@ metadata:
 spec:
   healthCheck:
     requestPath: /healthz/ready
-    port: 15021
+    port: 15021 # defined in roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
     type: HTTP
   # https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress#apply_backend_service_settings
   # for Cloud Armor policy, 'gcloud compute security-policies'

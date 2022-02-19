@@ -10,6 +10,9 @@ spec:
     port: 8080
     type: HTTP
     requestPath: /healthz
+  # for Cloud Armor policy, 'gcloud compute security-policies'
+  securityPolicy:
+    name: {{cluster_name}}-security-policy
 ---
 apiVersion: v1
 kind: Service
