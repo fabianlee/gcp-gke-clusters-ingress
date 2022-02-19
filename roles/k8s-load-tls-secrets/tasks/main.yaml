@@ -12,8 +12,7 @@
     kind: Namespace
     name: "{{item}}"
     state: present
-  loop:
-    - asm-gateways
+  loop: "{{ cert_namespaces }}"
 
 ####################
 # primary ingress cert
@@ -44,9 +43,7 @@
     state: present
     src: /tmp/{{cluster_name}}/tls-secret.yaml
     namespace: "{{item}}"
-  loop:
-    - default
-    - asm-gateways
+  loop: "{{ cert_namespaces }}"
 
 ####################
 # secondary ingress cert
@@ -78,6 +75,4 @@
     state: present
     src: /tmp/{{cluster_name}}/tls-secret-int.yaml
     namespace: "{{item}}"
-  loop:
-    - default
-    - asm-gateways
+  loop: "{{ cert_namespaces }}"

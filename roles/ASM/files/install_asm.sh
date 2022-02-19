@@ -89,8 +89,6 @@ set +ex
 
 # namespace where ASM is installed
 kubectl create ns istio-system
-# ns where our ingress gateways will get placed in future steps, but need to apply istio.io/rev
-kubectl create ns asm-gateways
 
 # make sure GKE cluster meets requirements of 1.21.3+ for GKE Autopilot
 cluster_min_allowed_version="v1.21.3"
@@ -215,7 +213,7 @@ if [ "incluster" = $asm_type ]; then
   set +x
 
   # set ASM revision label for namespace
-  for ns in default asm-gateways; do
+  for ns in default; do
     kubectl label namespace $ns istio-injection- istio.io/rev=my-${asm_release_channel} --overwrite
   done
   kubectl get ns default --show-labels
@@ -250,7 +248,7 @@ elif [ "managed" = $asm_type ]; then
   
   
   # set revision label for namespace
-  for ns in default asm-gateways gmanaged-sidecar; do
+  for ns in default gmanaged-sidecar; do
     kubectl label namespace $ns istio-injection- istio.io/rev=asm-managed-$asm_release_channel --overwrite
   done
   kubectl get ns istio-system --show-labels
