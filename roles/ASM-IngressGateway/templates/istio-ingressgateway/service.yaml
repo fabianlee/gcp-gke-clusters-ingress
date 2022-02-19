@@ -9,15 +9,17 @@ metadata:
     istio: ingressgateway
   annotations:
     # https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress#install_an_ingress_gateway
-    # trying without NEG for autopilot
-    {{ https_lb_container_native_routing | ternary('','#') }}cloud.google.com/neg: '{"ingress": true}'
+    # need NEG to make k8s-ig-- backend connections healthy
+    cloud.google.com/neg: '{"ingress": true}'
     cloud.google.com/app-protocols: '{"https":"HTTPS"}'
 
     cloud.google.com/load-balancer-type: "Internal" # TCP LB
 
     networking.gke.io/suppress-firewall-xpn-error: "true"
-    # need backend config for implementing health check;  otherwise front-facing GCP L7 LB will not be healthy
-    {{ https_lb_container_native_routing | ternary('','#') }}cloud.google.com/backend-config: '{"default": "ingress-backendconfig"}'
+    # this TCP LB for the primary ingress is only instantiated when container native is false
+    # but without this backend health check the front-facing GCP HTTPS LB will not be healthy
+    # needed whether or not using container native routing
+    cloud.google.com/backend-config: '{"default": "ingress-backendconfig"}'
 spec:
   loadBalancerIP: {{subnet_prefix}}.198
   loadBalancerSourceRanges: [ 10.0.0.0/8 ]
