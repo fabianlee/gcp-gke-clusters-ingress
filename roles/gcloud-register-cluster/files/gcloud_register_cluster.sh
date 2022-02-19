@@ -38,7 +38,7 @@ echo "kubectl auth can-i do all ? $kubectl_do_all"
 
 # check for gcloud login context
 gcloud projects list > /dev/null 2>&1
-[ $? -eq 0 ] || gcloud auth login --no-browser
+[ $? -eq 0 ] || gcloud auth login --no-launch-browser
 gcloud auth list
 
 gcloud config set project $project_id

@@ -7,9 +7,6 @@
 BIN_DIR=$(dirname ${BASH_SOURCE[0]})
 cd $BIN_DIR
 
-trap "ERROR running gcloud commands, timed out" SIGINT
-
-
 cluster_type="$1"
 exposed_as="$2"
 cluster_name="$3"
@@ -36,7 +33,6 @@ fi
 # private means nodes have only internal IP, which means isolation from internet without CloudNAT
 [[ "public private " =~ $exposed_as[[:space:]] ]] || { echo "ERROR only valid exposed types are public|private"; exit 3; }
 
-
 # https://cloud.google.com/compute/docs/general-purpose-machines
 echo "is_regional_cluster is $is_regional_cluster"
 if [ $is_regional_cluster -eq 1 ]; then
@@ -61,8 +57,8 @@ if [ $cluster_type = "standard" ]; then
 fi
 
 # check for gcloud login context
-timeout --signal=SIGINT 10 gcloud projects list > /dev/null 2>&1
-[ $? -eq 0 ] || gcloud auth login --no-browser
+timeout 10 gcloud projects list > /dev/null 2>&1
+[ $? -eq 0 ] || gcloud auth login --no-launch-browser
 gcloud auth list
 
 # check gcloud version
@@ -71,7 +67,7 @@ gcloud --version | grep 'Google Cloud SDK'
 
 gcloud config set project $project_id
 
-# enable apis for fleet workload identity
+echo "enable apis for fleet workload identity..."
 gcloud services enable --project=$project_id \
    container.googleapis.com \
    gkeconnect.googleapis.com \

@@ -119,7 +119,7 @@ function check_prerequisites() {
 
   # check for gcloud login context
   timeout 15 gcloud projects list > /dev/null 2>&1
-  [ $? -eq 0 ] || gcloud auth login --no-browser
+  [ $? -eq 0 ] || gcloud auth login --no-launch-browser
   gcloud auth list
 
   # create personal credentials that terraform provider can use
