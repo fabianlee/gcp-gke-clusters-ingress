@@ -92,7 +92,9 @@ create_svc_account $project_id $account_name "terraform user"
 # roles/compute.securityAdmin - for compute.firewalls.* (create)
 # roles/compute.instanceAdmin - for compute.instances.* (create) and compute.disks.create
 # roles/compute.networkAdmin - for compute.networks.* (create)
-assign_role $project_id $account_name "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin"
+# roles/iam.serviceAccountUser - for creating GKE cluster 'google_container_cluster' with terraform
+# roles/pubsub.editor - for creating pubsub topic for cluster to send notifications
+assign_role $project_id $account_name "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin roles/iam.serviceAccountUser roles/pubsub.editor"
 
 # ADDITIONAL ROLES for Anthos Service Mesh registration
 # https://cloud.google.com/service-mesh/docs/installation-permissions
