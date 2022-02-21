@@ -57,7 +57,7 @@ if [ $cluster_type = "standard" ]; then
 fi
 
 # check for gcloud login context
-timeout 10 gcloud projects list > /dev/null 2>&1
+gcloud projects list > /dev/null 2>&1
 [ $? -eq 0 ] || gcloud auth login --no-launch-browser
 gcloud auth list
 
@@ -87,7 +87,9 @@ if [ $cluster_count -eq 0 ]; then
 
     extra_flags=""
     if [ "$exposed_as" = "private" ]; then 
-      extra_flags="--enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr --enable-private-endpoint"
+      extra_flags="--enable-private-endpoint --enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr"
+    else
+      extra_flags="--no-enable-master-authorized-networks"
     fi
  
     set -ex
@@ -100,19 +102,19 @@ if [ $cluster_count -eq 0 ]; then
    
     extra_flags=""
     if [ "$exposed_as" = "private" ]; then 
-      extra_flags="--disable-default-snat --enable-ip-alias --enable-master-global-access --enable-intra-node-visibility --enable-private-endpoint --enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr"
+      extra_flags="--enable-private-endpoint --enable-master-authorized-networks --master-authorized-networks=$additional_authorized_cidr"
     else
       extra_flags="--no-enable-master-authorized-networks"
     fi
 
     set -ex
     # even with public, we choose private nodes so nodes have unreachable internal IP but have public kubeapi endpoint
-    gcloud beta container --project $project_id clusters create $cluster_name $location_flag --num-nodes $num_nodes --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "$machine_type" --image-type "$image_type" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$network_name" --subnetwork "$subnet_name" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $project_id.svc.id.goog --cluster-secondary-range-name=pods --services-secondary-range-name=services --enable-private-nodes --master-ipv4-cidr $master_cidr $extra_flags
+    gcloud beta container --project $project_id clusters create $cluster_name $location_flag --num-nodes $num_nodes --cluster-version="$cluster_version" --release-channel "$cluster_release_channel" --machine-type "$machine_type" --image-type "$image_type" --metadata disable-legacy-endpoints=true --scopes "$cluster_scopes" --max-pods-per-node "110" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "$network_name" --subnetwork "$subnet_name" --default-max-pods-per-node "110" --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --workload-metadata=GKE_METADATA --workload-pool $project_id.svc.id.goog --cluster-secondary-range-name=pods --services-secondary-range-name=services --enable-private-nodes --enable-ip-alias --enable-intra-node-visibility --master-ipv4-cidr $master_cidr $extra_flags
     set +ex
   fi
 
   # update to set maintenance window flags
-  gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+  gcloud container clusters update $cluster_name $location_flag --maintenance-window-start "2022-01-28T10:00:00Z" --maintenance-window-end "2022-01-28T14:00:00Z" --maintenance-window-recurrence "FREQ=WEEKLY;BYDAY=TU,WE,TH,FR,SA,SU"
 
   # delete any old hub registrations, registration will be done later
   # not going to register here, because registering with fleet enablement uses kubeconfig connection
@@ -152,7 +154,7 @@ gcloud container clusters update $cluster_name $location_flag \
 set +x
 
 # show cluster, either using kubectl if public or gcloud if private
-timeout 10 kubectl get nodes -o wide
+timeout --preserve-status 10 kubectl get nodes -o wide
 if [ $? -ne 0 ]; then
   echo "kubectl failed. If this is a private GKE cluster with '--enable-private-endpoint' that makes sense because it would mean you cannot manage remotely and need to ssh into a jumpbox instead"
   gcloud container clusters list $location_flag

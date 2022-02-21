@@ -42,7 +42,7 @@ resource "google_container_cluster" "cluster" {
 
   # worker nodes with private IP addresses
   private_cluster_config {
-    enable_private_nodes = var.enable_private_nodes
+    enable_private_nodes = true
     enable_private_endpoint = var.enable_private_endpoint
     master_ipv4_cidr_block = var.master_ipv4_cidr_block_28
     master_global_access_config {
@@ -125,8 +125,8 @@ resource "google_container_cluster" "cluster" {
   # references names of secondary ranges
   # this enables ip aliasing '--enable-ip-alias'
   ip_allocation_policy {
-    cluster_secondary_range_name = "pods"
-    services_secondary_range_name = "services"
+    services_secondary_range_name = var.secondary_range_services_name
+    cluster_secondary_range_name = var.secondary_range_pods_name
   }
 
   workload_identity_config {
@@ -141,7 +141,7 @@ resource "google_container_node_pool" "primary_nodes" {
   name       = "${google_container_cluster.cluster.name}-node-pool"
   location   = var.region
   cluster    = google_container_cluster.cluster.id
-  initial_node_count = var.gke_num_nodes
+  initial_node_count = var.node_initial_node_count
   version  = data.google_container_engine_versions.cluster_versions.latest_node_version
 
   node_config {

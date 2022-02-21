@@ -46,7 +46,7 @@ gcloud services enable --project=$project_id \
    iam.googleapis.com \
    anthos.googleapis.com
 
-# IAM roles for registering cluster
+# IAM roles for registering clusters as default compute engine service account
 # not required for project owner who has all permissions
 # but would be required if asmcli install with --enable-all done using gcloud logged in as default compute engine
 # default auth on gcp VM instances in cloud scope is default compute engine
