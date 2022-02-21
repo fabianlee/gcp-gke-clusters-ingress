@@ -4,6 +4,16 @@ TF := terraform
 FLAGS := ""
 #"--auto-approve"
 
+STD_DIR := gke-private-standard-cluster
+AP_DIR := gke-private-autopilot-cluster
+
+GKE_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/std-pub-10-0-90-0.tfvars --state=../envs/std-pub-10-0-90-0.tfstate
+PRIVGKE_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/std-prv-10-0-100-0.tfvars --state=../envs/std-prv-10-0-100-0.tfstate
+
+AP_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/ap-pub-10-0-91-0.tfvars --state=../envs/ap-pub-10-0-91-0.tfstate
+PRIVAP_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/ap-prv-10-0-101-0.tfvars --state=../envs/ap-prv-10-0-101-0.tfstate
+
+
 init:
 
 networks: init
@@ -30,14 +40,21 @@ vms-destroy:
 	cd vms && $(TF) destroy --var-file=../envs/terraform.tfvars --state=../envs/vms.tfstate $(FLAGS)
 
 gke: init
-	cd gke-private-cluster && $(TF) init
-	cd gke-private-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke-private-pub-endpoint.tfvars --state=../envs/gke-private-pub-endpoint.tfstate $(FLAGS)
+	cd $(STD_DIR) && $(TF) init
+	cd $(STD_DIR) && $(TF) apply $(GKE_ARGS) $(FLAGS)
 gke-destroy:
-	cd gke-private-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke-private-pub-endpoint.tfvars --state=../envs/gke-private-pub-endpoint.tfstate $(FLAGS)
-
+	cd $(STD_DIR) && $(TF) destroy $(GKE_ARGS) $(FLAGS)
 
 privgke: init
-	cd gke-private-cluster && $(TF) init
-	cd gke-private-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke-private-prv-endpoint.tfvars --state=../envs/gke-private-prv-endpoint.tfstate $(FLAGS)
+	cd gke-private-standard-cluster && $(TF) init
+	cd gke-private-standard-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke-private-prv-endpoint.tfvars --state=../envs/gke-private-prv-endpoint.tfstate $(FLAGS)
 privgke-destroy:
-	cd gke-private-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke-private-prv-endpoint.tfvars --state=../envs/gke-private-prv-endpoint.tfstate $(FLAGS)
+	cd gke-private-standard-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke-private-prv-endpoint.tfvars --state=../envs/gke-private-prv-endpoint.tfstate $(FLAGS)
+
+
+autopilot: init
+	cd gke-private-standard-cluster && $(TF) init
+	cd gke-private-standard-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke-private-pub-endpoint.tfvars --state=../envs/gke-private-pub-endpoint.tfstate $(FLAGS)
+autopilot-destroy:
+	cd gke-private-standard-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke-private-pub-endpoint.tfvars --state=../envs/gke-private-pub-endpoint.tfstate $(FLAGS)
+
