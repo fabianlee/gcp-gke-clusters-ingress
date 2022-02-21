@@ -21,3 +21,7 @@ module "gcp-gke-private-cluster" {
   
 }
 
+output "cluster_name" {
+  value = module.gcp-gke-private-cluster.cluster_name
+}
+

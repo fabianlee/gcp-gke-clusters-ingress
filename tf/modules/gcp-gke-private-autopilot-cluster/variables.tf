@@ -43,8 +43,10 @@ variable node_ap_network_tags_list {
   type = list(string)
   default = ["gke-node"]
 }
-variable node_ap_labels_list {
-  type = list(string)
-  default = ["my-label"]
+variable node_ap_labels_map {
+  type = map
+  default = {
+    foo = "bar"
+  }
 }
 

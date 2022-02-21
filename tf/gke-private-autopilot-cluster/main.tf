@@ -16,3 +16,7 @@ module "gcp-gke-private-autopilot-cluster" {
   
 }
 
+output "cluster_name" {
+  value = module.gcp-gke-private-autopilot-cluster.cluster_name
+}
+

@@ -24,10 +24,11 @@ data "google_container_engine_versions" "cluster_versions" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster
-resource "google_container_cluster" "cluster" {
+resource "google_container_cluster" "apcluster" {
   provider = google-beta
   name     = var.cluster_name
-  location = var.is_regional_cluster ? var.region:var.zone
+  # Autopilot clusters are always regional (never zonal)
+  location = var.region
 
   # makes this an Autopilot cluster 
   enable_autopilot = true
@@ -114,9 +115,11 @@ resource "google_container_cluster" "cluster" {
     cluster_secondary_range_name = var.secondary_range_pods_name
   }
 
-  workload_identity_config {
-    workload_pool = "${var.project}.svc.id.goog"
-  }
+ 
+  # conflicts with Autopilot, so removing 
+  #workload_identity_config {
+  #  workload_pool = "${var.project}.svc.id.goog"
+  #}
 
   node_config {
     // Enable workload identity on this node pool.
@@ -124,8 +127,8 @@ resource "google_container_cluster" "cluster" {
       mode = "GKE_METADATA"
     }
     oauth_scopes = var.node_ap_oauth_scopes
-    tags = var.node_ap_tags_list
-    labels = var.node_ap_labels_list
+    tags = var.node_ap_network_tags_list
+    labels = var.node_ap_labels_map
   } # node_config
 
 }
