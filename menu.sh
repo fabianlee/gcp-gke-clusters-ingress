@@ -25,10 +25,10 @@ menu_items=(
   "ansibleping,Test ansible connection to public and private vms"
   "ansibleplay,Apply ansible playbook of minimal pkgs/utils for vms"
   ""
-  "gke,Create public standard GKE cluster"
-  "autopilot,Create public AutoGKE cluster"
-  "privgke,Create private standard GKE cluster"
-  "privautopilot,Create private AutoGKE cluster"
+  "gke,Create private GKE cluster w/public endpoint"
+  "autopilot,Create private Autopilot cluster w/public endpoint"
+  "privgke,Create private GKE cluster w/private endpoint"
+  "privautopilot,Create private Autopilot cluster w/private endpoint"
   ""
   "kubeconfigcopy,Copy kubeconfig and svc acct key to jumpboxes"
   "svcaccountcopy,Copy service account json key to jumpboxes"
@@ -118,12 +118,12 @@ function check_prerequisites() {
   jq --version
 
   # check for gcloud login context
-  timeout 15 gcloud projects list > /dev/null 2>&1
+  gcloud projects list > /dev/null 2>&1
   [ $? -eq 0 ] || gcloud auth login --no-launch-browser
   gcloud auth list
 
   # create personal credentials that terraform provider can use
-  timeout 15 gcloud auth application-default print-access-token >/dev/null 2>&1
+  gcloud auth application-default print-access-token >/dev/null 2>&1
   [ $? -eq 0 ] || gcloud auth application-default login
 
 } # check_prerequisites
@@ -288,7 +288,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.0/28"
       additional_authorized_cidr=""
       set -x
-      gcloud/create-gke-cluster.sh standard public std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-private-gke-cluster.sh standard public std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
@@ -300,7 +300,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.16/28"
       additional_authorized_cidr=""
       set -x
-      gcloud/create-gke-cluster.sh autopilot public ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-private-gke-cluster.sh autopilot public ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x 
 
@@ -312,7 +312,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.32/28"
       additional_authorized_cidr="10.0.90.0/24"
       set -x
-      gcloud/create-gke-cluster.sh standard private std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-private-gke-cluster.sh standard private std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
@@ -324,7 +324,7 @@ while [ 1 == 1 ]; do
       master_cidr="10.1.0.48/28"
       additional_authorized_cidr="10.0.91.0/24"
       set -x
-      gcloud/create-gke-cluster.sh autopilot private ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+      gcloud/create-private-gke-cluster.sh autopilot private ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
       retVal=$?
       set +x
 
