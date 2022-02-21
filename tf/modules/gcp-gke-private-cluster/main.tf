@@ -57,9 +57,8 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
-  # if this block exists at all, the "control plane for auth networks"
-  # will be enabled, but have no networks
-  # so we make the outer block dynamic to disable the feature completely
+  # if this block exists at all, the "control plane for auth networks" will be enabled, but have no networks
+  # so we need nested dynamic to represent
   # --no-enable-master-authorized-networks
   dynamic "master_authorized_networks_config" {
     for_each = length(var.master_authorized_networks_cidr_list)>0 ? [1]:[]
@@ -67,17 +66,17 @@ resource "google_container_cluster" "cluster" {
 
       # dynamic inner block to list authorized networks
       dynamic "cidr_blocks" {
-        for_each = var.master_authorized_networks_cidr_list
+        for_each =  var.master_authorized_networks_cidr_list
+        # notice the name inside is not 'each', it is name of dynamic block
         content {
-          display_name = "authnet ${each.value}"
-          cidr_block = each.value
+          cidr_block = cidr_blocks.value
+          display_name = "authnetworks ${cidr_blocks.value}"
         }
       } # end dynamic cidr_blocks
 
-    } # content for master_authorized_networks_config
+    } # end content of master_authorized_networks_config
 
-
-  } # end dynamic master_authorized_networks_config
+  } # end dynamic block master_authorized_networks_config
 
   # https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips#enable_pupis
   #  would disable default snat if using public IP space in private cluster

@@ -1,7 +1,8 @@
 THISDIR := $(notdir $(CURDIR))
 PROJECT := $(THISDIR)
 TF := terraform
-FLAGS := "--auto-approve"
+FLAGS := ""
+#"--auto-approve"
 
 init:
 
@@ -29,7 +30,14 @@ vms-destroy:
 	cd vms && $(TF) destroy --var-file=../envs/terraform.tfvars --state=../envs/vms.tfstate $(FLAGS)
 
 gke: init
-	cd std-cluster && $(TF) init
-	cd std-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke.tfvars --state=../envs/gke.tfstate $(FLAGS)
+	cd gke-private-cluster && $(TF) init
+	cd gke-private-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke-private-pub-endpoint.tfvars --state=../envs/gke-private-pub-endpoint.tfstate $(FLAGS)
 gke-destroy:
-	cd std-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke.tfvars --state=../envs/gke.tfstate $(FLAGS)
+	cd gke-private-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke-private-pub-endpoint.tfvars --state=../envs/gke-private-pub-endpoint.tfstate $(FLAGS)
+
+
+privgke: init
+	cd gke-private-cluster && $(TF) init
+	cd gke-private-cluster && $(TF) apply --var-file=../envs/all.tfvars --var-file=../envs/gke-private-prv-endpoint.tfvars --state=../envs/gke-private-prv-endpoint.tfstate $(FLAGS)
+privgke-destroy:
+	cd gke-private-cluster && $(TF) destroy --var-file=../envs/all.tfvars --var-file=../envs/gke-private-prv-endpoint.tfvars --state=../envs/gke-private-prv-endpoint.tfstate $(FLAGS)

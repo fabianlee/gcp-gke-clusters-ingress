@@ -28,21 +28,22 @@ resource "google_container_cluster" "cluster" {
   provider = google-beta
   name     = var.cluster_name
   location = var.is_regional_cluster ? var.region:var.zone
+
+  # makes this an Autopilot cluster 
+  enable_autopilot = true
+
   min_master_version  = data.google_container_engine_versions.cluster_versions.latest_master_version
 
   release_channel {
     channel = var.cluster_release_channel
   }
 
-  remove_default_node_pool = true
-  initial_node_count       = 1
-
   network =  data.google_compute_network.vpc.name
   subnetwork = data.google_compute_subnetwork.subnet.name
 
   # worker nodes with private IP addresses
   private_cluster_config {
-    enable_private_nodes = var.enable_private_nodes
+    enable_private_nodes = true
     enable_private_endpoint = var.enable_private_endpoint
     master_ipv4_cidr_block = var.master_ipv4_cidr_block_28
     master_global_access_config {
@@ -57,9 +58,8 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
-  # if this block exists at all, the "control plane for auth networks"
-  # will be enabled, but have no networks
-  # so we make the outer block dynamic to disable the feature completely
+  # if this block exists at all, the "control plane for auth networks" will be enabled, but have no networks
+  # so we need nested dynamic to represent
   # --no-enable-master-authorized-networks
   dynamic "master_authorized_networks_config" {
     for_each = length(var.master_authorized_networks_cidr_list)>0 ? [1]:[]
@@ -67,28 +67,18 @@ resource "google_container_cluster" "cluster" {
 
       # dynamic inner block to list authorized networks
       dynamic "cidr_blocks" {
-        for_each = var.master_authorized_networks_cidr_list
+        for_each =  var.master_authorized_networks_cidr_list
+        # notice the name inside is not 'each', it is name of dynamic block
         content {
-          display_name = "authnet ${each.value}"
-          cidr_block = each.value
+          cidr_block = cidr_blocks.value
+          display_name = "authnetworks ${cidr_blocks.value}"
         }
       } # end dynamic cidr_blocks
 
-    } # content for master_authorized_networks_config
+    } # end content of master_authorized_networks_config
 
+  } # end dynamic block master_authorized_networks_config
 
-  } # end dynamic master_authorized_networks_config
-
-  # https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips#enable_pupis
-  #  would disable default snat if using public IP space in private cluster
-  # but we are using RFC 1918 private space only
-  #default_snat_status {
-  #  disabled = true
-  #}
-
-  # --enable-intra-node-visibility
-  enable_intranode_visibility = true
-  
 
   addons_config {
     # wanted by ASM
@@ -99,11 +89,6 @@ resource "google_container_cluster" "cluster" {
     # beta, enabled
     gce_persistent_disk_csi_driver_config {
       enabled = true
-    }
-
-    # this is default value, just making explicit.  inherited by nodes
-    network_policy_config {
-      disabled = false
     }
   }
 
@@ -125,74 +110,23 @@ resource "google_container_cluster" "cluster" {
   # references names of secondary ranges
   # this enables ip aliasing '--enable-ip-alias'
   ip_allocation_policy {
-    cluster_secondary_range_name = "pods"
-    services_secondary_range_name = "services"
+    services_secondary_range_name = var.secondary_range_services_name
+    cluster_secondary_range_name = var.secondary_range_pods_name
   }
 
   workload_identity_config {
     workload_pool = "${var.project}.svc.id.goog"
   }
 
-
-}
-
-# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool
-resource "google_container_node_pool" "primary_nodes" {
-  name       = "${google_container_cluster.cluster.name}-node-pool"
-  location   = var.region
-  cluster    = google_container_cluster.cluster.id
-  initial_node_count = var.gke_num_nodes
-  version  = data.google_container_engine_versions.cluster_versions.latest_node_version
-
   node_config {
-    disk_size_gb = var.node_disk_size_gb
-    image_type = var.node_image_type
-    oauth_scopes = var.node_oauth_scopes
-
-    preemptible  = var.node_preemptible
-
-    # use smaller for regional cluster that has more nodes
-    machine_type = var.is_regional_cluster ? var.node_machine_type_regional:var.node_machine_type_zonal
-
-    # network tags are for firewalls
-    tags         = var.node_network_tags_list
-    
-    # kubernetes labels added to each node
-    labels = {
-      cluster = google_container_cluster.cluster.name
-    }
-
-    # do for all clusters
-    metadata = {
-      disable-legacy-endpoints = "true"
-    }
-
     // Enable workload identity on this node pool.
     workload_metadata_config {
       mode = "GKE_METADATA"
     }
-
-  }
-
-  management {
-    auto_repair = var.node_auto_repair
-    auto_upgrade = var.node_auto_upgrade
-  }
-
-  # how many nodes can be created and lost during upgrades
-  upgrade_settings {
-    max_surge = var.nodes_max_surge
-    max_unavailable = var.nodes_max_unavailable
-  }
-
-  # ignore these changes in nodepool
-  lifecycle {
-    ignore_changes = [
-      initial_node_count,
-      node_count,
-      version
-    ]
-  }
-
+    oauth_scopes = var.node_ap_oauth_scopes
+    tags = var.node_ap_tags_list
+    labels = var.node_ap_labels_list
+  } # node_config
 
 }
+
