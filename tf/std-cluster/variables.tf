@@ -4,11 +4,11 @@ variable zone {}
 
 variable vpc_network_name {}
 
+variable cluster_name { }
 variable is_regional_cluster { default=false }
 variable subnetwork_name {}
 variable gke_num_nodes { default=1 }
 
-variable gke_nodes_preemptible { default=true }
 variable cluster_version_prefix { default="1.21.5" }
 
 # terraform says repair+upgrade must be true when REGULAR
@@ -25,6 +25,7 @@ variable master_authorized_networks_cidr_list {
 } 
 
 variable node_machine_type_large { default="e2-standard-4" }
+variable node_preemptible { default=true }
 variable node_image_type { default = "COS" }
 variable node_oauth_scopes {
   type = list(string)

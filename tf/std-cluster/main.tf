@@ -39,7 +39,7 @@ data "google_container_engine_versions" "cluster_versions" {
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster
 resource "google_container_cluster" "cluster" {
   provider = google-beta
-  name     = "std-${var.subnetwork_name}"
+  name     = var.cluster_name
   location = var.is_regional_cluster ? var.region:var.zone
   min_master_version  = data.google_container_engine_versions.cluster_versions.latest_master_version
 
@@ -87,11 +87,14 @@ resource "google_container_cluster" "cluster" {
   }
   maintenance_policy {
     recurring_window {
-      start_time = "2019-01-01T06:00:00Z" # UTC
-      end_time = "2019-01-02T10:00:00Z" # UTC
-      recurrence = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU"
+      start_time = "2022-01-28T10:00:00Z" # UTC
+      end_time = "2022-01-28T14:00:00Z" # UTC
+      recurrence = "FREQ=WEEKLY;BYDAY=TU,WE,TH,FR,SA,SU"
     }
   }
+
+}
+
   # use names of secondary ranges
   ip_allocation_policy {
     cluster_secondary_range_name = "pods"
@@ -118,7 +121,7 @@ resource "google_container_node_pool" "primary_nodes" {
     #image_type = var.node_image_type
     oauth_scopes = var.node_oauth_scopes
 
-    preemptible  = var.gke_nodes_preemptible
+    preemptible  = var.node_preemptible
 
     # use smaller for regional cluster that has more nodes
     machine_type = var.is_regional_cluster ? "e2-standard-2":var.node_machine_type_large
