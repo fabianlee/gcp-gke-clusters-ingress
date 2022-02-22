@@ -58,14 +58,12 @@ vms-destroy:
 gke: init
 	cd $(STD_DIR) && $(TF) init
 	cd $(STD_DIR) && $(TF) apply $(GKE_ARGS) $(FLAGS)
-	#KUBECONFIG=../kubeconfig-std-pub-10-0-90-0 gcloud container clusters get-credentials std-pub-10-0-90-0
 gke-destroy:
 	cd $(STD_DIR) && $(TF) destroy $(GKE_ARGS) $(FLAGS)
 
 ap: init
 	cd $(AP_DIR) && $(TF) init
 	cd $(AP_DIR) && $(TF) apply $(AP_ARGS) $(FLAGS)
-	#KUBECONFIG=../kubeconfig-ap-pub-10-0-91-0 gcloud container clusters get-credentials ap-prv-10-0-101-0
 ap-refresh: init
 	cd $(AP_DIR) && $(TF) refresh $(AP_ARGS) $(FLAGS)
 ap-destroy:
@@ -74,13 +72,11 @@ ap-destroy:
 privgke: init
 	cd $(STD_DIR) && $(TF) init
 	cd $(STD_DIR) && $(TF) apply $(PRIVGKE_ARGS) $(FLAGS)
-	#KUBECONFIG=../kubeconfig-std-prv-10-0-100-0 gcloud container clusters get-credentials std-prv-10-0-100-0
 privgke-destroy:
 	cd $(STD_DIR) && $(TF) destroy $(PRIVGKE_ARGS) $(FLAGS)
 
 privap: init
 	cd $(AP_DIR) && $(TF) init
 	cd $(AP_DIR) && $(TF) apply $(PRIVAP_ARGS) $(FLAGS)
-	#KUBECONFIG=../kubeconfig-ap-prv-10-0-101-0 gcloud container clusters get-credentials ap-prv-10-0-101-0
 privap-destroy:
 	cd $(AP_DIR) && $(TF) destroy $(PRIVAP_ARGS) $(FLAGS)
