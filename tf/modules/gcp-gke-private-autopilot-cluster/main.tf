@@ -15,6 +15,8 @@ data "google_compute_subnetwork" "subnet" {
 resource "google_pubsub_topic" "cluster_topic" {
   name     = "std-${var.subnetwork_name}"
   message_retention_duration = "86600s"
+  # added so 'tf apply' does not find changes
+  labels = {}
 }
 
 # available cluster versions
@@ -80,6 +82,10 @@ resource "google_container_cluster" "apcluster" {
 
   } # end dynamic block master_authorized_networks_config
 
+  # added so that 'tf apply' does not find changes
+  vertical_pod_autoscaling {
+    enabled = true
+  }
 
   addons_config {
     # wanted by ASM
@@ -127,8 +133,8 @@ resource "google_container_cluster" "apcluster" {
       mode = "GKE_METADATA"
     }
     oauth_scopes = var.node_ap_oauth_scopes
-    tags = var.node_ap_network_tags_list
-    labels = var.node_ap_labels_map
+    #tags = var.node_ap_network_tags_list
+    #labels = var.node_ap_labels_map
   } # node_config
 
 }

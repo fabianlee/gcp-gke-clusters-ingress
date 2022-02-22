@@ -15,6 +15,8 @@ data "google_compute_subnetwork" "subnet" {
 resource "google_pubsub_topic" "cluster_topic" {
   name     = "std-${var.subnetwork_name}"
   message_retention_duration = "86600s"
+  # added so 'tf apply' does not find changes
+  labels = {}
 }
 
 # available cluster versions

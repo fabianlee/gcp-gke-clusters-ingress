@@ -11,9 +11,13 @@ NETWORKS_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/networks.tfvar
 CLOUDNAT_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/cloudnat.tfvars --state=../envs/cloudnat.tfstate
 VMS_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/vms.tfvars --state=../envs/vms.tfstate
 
+# private standard cluster, publicly exposed
 GKE_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/std-pub-10-0-90-0.tfvars --state=../envs/std-pub-10-0-90-0.tfstate
-PRIVGKE_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/std-prv-10-0-100-0.tfvars --state=../envs/std-prv-10-0-100-0.tfstate
+# private Autopilot cluster, publicly exposed
 AP_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/ap-pub-10-0-91-0.tfvars --state=../envs/ap-pub-10-0-91-0.tfstate
+# private standard cluster, privately exposed only
+PRIVGKE_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/std-prv-10-0-100-0.tfvars --state=../envs/std-prv-10-0-100-0.tfstate
+# private Autopilot cluster, privately exposed only
 PRIVAP_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/ap-prv-10-0-101-0.tfvars --state=../envs/ap-prv-10-0-101-0.tfstate
 
 init:
@@ -52,6 +56,8 @@ ap: init
 	cd $(AP_DIR) && $(TF) init
 	cd $(AP_DIR) && $(TF) apply $(AP_ARGS) $(FLAGS)
 	#KUBECONFIG=../kubeconfig-ap-pub-10-0-91-0 gcloud container clusters get-credentials ap-prv-10-0-101-0
+ap-refresh: init
+	cd $(AP_DIR) && $(TF) refresh $(AP_ARGS) $(FLAGS)
 ap-destroy:
 	cd $(AP_DIR) && $(TF) destroy $(AP_ARGS) $(FLAGS)
 

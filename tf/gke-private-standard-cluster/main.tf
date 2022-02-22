@@ -1,10 +1,6 @@
-# if this has public endpoint, you can grab kubeconfig
-# cluster_name=tfstd-pub-10-0-91-0
-# KUBECONFIG=kubeconfig-$cluster_name gcloud container clusters get-credentials $cluster_name --zone=us-east1-b
 
-
-module "gcp-gke-private-cluster" {
-  source = "../modules/gcp-gke-private-cluster"
+module "gcp-gke-private-standard-cluster" {
+  source = "../modules/gcp-gke-private-standard-cluster"
 
   project = var.project
   region = var.region
@@ -22,6 +18,6 @@ module "gcp-gke-private-cluster" {
 }
 
 output "cluster_name" {
-  value = module.gcp-gke-private-cluster.cluster_name
+  value = module.gcp-gke-private-standard-cluster.cluster_name
 }
 
