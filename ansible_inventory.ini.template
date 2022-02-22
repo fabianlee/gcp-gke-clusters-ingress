@@ -1,4 +1,6 @@
 # show all vars for host: ansible -m debug -a var=hostvars[inventory_hostname] vm-prv-10-0-100-0
+# show private IP: ansible -m debug -a var=hostvars[inventory_hostname].ansible_host vm-prv-10-0-101-0
+#
 # test ping to all: ansible -m ping all
 # if issues with key exchange, try clearing: ssh-keygen -f ~/.ssh/known_hosts -R <IP>
 #
