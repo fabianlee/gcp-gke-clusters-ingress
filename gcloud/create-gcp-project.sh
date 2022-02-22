@@ -37,15 +37,6 @@ gcloud beta billing projects link $project_id --billing-account=$billing_account
 gcloud beta billing projects list --billing-account=$billing_account
 set +x
 
-echo "enable apis for fleet workload identity"
-gcloud services enable --project=$project_id \
-   container.googleapis.com \
-   gkeconnect.googleapis.com \
-   gkehub.googleapis.com \
-   cloudresourcemanager.googleapis.com \
-   iam.googleapis.com \
-   anthos.googleapis.com
-
 # IAM roles for registering clusters as default compute engine service account
 # not required for project owner who has all permissions
 # but would be required if asmcli install with --enable-all done using gcloud logged in as default compute engine

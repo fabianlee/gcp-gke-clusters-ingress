@@ -12,7 +12,7 @@ declare -A done_status
 # 1st column = action
 # 2nd column = description
 menu_items=(
-  "project,Create gcp project"
+  "project,Create gcp project and enable services"
   "svcaccount,Create service account for provisioning"
   "network,Create network, subnets, and firewall"
   "cloudnat,Create Cloud NAT for public egress of private IP"
@@ -30,8 +30,10 @@ menu_items=(
   "privgke,Create private GKE cluster w/private endpoint"
   "privautopilot,Create private Autopilot cluster w/private endpoint"
   ""
-  "kubeconfigcopy,Copy kubeconfig and svc acct key to jumpboxes"
+  "kubeconfiggen,Use gcloud to retrieve any missing kubeconfig"
+  "kubeconfigcopy,Copy kubeconfig to jumpboxes"
   "svcaccountcopy,Copy service account json key to jumpboxes"
+  ""
   "kubeconfig,Select KUBECONFIG \$MYKUBECONFIG"
   "k8s-register,Register with hub and get fleet identity"
   "k8s-scale,Apply balloon pod to warm up cluster"
@@ -163,6 +165,7 @@ while [ 1 == 1 ]; do
     project)
       set -x
       gcloud/create-gcp-project.sh $project_id $project_name
+      gcloud/services-enable.sh $project_id
       retVal=$?
       set +x 
 
@@ -331,6 +334,20 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
+    kubeconfiggen)
+      set -x
+      for cluster in std-pub-10-0-90-0 std-prv-10-0-100-0; do
+        gcloud/generate-kubeconfig.sh $project_id $cluster $is_regional_cluster $region
+      done
+      for cluster in ap-pub-10-0-91-0 ap-prv-10-0-101-0; do
+        gcloud/generate-kubeconfig.sh $project_id $cluster 1 $region
+      done
+      retVal=$?
+      set +x 
+
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+
     kubeconfigcopy)
       set -x
       ansible-playbook playbooks/playbook-copy-kubeconfig-remotely.yaml -l localhost,jumpboxes
@@ -342,7 +359,7 @@ while [ 1 == 1 ]; do
 
     svcaccountcopy)
       set -x
-      ansible-playbook playbooks/playbook-config-gcloud-remotely.yaml -l localhost,jumpboxes
+      ansible-playbook playbooks/playbook-config-gcloud-remotely.yaml -l jumpboxes
       retVal=$?
       set +x 
 
