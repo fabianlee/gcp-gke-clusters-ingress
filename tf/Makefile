@@ -1,8 +1,10 @@
 THISDIR := $(notdir $(CURDIR))
 PROJECT := $(THISDIR)
 TF := terraform
+INIT_FLAGS :=
+# -upgrade (when provider version is upgraded)
 FLAGS := 
-#--auto-approve
+#--auto-approve (if you want changes approved without prompt)
 
 STD_DIR := gke-private-standard-cluster
 AP_DIR := gke-private-autopilot-cluster
@@ -27,25 +29,25 @@ init:
 project: init
 	@echo Creating the project is a bootstrapping function done as the editor or owner of project
 	gcloud auth application-default login
-	cd project && $(TF) init
+	cd project && $(TF) init $(INIT_FLAGS)
 	cd project && $(TF) apply $(PROJECT_ARGS) $(FLAGS)
 project-destroy:
 	cd project && $(TF) destroy $(PROJECT_ARGS) $(FLAGS)
 
 networks: init
-	cd networks && $(TF) init
+	cd networks && $(TF) init $(INIT_FLAGS)
 	cd networks && $(TF) apply $(NETWORKS_ARGS) $(FLAGS)
 networks-destroy: init
 	cd networks && $(TF) destroy $(NETWORKS_ARGS) $(FLAGS)
 
 cloudnat: init
-	cd cloudnat && $(TF) init
+	cd cloudnat && $(TF) init $(INIT_FLAGS)
 	cd cloudnat && $(TF) apply $(CLOUDNAT_ARGS) $(FLAGS)
 cloudnat-destroy:
 	cd cloudnat && $(TF) destroy $(CLOUDNAT_ARGS) $(FLAGS)
 
 vms: init
-	cd vms && $(TF) init
+	cd vms && $(TF) init $(INIT_FLAGS)
 	cd vms && $(TF) apply $(VMS_ARGS) $(FLAGS)
 vms-refresh:
 	cd vms && $(TF) refesh $(VMS_ARGS)
@@ -56,13 +58,13 @@ vms-destroy:
 	cd vms && $(TF) destroy $(VMS_ARGS) $(FLAGS)
 
 gke: init
-	cd $(STD_DIR) && $(TF) init
+	cd $(STD_DIR) && $(TF) init $(INIT_FLAGS)
 	cd $(STD_DIR) && $(TF) apply $(GKE_ARGS) $(FLAGS)
 gke-destroy:
 	cd $(STD_DIR) && $(TF) destroy $(GKE_ARGS) $(FLAGS)
 
 ap: init
-	cd $(AP_DIR) && $(TF) init
+	cd $(AP_DIR) && $(TF) init $(INIT_FLAGS)
 	cd $(AP_DIR) && $(TF) apply $(AP_ARGS) $(FLAGS)
 ap-refresh: init
 	cd $(AP_DIR) && $(TF) refresh $(AP_ARGS) $(FLAGS)
@@ -70,13 +72,13 @@ ap-destroy:
 	cd $(AP_DIR) && $(TF) destroy $(AP_ARGS) $(FLAGS)
 
 privgke: init
-	cd $(STD_DIR) && $(TF) init
+	cd $(STD_DIR) && $(TF) init $(INIT_FLAGS)
 	cd $(STD_DIR) && $(TF) apply $(PRIVGKE_ARGS) $(FLAGS)
 privgke-destroy:
 	cd $(STD_DIR) && $(TF) destroy $(PRIVGKE_ARGS) $(FLAGS)
 
 privap: init
-	cd $(AP_DIR) && $(TF) init
+	cd $(AP_DIR) && $(TF) init $(INIT_FLAGS)
 	cd $(AP_DIR) && $(TF) apply $(PRIVAP_ARGS) $(FLAGS)
 privap-destroy:
 	cd $(AP_DIR) && $(TF) destroy $(PRIVAP_ARGS) $(FLAGS)
