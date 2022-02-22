@@ -1,11 +1,11 @@
-# Private GKE clusters using Terraform, Anthos Service Mesh with dual endpoints
+# Private GKE clusters using Terraform, Anthos Service Mesh with public/private endpoints
 
 This project creates private GKE clusters (worker nodes have private IP addresses) in four different configurations:
 
-* Private standard GKE cluster with public endpoint (10.0.90.0/24)
-* Private Autopilot GKE cluster with public endpoint (10.0.91.0/24)
-* Private standard GKE cluster with private endpoint (10.0.100.0/24)
-* Private Autopilot GKE cluster with private endpoint (10.0.101.0/24)
+* Private standard GKE cluster with public endpoint
+* Private Autopilot GKE cluster with public endpoint
+* Private standard GKE cluster with private endpoint
+* Private Autopilot GKE cluster with private endpoint
 
 After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).
 
@@ -130,6 +130,68 @@ master:    10.1.0.48/28
             |           pods:     10.127.128.0/17 |             
             +-------------------------------------+             
 ```
+
+# Anthos Service Mesh
+
+For standard GKE clusters, we deploy using the Istio Ingress Gateway service as the entry point for the load balancers. This means ASM controls the flow using our Gateway and VirtualService objects that point at the services.
+
+For Autopilot GKE cluster, we do something a little different and have the Ingress for the public HTTPS LB use container native load balancing, allowing the HTTPS LB to serve directly back to the services (no need for Gateway or VirtualService).
+
+## Anthos Service Mesh on Standard GKE
+
+```
+                           +----------------------------------------------------------------------------------+
+                  creates  |   +---------------+                                     creates                  |
+                   +-----------| Ingress       |                                 |------------------+         |
+                   |       |   +---------------+                                 |                  |         |
+                   v       |                                                     |                  v         |
+     Public    +--------+  |              PUBLIC SERVICES             PRIVATE SERVICES         +--------+     |
+     Users     | HTTPS  |  | NEG        +------------------+        +------------------+       | TCP    |     |
+     --------->| LB     |-------------->| istio            |        | istio            |       | LB     |     |
+               |        |  |            | ingressgateway   |        | ingressgateway   |       |        |     |
+               +--------+  |            +------------------+        +------------------+       +--------+     |
+                           |            +------------------+        +------------------+           ^          |
+                           |            | Gateway          |        | Gateway          |           |          |
+                           |            +------------------+        +------------------+           |          |
+                           |            +------------------+        +------------------+           |          |
+                           |            | VirtualService(s)|        | VirtualService(s)|           |          |
+                           |            +------------------+        +------------------+        Internal      |
+                           |            +------------------+        +------------------+        Users         |
+                           |            | Service(s)       |        | Service(s)       |                      |
+                           |            +------------------+        +------------------+                      |
+                           |                                                                                  |
+                           +----------------------------------------------------------------------------------+
+```
+
+
+## Anthos Service Mesh on Autopilot GKE
+
+
+```
+                           +----------------------------------------------------------------------------------+
+                  creates  |   +---------------+                                     creates                  |
+                   +-----------| Ingress       |                                 |------------------+         |
+                   |       |   +---------------+                                 |                  |         |
+                   v       |                                                     |                  v         |
+     Public    +--------+  |              PUBLIC SERVICES             PRIVATE SERVICES         +--------+     |
+     Users     | HTTPS  |  | NEG        +------------------+        +------------------+       | TCP    |     |
+     --------->| LB     |-------------->| Service          |        | istio            |       | LB     |     |
+               |        -------+        +------------------+        | ingressgateway   |       |        |     |
+               +--------+----+ |        +------------------+        +------------------+       +--------+     |
+                           | | ---------| Service          |        +------------------+           ^          |
+                           | |          +------------------+        | Gateway          |           |          |
+                           | |          +------------------+        +------------------+           |          |
+                           | -----------| Service          |        +------------------+           |          |
+                           |            +------------------+        | VirtualService(s)|           |          |
+                           |                                        +------------------+        Internal      |
+                           |                                        +------------------+        Users         |
+                           |                                        | Service(s)       |                      |
+                           |                                        +------------------+                      |
+                           |                                                                                  |
+                           +----------------------------------------------------------------------------------+
+```
+
+
 
 # Building the clusters
 
