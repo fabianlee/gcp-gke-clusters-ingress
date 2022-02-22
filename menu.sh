@@ -46,7 +46,7 @@ menu_items=(
   "k8s-lb-tcp,Deploy Ingress Gateway for private TCP LB"
   "k8s-lb-https,Deploy Ingress for public HTTPS LB"
   "k8s-helloapp,Install hello apps"
-  "k8s-curl,Run curl to test public and private hello apps"
+  "k8s-curl,Run curl to test public and private hello endpoints"
   ""
   "delgke,Delete GKE public standard cluster"
   "delautopilot,Delete GKE public Autopilot cluster"
