@@ -1,4 +1,4 @@
-# Creates private GKE standard and Autopilot clusters using Terraform
+# Private GKE standard and Autopilot clusters using Terraform, with dual Anthos Service Mesh endpoints
 
 This project creates private GKE clusters (worker nodes have private IP addresses) in four different configurations:
 
@@ -6,6 +6,13 @@ This project creates private GKE clusters (worker nodes have private IP addresse
 * Private Autopilot GKE cluster with public endpoint (10.0.91.0/24)
 * Private standard GKE cluster with private endpoint (10.0.100.0/24)
 * Private Autopilot GKE cluster with private endpoint (10.0.101.0/24)
+
+After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent (ingress gateways)[https://cloud.google.com/service-mesh/docs/gateways].
+
+There are dual ingress to ASM:
+* A public HTTPS LB 'Ingress' that exposes services to the world (your public customers)
+* A private TCP LB that exposes services only to internal consumers (internal management tools)
+
 
 ## Private standard GKE cluster with public endpoint
 
