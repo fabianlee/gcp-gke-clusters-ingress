@@ -77,7 +77,7 @@ master:    10.1.0.32/28
 
 
  Public        +--------------+                          
- IP            | Bastion  VM  |   authorized network 
+ IP            | bastion/jump |   authorized network 
  ------------->| 10.0.90.x/32 |------------------------
                |              |                       |
                +--------------+                       | 
@@ -110,7 +110,7 @@ master:    10.1.0.48/28
 
 
  Public        +--------------+                          
- IP            | Bastion  VM  |   authorized network 
+ IP            | bastion/jump |   authorized network 
  ------------->| 10.0.91.x/32 |------------------------
                |              |                       |
                +--------------+                       | 
@@ -120,7 +120,7 @@ master:    10.1.0.48/28
             | 10.0.101.0/24                       |   |          
             |      |                              |   |          
             |      |          +----------------+  |   |          
-            |      v          |  std cluster   |  |   |
+            |      v          |  ap cluster    |  |   |
             | +--------+      |  worker nodes  |  |   ------->          
             | |jumpbox |      |                |------------->  
             | |        |                       |  |  master     
