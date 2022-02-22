@@ -211,5 +211,5 @@ delnetwork       Delete networks and Cloud NAT
 ```
 
 
-[diagrams](https://textik.com/)
+[diagrams on texttik.com](https://textik.com/)
 
