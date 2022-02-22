@@ -80,7 +80,55 @@ master:    10.1.0.48/28
 
 ## Menu driven build
 
+From here forward, you can use the menu driven wizard to execute the major actions required. It will generally look like below, and you should start at the top and work your way down through the components and ultimately the GKE cluster types you want to build.
 
+Don't forget to delete the objects you create, Google will charge you for this infrastructure.
+
+```
+===========================================================================
+ MAIN MENU
+===========================================================================
+
+project          Create gcp project and enable services                                   
+svcaccount       Create service account for provisioning                                  
+networks         Create network, subnets, and firewall                                    
+cloudnat         Create Cloud NAT for public egress of private IP                         
+
+sshmetadata      Load ssh key into project metadata                                       
+vms              Create VM instances in subnets                                           
+enablessh        Setup ssh config for bastions and ansible inventory                      
+ssh              SSH into jumpbox                                                         
+
+ansibleping      Test ansible connection to public and private vms                        
+ansibleplay      Apply ansible playbook of minimal pkgs/utils for vms                     
+
+gke              Create private GKE cluster w/public endpoint                             
+autopilot        Create private Autopilot cluster w/public endpoint                       
+privgke          Create private GKE cluster w/private endpoint                            
+privautopilot    Create private Autopilot cluster w/private endpoint                      
+
+kubeconfiggen    Use gcloud to retrieve any missing kubeconfig                            
+kubeconfigcopy   Copy kubeconfig to jumpboxes                                             
+svcaccountcopy   Copy service account json key to jumpboxes                               
+
+kubeconfig       Select KUBECONFIG                                                        
+k8s-register     Register with hub and get fleet identity                                 
+k8s-scale        Apply balloon pod to warm up cluster                                     
+k8s-tinytools    Apply tiny-tools Daemonset to cluster                                    
+k8s-ASM          Install ASM on cluster                                                   
+k8s-certs        Create and load TLS certificates                                         
+k8s-lb-tcp       Deploy Ingress Gateway for private TCP LB                                
+k8s-lb-https     Deploy Ingress for public HTTPS LB                                       
+k8s-helloapp     Install hello apps                                                       
+k8s-curl         Run curl to test public and private hello apps                           
+
+delgke           Delete GKE public standard cluster                                       
+delautopilot     Delete GKE public Autopilot cluster                                      
+delprivgke       Delete GKE private standard cluster                                      
+delprivautopilot Delete GKE private Autopilot cluster                                     
+delvms           Delete VM instances                                                      
+delnetwork       Delete networks and Cloud NAT
+```
 
 
 
