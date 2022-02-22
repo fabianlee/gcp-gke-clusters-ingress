@@ -53,7 +53,7 @@ menu_items=(
   "delprivgke,Delete GKE private standard cluster"
   "delprivautopilot,Delete GKE private Autopilot cluster"
   "delvms,Delete VM instances"
-  "delnetwork,Delete network and Cloud NAT"
+  "delnetwork,Delete networks and Cloud NAT"
 )
 
 function showMenu() {
@@ -331,13 +331,21 @@ while [ 1 == 1 ]; do
       ;;
 
     gke)
-      subnet=pub-10-0-90-0
-      master_cidr="10.1.0.0/28"
-      additional_authorized_cidr=""
-      set -x
-      gcloud/create-private-gke-cluster.sh standard public std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
-      retVal=$?
-      set +x
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make gke
+        retVal=$?
+        set +x
+      else
+        subnet=pub-10-0-90-0
+        master_cidr="10.1.0.0/28"
+        additional_authorized_cidr=""
+        set -x
+        gcloud/create-private-gke-cluster.sh standard public std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+        retVal=$?
+        set +x
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -363,25 +371,41 @@ while [ 1 == 1 ]; do
       ;;
 
     privgke)
-      subnet=prv-10-0-100-0
-      master_cidr="10.1.0.32/28"
-      additional_authorized_cidr="10.0.90.0/24"
-      set -x
-      gcloud/create-private-gke-cluster.sh standard private std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
-      retVal=$?
-      set +x
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make privgke
+        retVal=$?
+        set +x
+      else
+        subnet=prv-10-0-100-0
+        master_cidr="10.1.0.32/28"
+        additional_authorized_cidr="10.0.90.0/24"
+        set -x
+        gcloud/create-private-gke-cluster.sh standard private std-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+        retVal=$?
+        set +x
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
     privautopilot)
-      subnet=prv-10-0-101-0
-      master_cidr="10.1.0.48/28"
-      additional_authorized_cidr="10.0.91.0/24"
-      set -x
-      gcloud/create-private-gke-cluster.sh autopilot private ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
-      retVal=$?
-      set +x
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make privap
+        retVal=$?
+        set +x
+      else
+        subnet=prv-10-0-101-0
+        master_cidr="10.1.0.48/28"
+        additional_authorized_cidr="10.0.91.0/24"
+        set -x
+        gcloud/create-private-gke-cluster.sh autopilot private ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+        retVal=$?
+        set +x
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -538,10 +562,18 @@ while [ 1 == 1 ]; do
       ;;
 
     delgke)
-      set -x
-      gcloud/delete-gke-cluster.sh $project_id std-pub-10-0-90-0 $region $is_regional_cluster
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make gke-destroy
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/delete-gke-cluster.sh $project_id std-pub-10-0-90-0 $region $is_regional_cluster
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -562,46 +594,72 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
     delprivgke)
-      set -x
-      gcloud/delete-gke-cluster.sh $project_id std-prv-10-0-100-0 $region $is_regional_cluster
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make privgke-destroy
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/delete-gke-cluster.sh $project_id std-prv-10-0-100-0 $region $is_regional_cluster
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
     delprivautopilot)
-      set -x
-      gcloud/delete-gke-cluster.sh $project_id ap-prv-10-0-101-0 $region 1
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make privap-destroy
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/delete-gke-cluster.sh $project_id ap-prv-10-0-101-0 $region 1
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
 
     delnetwork)
-      set -x
-      gcloud/delete-network.sh $project_id $network_name $region
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make cloudnat-destroy
+        make networks-destroy
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/delete-networks-cloudnat.sh $project_id $network_name $region
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
     delvms)
-      set -x
-      retVal=0
-      for subnet in pub-10-0-90-0 pub-10-0-91-0 prv-10-0-100-0 prv-10-0-101-0; do
-        gcloud/delete-vm-instance.sh $project_id vm-$subnet $region
-        [ $? -eq 0 ] || retVal=$?
-      done
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make vms-destroy
+        retVal=$?
+        set +x
+      else
+        set -x
+        retVal=0
+        for subnet in pub-10-0-90-0 pub-10-0-91-0 prv-10-0-100-0 prv-10-0-101-0; do
+          gcloud/delete-vm-instance.sh $project_id vm-$subnet $region
+          [ $? -eq 0 ] || retVal=$?
+        done
+      fi
 
-      set +x 
-      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
-      ;;
-    delprivvm)
-      set -x
-      gcloud/delete-vm.sh $project_id vm-private $region
-      retVal=$?
       set +x 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;

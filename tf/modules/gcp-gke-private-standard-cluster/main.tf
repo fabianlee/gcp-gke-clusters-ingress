@@ -52,6 +52,9 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
+  # added to tf apply does not see change
+  resource_labels = {}
+
   notification_config {
     pubsub {
       enabled = true
@@ -104,7 +107,7 @@ resource "google_container_cluster" "cluster" {
 
     # this is default value, just making explicit.  inherited by nodes
     network_policy_config {
-      disabled = false
+      disabled = true
     }
   }
 
@@ -140,7 +143,7 @@ resource "google_container_cluster" "cluster" {
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_node_pool
 resource "google_container_node_pool" "primary_nodes" {
   name       = "${google_container_cluster.cluster.name}-node-pool"
-  location   = var.region
+  location = var.is_regional_cluster ? var.region:var.zone
   cluster    = google_container_cluster.cluster.id
   initial_node_count = var.node_initial_node_count
   version  = data.google_container_engine_versions.cluster_versions.latest_node_version
