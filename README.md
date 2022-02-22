@@ -7,10 +7,10 @@ This project creates private GKE clusters (worker nodes have private IP addresse
 * Private standard GKE cluster with private endpoint (10.0.100.0/24)
 * Private Autopilot GKE cluster with private endpoint (10.0.101.0/24)
 
-After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent [ingress gateways](https://cloud.google.com/service-mesh/docs/gateways).
+After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).
 
-There are dual ingress to ASM:
-* A public HTTPS LB 'Ingress' that exposes services to the world (your public customers)
+There are two entry points configured to ASM:
+* A public HTTPS LB Ingress that exposes services to the world (your public customers)
 * A private TCP LB that exposes services only to internal consumers (internal management tools)
 
 
