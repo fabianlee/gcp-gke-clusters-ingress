@@ -195,5 +195,21 @@ resource "google_container_node_pool" "primary_nodes" {
     ]
   }
 
-
 }
+
+
+# Register the cluster, makes viewable in 'Anthos' section
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_membership
+# https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster
+resource "google_gke_hub_membership" "membership" {
+  membership_id = google_container_cluster.cluster.name
+  endpoint {
+    gke_cluster {
+      resource_link = google_container_cluster.cluster.id
+    }
+  }
+  authority {
+    issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
+  }
+}
+
