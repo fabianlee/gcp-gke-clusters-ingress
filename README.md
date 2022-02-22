@@ -283,5 +283,5 @@ delnetwork       Delete networks and Cloud NAT
 ```
 
 
-[diagrams on texttik.com](https://textik.com/)
+[diagrams created on texttik.com](https://textik.com/)
 
