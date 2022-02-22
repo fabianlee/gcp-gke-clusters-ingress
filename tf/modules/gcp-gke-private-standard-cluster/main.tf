@@ -211,5 +211,7 @@ resource "google_gke_hub_membership" "membership" {
   authority {
     issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
   }
+  # empty so tf apply does not see changes
+  labels = {}
 }
 

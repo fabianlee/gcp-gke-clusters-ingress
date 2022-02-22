@@ -5,6 +5,9 @@
 BIN_DIR=$(dirname ${BASH_SOURCE[0]})
 cd $BIN_DIR
 
+# whether to use gcloud scripts, or terraform for GCP infrastructure
+USE_TERRAFORM=1
+
 # visual marker for task
 declare -A done_status
 
@@ -110,6 +113,7 @@ function check_prerequisites() {
   ensure_binary ansible "install https://fabianlee.org/2021/05/31/ansible-installing-the-latest-ansible-on-ubuntu/"
   ensure_binary yq "download from https://github.com/mikefarah/yq/releases"
   ensure_binary jq "run 'sudo apt install jq'"
+  ensure_binary make "run 'sudo apt install make'"
 
   # show binary versions
   # on apt, can be upgraded with 'sudo apt install --only-upgrade google-cloud-sdk -y'
@@ -118,6 +122,14 @@ function check_prerequisites() {
   ansible --version | head -n1
   yq --version
   jq --version
+  make --version | head -n1
+
+  echo ""
+  if [ $USE_TERRAFORM -eq 1 ]; then
+    echo "TERRAFORM for infrastructure"
+  else
+    echo "GCLOUD for infrastructure"
+  fi
 
   # check for gcloud login context
   gcloud projects list > /dev/null 2>&1
@@ -163,11 +175,19 @@ while [ 1 == 1 ]; do
   case $answer in
 
     project)
-      set -x
-      gcloud/create-gcp-project.sh $project_id $project_name
-      gcloud/services-enable.sh $project_id
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make project
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/create-gcp-project.sh $project_id $project_name
+        gcloud/services-enable.sh $project_id
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -182,19 +202,35 @@ while [ 1 == 1 ]; do
       ;;
 
     network)
-      set -x
-      gcloud/create-network-and-subnets.sh $project_id $network_name $region $firewall_internal_allow_cidr
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make networks
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/create-network-and-subnets.sh $project_id $network_name $region $firewall_internal_allow_cidr
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
     cloudnat)
-      set -x
-      gcloud/create-cloud-nat.sh $project_id $network_name $region
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make cloudnat
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/create-cloud-nat.sh $project_id $network_name $region
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -209,17 +245,25 @@ while [ 1 == 1 ]; do
       ;;
 
     vms)
-      set -x
-      retVal=0
-      for subnet in pub-10-0-90-0 pub-10-0-91-0; do
-        gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region $vm_cloud_scope $vm_preemptable
-        [ $? -eq 0 ] || retVal=$?
-      done
-      for subnet in prv-10-0-100-0 prv-10-0-101-0; do
-        gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region $vm_cloud_scope $vm_preemptable
-        [ $? -eq 0 ] || retVal=$?
-      done
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make vms
+        retVal=$?
+        set +x
+      else
+        set -x
+        retVal=0
+        for subnet in pub-10-0-90-0 pub-10-0-91-0; do
+          gcloud/create-vm-instance.sh public vm-$subnet $project_id $network_name $subnet $region $vm_cloud_scope $vm_preemptable
+          [ $? -eq 0 ] || retVal=$?
+        done
+        for subnet in prv-10-0-100-0 prv-10-0-101-0; do
+          gcloud/create-vm-instance.sh private vm-$subnet $project_id $network_name $subnet $region $vm_cloud_scope $vm_preemptable
+          [ $? -eq 0 ] || retVal=$?
+        done
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -299,13 +343,21 @@ while [ 1 == 1 ]; do
       ;;
  
     autopilot)
-      subnet=pub-10-0-91-0
-      master_cidr="10.1.0.16/28"
-      additional_authorized_cidr=""
-      set -x
-      gcloud/create-private-gke-cluster.sh autopilot public ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make ap
+        retVal=$?
+        set +x
+      else
+        subnet=pub-10-0-91-0
+        master_cidr="10.1.0.16/28"
+        additional_authorized_cidr=""
+        set -x
+        gcloud/create-private-gke-cluster.sh autopilot public ap-$subnet $cluster_version $cluster_release_channel $node_image_type $project_id $network_name $subnet "$master_cidr" "$additional_authorized_cidr" $region $is_regional_cluster
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -494,10 +546,18 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
     delautopilot)
-      set -x
-      gcloud/delete-gke-cluster.sh $project_id ap-pub-10-0-91-0 $region 1
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf
+        make ap-destroy
+        retVal=$?
+        set +x
+      else
+        set -x
+        gcloud/delete-gke-cluster.sh $project_id ap-pub-10-0-91-0 $region 1
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
