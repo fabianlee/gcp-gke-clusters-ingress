@@ -1,4 +1,4 @@
-# Private GKE standard and Autopilot clusters using Terraform, with dual Anthos Service Mesh endpoints
+# Private GKE clusters using Terraform, Anthos Service Mesh with dual endpoints
 
 This project creates private GKE clusters (worker nodes have private IP addresses) in four different configurations:
 
@@ -23,6 +23,20 @@ GKE nodes: 10.0.90.0/24
 services:  10.128.0.0/19
 pods:      10.126.0.0/17
 master:    10.1.0.0/28
+
+            +-------------------------------------+             
+            | 10.0.90.0/24                        |             
+            |                                     |             
+            |                 +----------------+  |             
+            |                 |  worker nodes  |  |             
+ public     | +--------+      |                |  |             
+ IP         | |jumpbox |      |                |------------->  
+ ---------------->     |      |                |  |  master     
+            | |        |      |                |  |  10.1.0.0/28
+            | +--------+      +----------------+  |             
+            |             services: 10.128.0.0/19 |             
+            |             pods:     10.126.0.0/17 |             
+            +-------------------------------------+        
 ```
 
 ## Private Autopilot cluster with public endpoint
