@@ -15,6 +15,9 @@ resource "google_compute_subnetwork" "subnetwork" {
   ip_cidr_range = each.value.cidr
   region        = var.subnetwork_region
   network       = google_compute_network.vpc_network.name
+ 
+  # vms in this subnet can reach Google API 
+  private_ip_google_access = true
 
   secondary_ip_range {
     range_name    = "pods"

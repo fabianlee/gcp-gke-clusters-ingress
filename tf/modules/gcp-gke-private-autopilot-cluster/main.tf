@@ -137,6 +137,28 @@ resource "google_container_cluster" "apcluster" {
     #labels = var.node_ap_labels_map
   } # node_config
 
+
+  # creates local kubeconfig file
+  provisioner "local-exec" { 
+    command = <<EOT
+      gcloud container clusters get-credentials ${var.cluster_name} --region=${var.region}
+EOT 
+    environment = {
+                   "KUBECONFIG" = "kubeconfig-${var.cluster_name}"
+                  }
+    working_dir = "${path.module}/../../.."
+    on_failure  = continue
+  } 
+
+  # deletes local kubeconfig file
+  provisioner "local-exec" { 
+    when        = destroy
+    # does not have access to var, only self's attributes
+    command     = "rm -f kubeconfig-${self.name}"
+    working_dir = "${path.module}/../../.."
+    on_failure  = continue
+  }
+
 }
 
 # Register the cluster, makes viewable in 'Anthos' section

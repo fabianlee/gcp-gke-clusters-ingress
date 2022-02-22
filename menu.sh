@@ -17,7 +17,7 @@ declare -A done_status
 menu_items=(
   "project,Create gcp project and enable services"
   "svcaccount,Create service account for provisioning"
-  "network,Create network, subnets, and firewall"
+  "networks,Create network, subnets, and firewall"
   "cloudnat,Create Cloud NAT for public egress of private IP"
   ""
   "sshmetadata,Load ssh key into project metadata"
@@ -181,6 +181,7 @@ while [ 1 == 1 ]; do
         make project
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/create-gcp-project.sh $project_id $project_name
@@ -201,13 +202,14 @@ while [ 1 == 1 ]; do
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
 
-    network)
+    networks)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
         cd tf
         make networks
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/create-network-and-subnets.sh $project_id $network_name $region $firewall_internal_allow_cidr
@@ -224,6 +226,7 @@ while [ 1 == 1 ]; do
         cd tf
         make cloudnat
         retVal=$?
+        cd ..
         set +x
       else
         set -x
@@ -251,6 +254,7 @@ while [ 1 == 1 ]; do
         make vms
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         retVal=0
@@ -337,6 +341,7 @@ while [ 1 == 1 ]; do
         make gke
         retVal=$?
         set +x
+        cd ..
       else
         subnet=pub-10-0-90-0
         master_cidr="10.1.0.0/28"
@@ -357,6 +362,7 @@ while [ 1 == 1 ]; do
         make ap
         retVal=$?
         set +x
+        cd ..
       else
         subnet=pub-10-0-91-0
         master_cidr="10.1.0.16/28"
@@ -377,6 +383,7 @@ while [ 1 == 1 ]; do
         make privgke
         retVal=$?
         set +x
+        cd ..
       else
         subnet=prv-10-0-100-0
         master_cidr="10.1.0.32/28"
@@ -397,6 +404,7 @@ while [ 1 == 1 ]; do
         make privap
         retVal=$?
         set +x
+        cd ..
       else
         subnet=prv-10-0-101-0
         master_cidr="10.1.0.48/28"
@@ -568,6 +576,7 @@ while [ 1 == 1 ]; do
         make gke-destroy
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/delete-gke-cluster.sh $project_id std-pub-10-0-90-0 $region $is_regional_cluster
@@ -584,6 +593,7 @@ while [ 1 == 1 ]; do
         make ap-destroy
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/delete-gke-cluster.sh $project_id ap-pub-10-0-91-0 $region 1
@@ -600,6 +610,7 @@ while [ 1 == 1 ]; do
         make privgke-destroy
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/delete-gke-cluster.sh $project_id std-prv-10-0-100-0 $region $is_regional_cluster
@@ -616,6 +627,7 @@ while [ 1 == 1 ]; do
         make privap-destroy
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/delete-gke-cluster.sh $project_id ap-prv-10-0-101-0 $region 1
@@ -635,6 +647,7 @@ while [ 1 == 1 ]; do
         make networks-destroy
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         gcloud/delete-networks-cloudnat.sh $project_id $network_name $region
@@ -651,6 +664,7 @@ while [ 1 == 1 ]; do
         make vms-destroy
         retVal=$?
         set +x
+        cd ..
       else
         set -x
         retVal=0

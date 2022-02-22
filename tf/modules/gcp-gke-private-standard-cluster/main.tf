@@ -137,6 +137,26 @@ resource "google_container_cluster" "cluster" {
     workload_pool = "${var.project}.svc.id.goog"
   }
 
+  # creates local kubeconfig file
+  provisioner "local-exec" {
+    command = <<EOT
+      gcloud container clusters get-credentials ${var.cluster_name} ${ var.is_regional_cluster ? "--region=${var.region}" : "--zone=${var.region}-b" }
+EOT
+    environment = {
+                   "KUBECONFIG" = "kubeconfig-${var.cluster_name}"
+                  }
+    working_dir = "${path.module}/../../.."
+    on_failure  = continue
+  }
+
+  # deletes local kubeconfig file
+  provisioner "local-exec" {
+    when        = destroy
+    # does not have access to var, only self's attributes
+    command     = "rm -f kubeconfig-${self.name}"
+    working_dir = "${path.module}/../../.."
+    on_failure  = continue
+  }
 
 }
 
