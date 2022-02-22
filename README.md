@@ -62,13 +62,13 @@ master:    10.1.0.48/28
 
 ## Binary Prerequisites
 
-* [gcloud](https://cloud.google.com/sdk/docs/install)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+* [gcloud 370+](https://cloud.google.com/sdk/docs/install)
+* [kubectl 1.21+](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
 * [terraform 14+](https://fabianlee.org/2021/05/30/terraform-installing-terraform-manually-on-ubuntu/)
-* [ansible](https://fabianlee.org/2021/05/31/ansible-installing-the-latest-ansible-on-ubuntu/)
-* [yq](https://github.com/mikefarah/yq/releases)
-* jq (sudo apt install jq)
-* make (sudo apt install make)
+* [ansible 2.10+](https://fabianlee.org/2021/05/31/ansible-installing-the-latest-ansible-on-ubuntu/)
+* [yq 4.x+](https://github.com/mikefarah/yq/releases)
+* jq 1.5+ (sudo apt install jq)
+* make 4.x+ (sudo apt install make)
 
 ## Account Prerequisites
 
