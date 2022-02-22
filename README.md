@@ -139,6 +139,10 @@ For Autopilot GKE cluster, we do something a little different and have the Ingre
 
 ## Anthos Service Mesh on Standard GKE
 
+On the standard GKE Clusters, we deploy two istio ingress gateway services. One delivers for the services meant to be served over the public internet, and the other delivers the services meant for private consumption only (e.g. management UI only accessible to employees).
+
+The VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
+
 ```
                     +-------------------------------------------------------------------------------+
            creates  |   +---------------+                                     creates               |
@@ -165,6 +169,12 @@ Users   | HTTPS  |  | NEG        +------------------+        +------------------
 
 
 ## Anthos Service Mesh on Autopilot GKE
+
+On the Autopilot GKE Clusters, we only deploy istio ingress gateway services for internal, private services. This follows the same path as above; the VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
+
+But for the Public End user services, instead of using VirtualService and Gateway to select an istio IngressGateway, we define a [URL map](https://cloud.google.com/load-balancing/docs/url-map-concepts) directly on the Ingress object so that it not only creates the GCP HTTPS LB, but tells the LB how to reach our public services directly via Network Endpoint Group NEG.
+
+This does require that we add a BackendConfig to each service so that a health check can be done by the HTTPS LB.
 
 
 ```
