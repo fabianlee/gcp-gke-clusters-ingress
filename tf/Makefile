@@ -7,6 +7,8 @@ FLAGS :=
 STD_DIR := gke-private-standard-cluster
 AP_DIR := gke-private-autopilot-cluster
 
+PROJECT_ARGS := --var-file=../envs/all.tfvars --state=../envs/project.tfstate
+
 NETWORKS_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/networks.tfvars --state=../envs/networks.tfstate
 CLOUDNAT_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/cloudnat.tfvars --state=../envs/cloudnat.tfstate
 VMS_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/vms.tfvars --state=../envs/vms.tfstate
@@ -21,6 +23,14 @@ PRIVGKE_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/std-prv-10-0-10
 PRIVAP_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/ap-prv-10-0-101-0.tfvars --state=../envs/ap-prv-10-0-101-0.tfstate
 
 init:
+
+project: init
+	@echo Creating the project is a bootstrapping function done as the editor or owner of project
+	gcloud auth application-default login
+	cd project && $(TF) init
+	cd project && $(TF) apply $(PROJECT_ARGS) $(FLAGS)
+project-destroy:
+	cd project && $(TF) destroy $(PROJECT_ARGS) $(FLAGS)
 
 networks: init
 	cd networks && $(TF) init
