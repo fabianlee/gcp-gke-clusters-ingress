@@ -9,3 +9,4 @@
 - name: set gcp project id
   command:
     cmd: gcloud config set project {{project_id}}
+

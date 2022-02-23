@@ -1,7 +1,9 @@
+# do equivalent of gcloud init using service account for authentication
+# the VM instances are not using 'cloud' scope, so they are not using the default engine account
 ---
 
 - hosts: jumpboxes
-  become: yes
+  become: no
   tasks:
     - name: copy tf-creator.json key remotely for gcloud auth on jumpboxes
       copy:
@@ -15,7 +17,7 @@
       command:
         cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
       register: activate_svc_account
-    - debug: msg="{{activate_svc_account}}"
+    - debug: msg="{{activate_svc_account.stdout_lines}}"
     
     - name: set project id
       command:
@@ -25,12 +27,28 @@
       command:
         cmd: gcloud auth list
       register: gcloud_alist
-    - debug: msg="{{gcloud_alist}}"
+    - debug: msg="{{gcloud_alist.stdout}}"
     
     - name: show gcloud project list as proof
       command:
         cmd: gcloud projects list
       register: gcloud_plist
-    - debug: msg="{{gcloud_plist}}"
+    - debug: msg="{{gcloud_plist.stdout_lines}}"
 
+
+- hosts: jumpboxes
+  become: yes
+  tasks:
+    - name: set tf-creator service accound for gcloud
+      command:
+        cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
+      register: activate_svc_account
+    - name: set project id
+      command:
+        cmd: gcloud config set project {{project_id}}
+    - name: show gcloud project list as proof
+      command:
+        cmd: gcloud projects list
+      register: gcloud_plist
+    - debug: msg="{{gcloud_plist.stdout_lines}}"
 
