@@ -21,10 +21,12 @@ A standard private GKE cluster, that offers a public endpoint for kubeapi.  But 
 ```
 subnet:    pub-10-0-90-0
 jumpbox:   vm-pub-10-0-90-0
+cluster:   std-pub-10-0-90-0
 GKE nodes: 10.0.90.0/24
 services:  10.128.0.0/19
 pods:      10.126.0.0/17
 master:    10.1.0.0/28
+
 
             +-------------------------------------+             
             | 10.0.90.0/24                        |             
@@ -48,10 +50,12 @@ An Autopilot private GKE cluster, that offers a public endpoint for kubeapi.  Bu
 ```
 subnet:    pub-10-0-91-0
 jumpbox:   vm-pub-10-0-91-0
+cluster:   ap-pub-10-0-91-0
 GKE nodes: 10.0.91.0/24
 services:  10.128.32.0/19
 pods:      10.126.128.0/17
 master:    10.1.0.16/28
+
 
             +-------------------------------------+             
             | 10.0.91.0/24                        |             
@@ -77,11 +81,11 @@ A standard private GKE cluster, that only offers a private endpoint for kubeapi.
 ```
 subnet:    prv-10-0-100-0
 jumpbox:   vm-prv-10-0-90-0
+cluster:   std-prv-10-0-100-0
 GKE nodes: 10.0.100.0/24
 services:  10.128.64.0/19
 pods:      10.127.0.0/17
 master:    10.1.0.32/28
-
 
 
  Public        +--------------+                          
@@ -115,6 +119,7 @@ An Autopilot private GKE cluster, that only offers a private endpoint for kubeap
 ```
 subnet:    prv-10-0-101-0
 jumpbox:   vm-prv-10-0-101-0
+cluster:   ap-prv-10-0-101-0
 GKE nodes: 10.0.101.0/24
 services:  10.128.96.0/19
 pods:      10.127.128.0/17
