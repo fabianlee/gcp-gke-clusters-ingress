@@ -10,6 +10,7 @@ STD_DIR := gke-private-standard-cluster
 AP_DIR := gke-private-autopilot-cluster
 
 PROJECT_ARGS := --var-file=../envs/all.tfvars --state=../envs/project.tfstate
+SVCACCT_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/serviceaccount.tfvars --state=../envs/serviceaccount.tfstate
 
 NETWORKS_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/networks.tfvars --state=../envs/networks.tfstate
 CLOUDNAT_ARGS := --var-file=../envs/all.tfvars --var-file=../envs/cloudnat.tfvars --state=../envs/cloudnat.tfstate
@@ -33,6 +34,16 @@ project: init
 	cd project && $(TF) apply $(PROJECT_ARGS) $(FLAGS)
 project-destroy:
 	cd project && $(TF) destroy $(PROJECT_ARGS) $(FLAGS)
+
+svcaccount: init
+	@echo Creating the service account is a bootstrapping function done as the editor or owner of project
+	@echo You must run this first 'gcloud auth application-default login'
+	cd serviceaccount && $(TF) init $(INIT_FLAGS)
+	cd serviceaccount && $(TF) apply $(SVCACCT_ARGS) $(FLAGS)
+svcaccount-output:
+	cd serviceaccount && $(TF) output -raw --state=../envs/serviceaccount.tfstate svcaccount_json > ../../tf-creator2.json
+svcaccount-destroy:
+	cd serviceaccount && $(TF) destroy $(SVCACCT_ARGS) $(FLAGS)
 
 networks: init
 	cd networks && $(TF) init $(INIT_FLAGS)

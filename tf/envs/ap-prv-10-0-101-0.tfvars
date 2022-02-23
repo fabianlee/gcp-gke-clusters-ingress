@@ -3,7 +3,7 @@ subnetwork_name = "prv-10-0-101-0"
 # gcloud container get-server-config --region=us-east1
 cluster_name = "ap-prv-10-0-101-0"
 
-master_ipv4_cidr_block_28 = "10.1.48.0/28"
+master_ipv4_cidr_block_28 = "10.1.0.48/28"
 
 # false means it has public kubeapi endpoint
 # true means it is private endpoint
