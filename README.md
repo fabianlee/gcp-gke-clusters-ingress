@@ -145,9 +145,8 @@ master:    10.1.0.48/28
 
 # Anthos Service Mesh
 
-For standard GKE clusters, we deploy using the Istio Ingress Gateway service as the entry point for the load balancers. This means ASM controls the flow using our Gateway and VirtualService objects that point at the services.
+Because these are all private GKE cluster with internal IP addresses, we use Anthos Service Mesh to expose the services we want to offer publicly to end users as well as internal-only management web services.
 
-For Autopilot GKE cluster, we do something a little different and have the Ingress for the public HTTPS LB use container native load balancing, allowing the HTTPS LB to serve directly back to the services (no need for Gateway or VirtualService).
 
 ## Anthos Service Mesh on Standard GKE
 
