@@ -1,6 +1,6 @@
 # Private GKE clusters using Terraform, exposed using Anthos Service Mesh with public/private ingress
 
-This project creates private GKE clusters (worker nodes have private IP addresses) in four different configurations:
+This project creates private GKE clusters (worker nodes with private IP addresses) in four different configurations:
 
 1. Private standard GKE cluster with public endpoint
 2. Private Autopilot GKE cluster with public endpoint
