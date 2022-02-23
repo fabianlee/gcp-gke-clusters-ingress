@@ -13,6 +13,9 @@ There are two ASM entry points configured for each cluster:
 1. A public HTTPS LB Ingress that exposes services to the world (your public customers)
 2. A private TCP LB that exposes services only to internal consumers (internal management tools)
 
+The internal TCP LB is meant for internal services that, for example, should only be exposed to employees or those on the corporate Intranet.  Example could be the Kubernetes dashboard, Prometheus web interface, or perhaps a custom User/Product Web UI.
+
+
 
 # Network and Cluster summary
 
