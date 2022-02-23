@@ -15,15 +15,15 @@ There are two entry points configured to ASM:
 
 ## Network and Cluster summary table
 
-info | std gke w/pub endpoint | gke w/pub endpoint | std gke w/private endpoint | ap w/private endpoint
+ | STD gke w/pub endpoint | AP w/pub endpoint | STD gke w/private endpoint | AP w/private endpoint
 --|--|--|--|--
-subnet |  pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
-jumpbox |  vm-pub-10-0-90-0 | vm-pub-10-0-91-0 | vm-prv-10-0-100-0 | vm-prv-10-0-101-0
-cluster |  std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
-GKE nodes | 10.0.90.0/24 | 10.0.91.0/24 | 10.0.100.0/24 | 10.0.101.0/24
-services | 10.128.0.0/19 | 10.128.0.32/19 | 10.128.0.64.0/19 | 10.128.0.96.0/19
-pods | 10.126.0.0/17 | 10.126.128.0/17 | 10.127.0.0/17 | 10.127.128.0.17
-master | 10.1.0.0/28 | 10.1.0.16/28 | 10.1.0.32/28 | 10.1.0.48/28
+subnet  | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
+CIDR    | 10.0.90.0/24  | 10.0.91.0/24  | 10.0.100.0/24 | 10.0.101.0/24
+jumpbox | vm-pub-10-0-90-0 | vm-pub-10-0-91-0 | vm-prv-10-0-100-0 | vm-prv-10-0-101-0
+cluster | std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
+services| 10.128.0.0/19 | 10.128.0.32/19 | 10.128.0.64.0/19 | 10.128.0.96.0/19
+pods    | 10.126.0.0/17 | 10.126.128.0/17| 10.127.0.0/17 | 10.127.128.0.17
+master  | 10.1.0.0/28   | 10.1.0.16/28   | 10.1.0.32/28 | 10.1.0.48/28
 
 
 ## Private standard GKE cluster with public endpoint
