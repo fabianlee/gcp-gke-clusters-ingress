@@ -294,4 +294,5 @@ delnetwork       Delete networks and Cloud NAT
 
 
 [diagrams created on texttik.com](https://textik.com/)
+[visual subnet calculator](https://www.davidc.net/sites/default/subnets/subnets.html)
 
