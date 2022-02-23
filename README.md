@@ -1,22 +1,22 @@
-# Private GKE clusters using Terraform, Anthos Service Mesh with public/private endpoints
+# Private GKE clusters using Terraform, exposed using Anthos Service Mesh with public/private ingress
 
 This project creates private GKE clusters (worker nodes have private IP addresses) in four different configurations:
 
-* Private standard GKE cluster with public endpoint
-* Private Autopilot GKE cluster with public endpoint
-* Private standard GKE cluster with private endpoint
-* Private Autopilot GKE cluster with private endpoint
+1. Private standard GKE cluster with public endpoint
+2. Private Autopilot GKE cluster with public endpoint
+3. Private standard GKE cluster with private endpoint
+4. Private Autopilot GKE cluster with private endpoint
 
 After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).
 
-There are two entry points configured for ASM:
-* A public HTTPS LB Ingress that exposes services to the world (your public customers)
-* A private TCP LB that exposes services only to internal consumers (internal management tools)
+There are two ASM entry points configured for each cluster:
+1. A public HTTPS LB Ingress that exposes services to the world (your public customers)
+2. A private TCP LB that exposes services only to internal consumers (internal management tools)
 
 
-## Network and Cluster summary table
+# Network and Cluster summary
 
-| | STD gke w/public endpoint | AP w/public endpoint | STD gke w/private endpoint | AP w/private endpoint
+| | 1. STD gke w/public endpoint | 2. AP w/public endpoint | 3. STD gke w/private endpoint | 4. AP w/private endpoint
 |--|--|--|--|--
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |CIDR | 10.0.90.0/24 | 10.0.91.0/24 | 10.0.100.0/24 | 10.0.101.0/24
@@ -29,7 +29,7 @@ There are two entry points configured for ASM:
 |master_auth | | | 10.0.90.0/24 | 10.0.91.0/24
 
 
-## Private standard GKE cluster with public endpoint
+## 1. Private standard GKE cluster with public endpoint
 
 A standard private GKE cluster, that offers a public endpoint for kubeapi.  But you also have the ability to ssh into the jumpbox in the same subnet via its external IP address and run kubectl commands against the cluster.
 
@@ -53,7 +53,7 @@ cluster:   std-pub-10-0-90-0
             +-------------------------------------+             
 ```
 
-## Private Autopilot cluster with public endpoint
+## 2. Private Autopilot cluster with public endpoint
 
 An Autopilot private GKE cluster, that offers a public endpoint for kubeapi.  But you also have the ability to ssh into the jumpbox in the same subnet via its external IP address and run kubectl commands against the cluster.
 
@@ -77,7 +77,7 @@ cluster:   ap-pub-10-0-91-0
             +-------------------------------------+             
 ```
 
-## Private standard GKE cluster with private endpoint
+## 3. Private standard GKE cluster with private endpoint
 
 A standard private GKE cluster, that only offers a private endpoint for kubeapi.  That means you can only run kubectl from either:
 * the private jumpbox in the same subnet (reached via the public bastion/jumpbox in 10.0.90.0)
@@ -110,7 +110,7 @@ cluster:   std-prv-10-0-100-0
             +-------------------------------------+             
 ```
 
-## Private Autopilot cluster with private endpoint
+## 4. Private Autopilot cluster with private endpoint
 
 An Autopilot private GKE cluster, that only offers a private endpoint for kubeapi.  That means you can only run kubectl from either:
 * the private jumpbox in the same subnet (reached via the public bastion/jumpbox in 10.0.91.0)
