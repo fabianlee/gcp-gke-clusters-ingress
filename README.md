@@ -16,6 +16,8 @@ There are two entry points configured to ASM:
 
 ## Private standard GKE cluster with public endpoint
 
+A standard private GKE cluster (nodes have private IP), that offers a public endpoint for kubeapi.  But you also have the ability to ssh into the jumpbox in the same subnet via its external IP address and run kubectl commands against the cluster.
+
 ```
 subnet:    pub-10-0-90-0
 jumpbox:   vm-pub-10-0-90-0
@@ -41,6 +43,8 @@ master:    10.1.0.0/28
 
 ## Private Autopilot cluster with public endpoint
 
+An Autopilot GKE cluster (nodes have private IP), that offers a public endpoint for kubeapi.  But you also have the ability to ssh into the jumpbox in the same subnet via its external IP address and run kubectl commands against the cluster.
+
 ```
 subnet:    pub-10-0-91-0
 jumpbox:   vm-pub-10-0-91-0
@@ -65,6 +69,10 @@ master:    10.1.0.16/28
 ```
 
 ## Private standard GKE cluster with private endpoint
+
+A standard private GKE cluster (nodes have private IP), that only offers a private endpoint for kubeapi.  That means you can only run kubectl from either:
+* the private jumpbox in the same subnet (reached via the public bastion/jumpbox in 10.0.90.0)
+* OR directly from the bastion/jumpbox on 10.0.90.0 because it has been added as a [master authorized network](https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks)
 
 ```
 subnet:    prv-10-0-100-0
@@ -99,6 +107,10 @@ master:    10.1.0.32/28
 ```
 
 ## Private Autopilot cluster with private endpoint
+
+An Autopilot private GKE cluster (nodes have private IP), that only offers a private endpoint for kubeapi.  That means you can only run kubectl from either:
+* the private jumpbox in the same subnet (reached via the public bastion/jumpbox in 10.0.91.0)
+* OR directly from the bastion/jumpbox on 10.0.91.0 because it has been added as a [master authorized network](https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks)
 
 ```
 subnet:    prv-10-0-101-0
