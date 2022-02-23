@@ -9,13 +9,14 @@ This project creates private GKE clusters (worker nodes have private IP addresse
 
 After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).
 
-There are two entry points configured to ASM:
+There are two entry points configured for ASM:
 * A public HTTPS LB Ingress that exposes services to the world (your public customers)
 * A private TCP LB that exposes services only to internal consumers (internal management tools)
 
+
 ## Network and Cluster summary table
 
-| | STD gke w/pub endpoint | AP w/pub endpoint | STD gke w/private endpoint | AP w/private endpoint
+| | STD gke w/public endpoint | AP w/public endpoint | STD gke w/private endpoint | AP w/private endpoint
 |--|--|--|--|--
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |CIDR | 10.0.90.0/24 | 10.0.91.0/24 | 10.0.100.0/24 | 10.0.101.0/24
@@ -36,7 +37,6 @@ A standard private GKE cluster, that offers a public endpoint for kubeapi.  But 
 subnet:    pub-10-0-90-0
 jumpbox:   vm-pub-10-0-90-0
 cluster:   std-pub-10-0-90-0
-
 
             +-------------------------------------+             
             | 10.0.90.0/24                        |             
@@ -61,7 +61,6 @@ An Autopilot private GKE cluster, that offers a public endpoint for kubeapi.  Bu
 subnet:    pub-10-0-91-0
 jumpbox:   vm-pub-10-0-91-0
 cluster:   ap-pub-10-0-91-0
-
 
             +-------------------------------------+             
             | 10.0.91.0/24                        |             
@@ -88,7 +87,6 @@ A standard private GKE cluster, that only offers a private endpoint for kubeapi.
 subnet:    prv-10-0-100-0
 jumpbox:   vm-prv-10-0-90-0
 cluster:   std-prv-10-0-100-0
-
 
  Public        +--------------+                          
  IP            | bastion/jump |   authorized network 
@@ -122,7 +120,6 @@ An Autopilot private GKE cluster, that only offers a private endpoint for kubeap
 subnet:    prv-10-0-101-0
 jumpbox:   vm-prv-10-0-101-0
 cluster:   ap-prv-10-0-101-0
-
 
  Public        +--------------+                          
  IP            | bastion/jump |   authorized network 
