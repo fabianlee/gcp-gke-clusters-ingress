@@ -197,12 +197,12 @@ This does require that we add a BackendConfig to each service so that a health c
 Public  +--------+  |              PUBLIC SERVICES             PRIVATE SERVICES         +--------+  |
 Users   | HTTPS  |  | NEG        +------------------+        +------------------+       | TCP    |  |
 ------->| LB     |-------------->| Service          |        | istio            |       | LB     |  |
-        |        -------+        +------------------+        | ingressgateway   |       |        |  |
+        |        |------+        +------------------+        | ingressgateway   |       |        |  |
         +--------+  |   |        +------------------+        +------------------+       +--------+  |
-              |     |   ---------| Service          |        +------------------+           ^       |
+              |     |   -------->| Service          |        +------------------+           ^       |
               |     |            +------------------+        | Gateway          |           |       |
               |     |            +------------------+        +------------------+           |       |
-        MAP   -------------------| Service          |        +------------------+           |       |
+        MAP   ------------------>| Service          |        +------------------+           |       |
         /path1 svc1 |            +------------------+        | VirtualService(s)|           |       |
         /path2 svc2 |                                        +------------------+        Internal   |
         /path3 svc3 |                                        +------------------+        Users      |
