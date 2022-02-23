@@ -641,6 +641,7 @@ while [ 1 == 1 ]; do
     delnetwork)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
+        gcloud/delete-network-endpoint-groups.sh $project_id $network_name $region
         cd tf
         make cloudnat-destroy
         make networks-destroy

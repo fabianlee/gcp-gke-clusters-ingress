@@ -19,6 +19,10 @@ gcloud config set project $project_id
 
 set -x
 
+# TODO these need to be deleted before deleting networks, k8s clusters leave them orphaned
+gcloud compute network-endpoint-groups list --regions=$region
+#gcloud compute network-endpoint-groups delete <name> --region=$region
+
 echo "delete NAT Cloud"
 gcloud compute routers nats delete ${network_name}-nat-gateway1 --router=${network_name}-router1 $location_flag --quiet
 gcloud compute routers delete ${network_name}-router1 $location_flag --quiet
