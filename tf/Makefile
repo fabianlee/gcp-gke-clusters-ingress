@@ -41,7 +41,7 @@ svcaccount: init
 	cd serviceaccount && $(TF) init $(INIT_FLAGS)
 	cd serviceaccount && $(TF) apply $(SVCACCT_ARGS) $(FLAGS)
 svcaccount-output:
-	cd serviceaccount && $(TF) output -raw --state=../envs/serviceaccount.tfstate svcaccount_json > ../../tf-creator2.json
+	cd serviceaccount && $(TF) output -raw --state=../envs/serviceaccount.tfstate svcaccount_json
 svcaccount-destroy:
 	cd serviceaccount && $(TF) destroy $(SVCACCT_ARGS) $(FLAGS)
 

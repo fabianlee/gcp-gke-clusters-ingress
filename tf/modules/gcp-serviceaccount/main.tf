@@ -10,7 +10,7 @@ resource "google_service_account" "svcaccount" {
   provisioner "local-exec" {
     when        = destroy
     # does not have access to var, only self's attributes
-    command     = "rm -f ${self.service_account_name}.json"
+    command     = "rm -f ${split("@",self.email)[0]}.json"
     working_dir = "${path.module}/../../.."
     on_failure  = continue
   }
@@ -46,9 +46,28 @@ resource "google_project_iam_member" "svcaccount_roles" {
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_service_account_key
 # for downloading service account key
+# even if service account resource is imported, this key resource cannot be imported, therefore a new key will be created and downloaded
 resource "google_service_account_key" "svcaccount_key" {
   service_account_id = google_service_account.svcaccount.name
   public_key_type    = "TYPE_X509_PEM_FILE"
+
+}
+
+resource "null_resource" "write_json" {
+
+  provisioner "local-exec" {
+    # private_key attribute is in base64 format
+    command = "echo ${google_service_account_key.svcaccount_key.private_key} | base64 -d > ${var.service_account_name}.json"
+    working_dir = "${path.module}/../../.."
+    on_failure  = continue
+    #environment = {
+    #  foo = ""
+    #}
+  }
+  triggers = {
+    "svcaccount_key" = google_service_account_key.svcaccount_key.id
+  }
+
 }
 
 output "svcaccount_json" {

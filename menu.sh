@@ -123,12 +123,12 @@ function check_prerequisites() {
   jq --version
   make --version | head -n1
 
-  echo ""
   if [ $USE_TERRAFORM -eq 1 ]; then
     echo "TERRAFORM for infrastructure"
   else
     echo "GCLOUD for infrastructure"
   fi
+  echo ""
 
   # check for gcloud login context
   gcloud projects list > /dev/null 2>&1
@@ -176,8 +176,7 @@ while [ 1 == 1 ]; do
     project)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make project
+        cd tf && make project
         retVal=$?
         set +x
         cd ..
@@ -193,10 +192,18 @@ while [ 1 == 1 ]; do
       ;;
 
     svcaccount)
-      set -x
-      gcloud/create-tf-service-account.sh $project_id
-      retVal=$?
-      set +x 
+      if [ $USE_TERRAFORM -eq 1 ]; then
+        set -x
+        cd tf && make svcaccount
+        retVal=$?
+        set +x
+        cd ..
+      else
+        set -x
+        gcloud/create-tf-service-account.sh $project_id
+        retVal=$?
+        set +x 
+      fi
 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
       ;;
@@ -204,8 +211,7 @@ while [ 1 == 1 ]; do
     networks)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make networks
+        cd tf && make networks
         retVal=$?
         set +x
         cd ..
@@ -222,8 +228,7 @@ while [ 1 == 1 ]; do
     cloudnat)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make cloudnat
+        cd tf && make cloudnat
         retVal=$?
         cd ..
         set +x
@@ -249,8 +254,7 @@ while [ 1 == 1 ]; do
     vms)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make vms
+        cd tf && make vms
         retVal=$?
         set +x
         cd ..
@@ -336,8 +340,7 @@ while [ 1 == 1 ]; do
     gke)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make gke
+        cd tf && make gke
         retVal=$?
         set +x
         cd ..
@@ -357,8 +360,7 @@ while [ 1 == 1 ]; do
     autopilot)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make ap
+        cd tf && make ap
         retVal=$?
         set +x
         cd ..
@@ -378,8 +380,7 @@ while [ 1 == 1 ]; do
     privgke)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make privgke
+        cd tf && make privgke
         retVal=$?
         set +x
         cd ..
@@ -399,8 +400,7 @@ while [ 1 == 1 ]; do
     privautopilot)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make privap
+        cd tf && make privap
         retVal=$?
         set +x
         cd ..
@@ -571,8 +571,7 @@ while [ 1 == 1 ]; do
     delgke)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make gke-destroy
+        cd tf && make gke-destroy
         retVal=$?
         set +x
         cd ..
@@ -588,8 +587,7 @@ while [ 1 == 1 ]; do
     delautopilot)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make ap-destroy
+        cd tf && make ap-destroy
         retVal=$?
         set +x
         cd ..
@@ -605,8 +603,7 @@ while [ 1 == 1 ]; do
     delprivgke)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make privgke-destroy
+        cd tf && make privgke-destroy
         retVal=$?
         set +x
         cd ..
@@ -622,8 +619,7 @@ while [ 1 == 1 ]; do
     delprivautopilot)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make privap-destroy
+        cd tf && make privap-destroy
         retVal=$?
         set +x
         cd ..
@@ -642,9 +638,7 @@ while [ 1 == 1 ]; do
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
         gcloud/delete-network-endpoint-groups.sh $project_id $network_name $region
-        cd tf
-        make cloudnat-destroy
-        make networks-destroy
+        cd tf && make cloudnat-destroy && make networks-destroy
         retVal=$?
         set +x
         cd ..
@@ -660,8 +654,7 @@ while [ 1 == 1 ]; do
     delvms)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
-        cd tf
-        make vms-destroy
+        cd tf && make vms-destroy
         retVal=$?
         set +x
         cd ..
