@@ -33,7 +33,6 @@ menu_items=(
   "privgke,Create private GKE cluster w/private endpoint"
   "privautopilot,Create private Autopilot cluster w/private endpoint"
   ""
-  "kubeconfiggen,Use gcloud to retrieve any missing kubeconfig"
   "kubeconfigcopy,Copy kubeconfig to jumpboxes"
   "svcaccountcopy,Copy service account json key to jumpboxes"
   ""
