@@ -20,11 +20,12 @@ There are two entry points configured to ASM:
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |CIDR | 10.0.90.0/24 | 10.0.91.0/24 | 10.0.100.0/24 | 10.0.101.0/24
 |cluster | std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
-|services| 10.128.0.0/19 | 10.128.0.32/19 | 10.128.0.64.0/19 | 10.128.0.96.0/19
+|services| 10.128.0.0/19 | 10.128.32.0/19 | 10.128.64.0/19 | 10.128.96.0/19
 |pods | 10.126.0.0/17 | 10.126.128.0/17| 10.127.0.0/17 | 10.127.128.0.17
 |master | 10.1.0.0/28 | 10.1.0.16/28 | 10.1.0.32/28 | 10.1.0.48/28
 |jumpbox | vm-pub-10-0-90-0 | vm-pub-10-0-91-0 | vm-prv-10-0-100-0 | vm-prv-10-0-101-0
 |bastion |  |  | vm-pub-10-0-90-0 | vm-pub-10-0-91-0
+|master_auth | | | 10.0.90.0/24 | 10.0.91.0/24
 
 
 ## Private standard GKE cluster with public endpoint
@@ -35,10 +36,6 @@ A standard private GKE cluster, that offers a public endpoint for kubeapi.  But 
 subnet:    pub-10-0-90-0
 jumpbox:   vm-pub-10-0-90-0
 cluster:   std-pub-10-0-90-0
-GKE nodes: 10.0.90.0/24
-services:  10.128.0.0/19
-pods:      10.126.0.0/17
-master:    10.1.0.0/28
 
 
             +-------------------------------------+             
@@ -64,10 +61,6 @@ An Autopilot private GKE cluster, that offers a public endpoint for kubeapi.  Bu
 subnet:    pub-10-0-91-0
 jumpbox:   vm-pub-10-0-91-0
 cluster:   ap-pub-10-0-91-0
-GKE nodes: 10.0.91.0/24
-services:  10.128.32.0/19
-pods:      10.126.128.0/17
-master:    10.1.0.16/28
 
 
             +-------------------------------------+             
@@ -95,10 +88,6 @@ A standard private GKE cluster, that only offers a private endpoint for kubeapi.
 subnet:    prv-10-0-100-0
 jumpbox:   vm-prv-10-0-90-0
 cluster:   std-prv-10-0-100-0
-GKE nodes: 10.0.100.0/24
-services:  10.128.64.0/19
-pods:      10.127.0.0/17
-master:    10.1.0.32/28
 
 
  Public        +--------------+                          
@@ -133,10 +122,6 @@ An Autopilot private GKE cluster, that only offers a private endpoint for kubeap
 subnet:    prv-10-0-101-0
 jumpbox:   vm-prv-10-0-101-0
 cluster:   ap-prv-10-0-101-0
-GKE nodes: 10.0.101.0/24
-services:  10.128.96.0/19
-pods:      10.127.128.0/17
-master:    10.1.0.48/28
 
 
  Public        +--------------+                          
