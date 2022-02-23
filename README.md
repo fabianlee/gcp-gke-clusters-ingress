@@ -148,6 +148,15 @@ cluster:   ap-prv-10-0-101-0
 Because these are all private GKE cluster with internal IP addresses, we use Anthos Service Mesh to expose the services we want to offer publicly to end users as well as internal-only management web services.
 
 
+| | STD gke w/public endpoint | AP w/public endpoint | STD gke w/private endpoint | AP w/private endpoint
+|--|--|--|--|--
+|subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
+|cluster | std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
+|TCP LB | 10.0.90.199 | 10.0.91.199 | 10.0.100.199 | 10.0.101.199
+|pub cert | my-primary.std-pub-10-0-90-0.local | my-primary.ap-pub-10-0-91-0.local | my-primary.std-prv-10-0-100-0.local | my-primary.ap-prv-10-0-101-0.local
+|priv cert | my-secondary.std-pub-10-0-90-0.local | my-secondary.ap-pub-10-0-91-0.local | my-secondary.std-prv-10-0-100-0.local | my-secondary.ap-prv-10-0-101-0.local
+
+
 ## Anthos Service Mesh on Standard GKE
 
 On the standard GKE Clusters, we deploy two istio ingress gateway services. One delivers for the services meant to be served over the public internet, and the other delivers the services meant for private consumption only (e.g. management UI only accessible to employees).

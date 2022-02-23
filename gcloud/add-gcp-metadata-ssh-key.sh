@@ -3,6 +3,10 @@
 # Adds public side of ssh key to GCP metadata
 # which allows login to VM
 #
+# this could be done with terraform google_compute_project_metadata, 
+# but gcloud logins change the ssh keys and would cause lots of unexpected diffs
+# https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_project_metadata
+#
 BIN_DIR=$(dirname ${BASH_SOURCE[0]})
 cd $BIN_DIR
 
