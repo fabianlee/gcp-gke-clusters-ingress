@@ -15,7 +15,7 @@ There are two entry points configured to ASM:
 
 ## Network and Cluster summary table
 
- | STD gke w/pub endpoint | AP w/pub endpoint | STD gke w/private endpoint | AP w/private endpoint
+item | STD gke w/pub endpoint | AP w/pub endpoint | STD gke w/private endpoint | AP w/private endpoint
 --|--|--|--|--
 subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 CIDR | 10.0.90.0/24 | 10.0.91.0/24 | 10.0.100.0/24 | 10.0.101.0/24
