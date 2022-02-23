@@ -15,8 +15,6 @@ data "google_compute_subnetwork" "subnet" {
 resource "google_pubsub_topic" "cluster_topic" {
   name     = "std-${var.subnetwork_name}"
   message_retention_duration = "86600s"
-  # added so 'tf apply' does not find changes
-  labels = {}
 }
 
 # available cluster versions
@@ -82,7 +80,7 @@ resource "google_container_cluster" "apcluster" {
 
   } # end dynamic block master_authorized_networks_config
 
-  # added so that 'tf apply' does not find changes
+  # added so that 'tf apply' does not continually find update changes
   vertical_pod_autoscaling {
     enabled = true
   }
@@ -121,7 +119,6 @@ resource "google_container_cluster" "apcluster" {
     cluster_secondary_range_name = var.secondary_range_pods_name
   }
 
- 
   # conflicts with Autopilot, so removing 
   #workload_identity_config {
   #  workload_pool = "${var.project}.svc.id.goog"
@@ -133,6 +130,8 @@ resource "google_container_cluster" "apcluster" {
       mode = "GKE_METADATA"
     }
     oauth_scopes = var.node_ap_oauth_scopes
+
+    # if set, terraform would need recreate level changes
     #tags = var.node_ap_network_tags_list
     #labels = var.node_ap_labels_map
   } # node_config
@@ -174,6 +173,4 @@ resource "google_gke_hub_membership" "membership" {
   authority {
     issuer = "https://container.googleapis.com/v1/${google_container_cluster.apcluster.id}"
   }
-  # empty so tf apply does not see changes
-  labels = {}
 }

@@ -15,8 +15,6 @@ data "google_compute_subnetwork" "subnet" {
 resource "google_pubsub_topic" "cluster_topic" {
   name     = "std-${var.subnetwork_name}"
   message_retention_duration = "86600s"
-  # added so 'tf apply' does not find changes
-  labels = {}
 }
 
 # available cluster versions
@@ -52,9 +50,6 @@ resource "google_container_cluster" "cluster" {
     }
   }
 
-  # added to tf apply does not see change
-  resource_labels = {}
-
   notification_config {
     pubsub {
       enabled = true
@@ -83,16 +78,8 @@ resource "google_container_cluster" "cluster" {
 
   } # end dynamic block master_authorized_networks_config
 
-  # https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips#enable_pupis
-  #  would disable default snat if using public IP space in private cluster
-  # but we are using RFC 1918 private space only
-  #default_snat_status {
-  #  disabled = true
-  #}
-
   # --enable-intra-node-visibility
   enable_intranode_visibility = true
-  
 
   addons_config {
     # wanted by ASM
@@ -234,7 +221,5 @@ resource "google_gke_hub_membership" "membership" {
   authority {
     issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
   }
-  # empty so tf apply does not see changes
-  labels = {}
 }
 
