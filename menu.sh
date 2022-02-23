@@ -308,7 +308,12 @@ while [ 1 == 1 ]; do
         ;;
       esac
 
-      if [ $retVal -eq 0 ]; then
+      if [[ $retVal -eq 0  && $USE_TERRAFORM -eq 1 ]]; then
+        set -x
+        tf/ssh-into-jumpbox-tf.sh $jumpbox
+        retVal=$?
+        set +x
+      elif [[ $retVal -eq 0  && $USE_TERRAFORM -eq 0 ]]; then
         set -x
         gcloud/ssh-into-jumpbox.sh $project_id $jumpbox $region
         retVal=$?

@@ -19,6 +19,7 @@ gcloud config set project $project_id
 
 ssh_key="$(cd ..;pwd)/gcp-ssh"
 
+# public jumpboxes (also serve as bastions for private networks)
 pub1=$(gcloud compute instances describe vm-pub-10-0-90-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
 pub2=$(gcloud compute instances describe vm-pub-10-0-91-0 --format='get(networkInterfaces[0].accessConfigs[0].natIP)' --zone=$region-b)
 
