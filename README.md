@@ -151,7 +151,7 @@ cluster:   ap-prv-10-0-101-0
 Because these are all private GKE cluster with internal IP addresses, we use Anthos Service Mesh to expose the services we want to offer publicly to end users as well as internal-only management web services.
 
 
-| | STD gke w/public endpoint | AP w/public endpoint | STD gke w/private endpoint | AP w/private endpoint
+| | 1. STD gke w/public endpoint | 2. AP w/public endpoint | 3. STD gke w/private endpoint | 4. AP w/private endpoint
 |--|--|--|--|--
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |cluster | std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
@@ -161,7 +161,7 @@ Because these are all private GKE cluster with internal IP addresses, we use Ant
 |priv cert | my-secondary.std-pub-10-0-90-0.local | my-secondary.ap-pub-10-0-91-0.local | my-secondary.std-prv-10-0-100-0.local | my-secondary.ap-prv-10-0-101-0.local
 
 
-## Anthos Service Mesh on Standard GKE
+## 1. and 3. Anthos Service Mesh on Standard GKE
 
 On the standard GKE Clusters, we deploy two istio ingress gateway services. One delivers for the services meant to be served over the public internet, and the other delivers the services meant for private consumption only (e.g. management UI only accessible to employees).
 
@@ -192,7 +192,7 @@ Users   | HTTPS  |  | NEG        +------------------+        +------------------
 ```
 
 
-## Anthos Service Mesh on Autopilot GKE
+## 2. and 4. Anthos Service Mesh on Autopilot GKE
 
 On the Autopilot GKE Clusters, we only deploy istio ingress gateway services for internal, private services. This follows the same path as above; the VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
 
