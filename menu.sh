@@ -52,7 +52,7 @@ menu_items=(
   "delprivgke,Delete GKE private standard cluster"
   "delprivautopilot,Delete GKE private Autopilot cluster"
   "delvms,Delete VM instances"
-  "delnetwork,Delete networks and Cloud NAT"
+  "delnetworks,Delete networks and Cloud NAT"
 )
 
 function showMenu() {
@@ -639,7 +639,7 @@ while [ 1 == 1 ]; do
       ;;
 
 
-    delnetwork)
+    delnetworks)
       if [ $USE_TERRAFORM -eq 1 ]; then
         set -x
         gcloud/delete-network-endpoint-groups.sh $project_id $network_name $region
@@ -649,6 +649,7 @@ while [ 1 == 1 ]; do
         cd ..
       else
         set -x
+        gcloud/delete-network-endpoint-groups.sh $project_id $network_name $region
         gcloud/delete-networks-cloudnat.sh $project_id $network_name $region
         retVal=$?
         set +x 
