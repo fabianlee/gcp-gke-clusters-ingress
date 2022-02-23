@@ -152,7 +152,8 @@ Because these are all private GKE cluster with internal IP addresses, we use Ant
 |--|--|--|--|--
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |cluster | std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
-|TCP LB | 10.0.90.199 | 10.0.91.199 | 10.0.100.199 | 10.0.101.199
+|pub HTTPS LB | ephemeral public | ephemeral public | epehemeral public | ephemeral public
+|int TCP LB | 10.0.90.199 | 10.0.91.199 | 10.0.100.199 | 10.0.101.199
 |pub cert | my-primary.std-pub-10-0-90-0.local | my-primary.ap-pub-10-0-91-0.local | my-primary.std-prv-10-0-100-0.local | my-primary.ap-prv-10-0-101-0.local
 |priv cert | my-secondary.std-pub-10-0-90-0.local | my-secondary.ap-pub-10-0-91-0.local | my-secondary.std-prv-10-0-100-0.local | my-secondary.ap-prv-10-0-101-0.local
 
