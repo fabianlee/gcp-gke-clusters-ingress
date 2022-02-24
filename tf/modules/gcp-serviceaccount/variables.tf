@@ -24,7 +24,8 @@ variable service_account_roles {
   "roles/servicemanagement.admin",
   "roles/serviceusage.serviceUsageAdmin",
   "roles/privateca.admin",
-  "roles/container.admin"
+  "roles/container.admin",
+  "roles/iam.workloadIdentityUser"
   ]
 }
 

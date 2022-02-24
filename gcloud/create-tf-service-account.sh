@@ -94,7 +94,8 @@ create_svc_account $project_id $account_name "terraform user"
 # roles/compute.networkAdmin - for compute.networks.* (create)
 # roles/iam.serviceAccountUser - for creating GKE cluster 'google_container_cluster' with terraform
 # roles/pubsub.editor - for creating pubsub topic for cluster to send notifications
-assign_role $project_id $account_name "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin roles/iam.serviceAccountUser roles/pubsub.editor"
+# roles/iam.workloadIdentityUser (for workload identity https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity)
+assign_role $project_id $account_name "roles/iam.serviceAccountAdmin roles/resourcemanager.projectIamAdmin roles/storage.admin roles/compute.securityAdmin roles/compute.instanceAdmin roles/compute.networkAdmin roles/iam.serviceAccountUser roles/pubsub.editor roles/iam.workloadIdentityUser"
 
 # ADDITIONAL ROLES for Anthos Service Mesh registration
 # https://cloud.google.com/service-mesh/docs/installation-permissions

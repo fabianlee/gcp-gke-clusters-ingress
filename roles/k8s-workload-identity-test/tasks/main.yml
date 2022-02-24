@@ -1,0 +1,60 @@
+---
+
+#- name: set gcloud login context with service account
+#  include_role:
+#    name: gcloud-use-serviceaccount
+#    tasks_from: main
+
+# testing workload identity
+# https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+
+- name: creates KSA 'wi-ksa' with annotation for existing GSA 'tf-creator'
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    kind: serviceaccount
+    name: wi-ksa
+    namespace: default
+    definition:
+      metadata:
+        annotations:
+          iam.gke.io/gcp-service-account: tf-creator@{{project_id}}.iam.gserviceaccount.com
+          # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#fails
+          traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
+
+- name: creates KSA 'dummy-ksa' with annotation for non-existent GSA 'tf-creator-dummy'
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    kind: serviceaccount
+    name: dummy-ksa
+    namespace: default
+    definition:
+      metadata:
+        annotations:
+          iam.gke.io/gcp-service-account: tf-creator-dummy@{{project_id}}.iam.gserviceaccount.com
+          # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity#fails
+          traffic.sidecar.istio.io/excludeOutboundIPRanges: "169.254.169.254/32"
+
+- name: Allow KSA 'wi-ksa' to impersonate the GSA service account 'tf-creator' by adding IAM policy binding
+  command:
+    cmd: gcloud iam service-accounts add-iam-policy-binding tf-creator@{{project_id}}.iam.gserviceaccount.com --role roles/iam.workloadIdentityUser --member serviceAccount:{{project_id}}.svc.id.goog[default/wi-ksa]
+  register: binding_output
+- debug: msg="{{binding_output}}"
+
+
+- name: copy workload identity file to remote host
+  copy:
+    src: "{{role_path}}/templates/workload-identity-test.yaml"
+    dest: .
+    owner: ubuntu
+    group: ubuntu
+
+# kubectl exec -it workload-identity-test --namespace default -- /bin/bash
+# curl -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/
+- name: workload identity test pod, try accessing google metadata from inside
+  k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: workload-identity-test.yaml
+    namespace: default

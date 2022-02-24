@@ -1,0 +1,8 @@
+# ansible-playbook playbooks/playbook-k8s-witest.yaml -l vm-prv-10-0-101-0 --extra-vars remote_kubeconfig=kubeconfig-ap-prv-10-0-101-0
+---
+
+- hosts: jumpboxes
+  gather_facts: false
+
+  roles:
+    - k8s-workload-identity-test

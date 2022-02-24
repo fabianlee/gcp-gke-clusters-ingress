@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: workload-identity-test-dummy
+  #namespace: default
+spec:
+  containers:
+  - image: google/cloud-sdk:slim
+    name: workload-identity-test
+    command: ["sleep","infinity"]
+  serviceAccountName: wi-ksa
+
+  # using 'dummy-ksa' will show it associated with the GSA 'tf-creator-dummy', 
+  # but that is a non-existent GSA so your google api calls will not authenticate properlyy
+  #serviceAccountName: dummy-ksa
+
+  # this node selection violates policy of Autopilot clusters
+  #nodeSelector:
+  #  iam.gke.io/gke-metadata-server-enabled: "true"
+
