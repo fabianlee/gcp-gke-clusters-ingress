@@ -120,7 +120,7 @@ kubectl get nodes
 
 # workload identity must be enabled
 workload_identity=$(gcloud container clusters describe $cluster_name --format="value(workloadIdentityConfig.workloadPool)" $location_flag)
-[ -n "$workload_identity" ] || { echo "ERROR workload identity must not be enabled for this cluster, see 'gcloud container clusters describe $cluster_name $location_flag'"; exit 5; }
+[ -n "$workload_identity" ] || { echo "ERROR workload identity is not be enabled for this cluster, see 'gcloud container clusters describe $cluster_name $location_flag'"; exit 5; }
 echo "workload identity: $workload_identity"
 
 # check for type that indicates ASM installation has been done
