@@ -9,8 +9,8 @@ This project creates private GKE clusters (worker nodes with private IP addresse
 
 Since these clusters are private, we expose our services to the outside world via [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with either:
 
-* The traditional in-cluster control plane, where you must maintain the components
-* OR a [Google managed control plane](https://cloud.google.com/service-mesh/docs/managed/configure-managed-anthos-service-mesh) where Google automatically maintains and upgrades the control plane components
+* The full traditional in-cluster control plane, where you must maintain the components
+* A [Google managed control plane](https://cloud.google.com/service-mesh/docs/managed/configure-managed-anthos-service-mesh) where Google automatically maintains and upgrades the control plane components
 
 As recommended in the latest versions of Istio/ASM, we deploy independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).  In fact, we deploy two entry points for each cluster:
 
@@ -204,8 +204,6 @@ Users   | HTTPS  |  | NEG        +------------------+        +------------------
 On the Autopilot GKE Clusters, we use the Google managed ASM control plane.  We deploy the istio ingress gateway services for internal, private services. This follows the same path as the section above; the VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
 
 But for the Public End user services, instead of using VirtualService and Gateway to select an istio IngressGateway, we define a [URL map](https://cloud.google.com/load-balancing/docs/url-map-concepts) directly on the Ingress object so that it not only creates the GCP HTTPS LB, but tells the LB how to reach our public services directly via Network Endpoint Group NEG.
-
-This does require that we add a BackendConfig to each service so that a health check can be done by the HTTPS LB.
 
 
 ```

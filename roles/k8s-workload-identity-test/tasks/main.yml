@@ -52,6 +52,14 @@
 
 # kubectl exec -it workload-identity-test --namespace default -- /bin/bash
 # curl -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/
+
+# test workload identity using gsutil for storage
+# will get 404 'Could not reach metadata service' if tied to 'dummy-ksa' 
+# list storage buckets: gsutil ls gs://
+# create storage bucket: gsutil mb -b on -l us-east1 gs://my-witest-bucket-123/
+# list storage buckets: gsutil ls gs://
+# delete storage bucket: gsutil rm -r gs://my-witest-bucket-123
+
 - name: workload identity test pod, try accessing google metadata from inside
   k8s:
     kubeconfig: "{{remote_kubeconfig}}"
