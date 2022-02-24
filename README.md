@@ -2,10 +2,10 @@
 
 This project creates private GKE clusters (worker nodes with private IP addresses) in four different configurations:
 
-1. Private standard GKE cluster with public kube-api endpoint, in-cluster ASM control plane
-2. Private Autopilot GKE cluster with public kube-api endpoint, Google managed ASM control plane
-3. Private standard GKE cluster with private kube-api endpoint, in-cluster ASM control plane
-4. Private Autopilot GKE cluster with private kube-api endpoint, Google managed ASM control plane
+1. Standard cluster with public kube-api endpoint, using in-cluster ASM
+2. Autopilot cluster with public kube-api endpoint, using Google managed ASM
+3. Standard cluster with private kube-api endpoint, using in-cluster ASM
+4. Autopilot cluster with private kube-api endpoint, using Google managed ASM
 
 Since these clusters are private, we expose our services to the outside world via [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with either:
 
