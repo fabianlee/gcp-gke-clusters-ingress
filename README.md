@@ -14,16 +14,16 @@ Since these clusters are private, we expose our services to the outside world vi
 
 As recommended in the latest versions of Istio/ASM, we deploy independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).  In fact, we deploy two entry points for each cluster:
 
-1. A public HTTPS LB Ingress that exposes services to the world (your public customers)
-2. A private TCP LB that exposes services only to internal consumers (internal management tools)
+1. A public HTTPS LB Ingress that exposes services to the world
+2. A private TCP LB that exposes services only to internal consumers
 
-The internal TCP LB is meant for internal services that, for example, should only be exposed to employees or those on the corporate Intranet.  Example could be the Kubernetes dashboard, Prometheus web interface, or perhaps a custom User/Product Web UI.
+The internal TCP LB is meant for internal services that, for example, should only be exposed to employees or those on the corporate Intranet.  Example could be the Kubernetes dashboard, Prometheus web interface, or perhaps a custom Adm Web UI.
 
 
 
 # Network and Cluster summary
 
-| | 1. STD gke w/public endpoint | 2. AP w/public endpoint | 3. STD gke w/private endpoint | 4. AP w/private endpoint
+| | 1. STD w/public endpoint | 2. AP w/public endpoint | 3. STD w/private endpoint | 4. AP w/private endpoint
 |--|--|--|--|--
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |CIDR | 10.0.90.0/24 | 10.0.91.0/24 | 10.0.100.0/24 | 10.0.101.0/24
@@ -152,22 +152,25 @@ cluster:   ap-prv-10-0-101-0
 
 # Anthos Service Mesh
 
-Because these are all private GKE cluster with internal IP addresses, we use Anthos Service Mesh to expose the services we want to offer publicly to end users as well as internal-only management web services.
+On the standard GKE clusters, we deploy the full traditional ASM control plane into the cluster itself, where all the istiod services are visible and available to us.
+
+However, on the Autopilot clusters, there are limitations [such as not allowing certificate signing requests](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#certificate_signing_requests) that mean the in-cluster istiod service does not start properly.  So instead we deploy the newer [Google managed control plane](https://cloud.google.com/service-mesh/docs/managed/configure-managed-anthos-service-mesh) where Google automatically maintains and upgrades the control plane components.
 
 
-| | 1. STD gke w/public endpoint | 2. AP w/public endpoint | 3. STD gke w/private endpoint | 4. AP w/private endpoint
+| | 1. STD w/public endpoint | 2. AP w/public endpoint | 3. STD w/private endpoint | 4. AP w/private endpoint
 |--|--|--|--|--
 |subnet | pub-10-0-90-0 | pub-10-0-91-0 | prv-10-0-100-0 | prv-10-0-101-0
 |cluster | std-pub-10-0-90-0 | ap-pub-10-0-91-0 | std-prv-10-0-100-0 | ap-prv-10-0-101-0
+|ASM ctrlplane | in-cluster | managed | in-cluster | managed
 |pub HTTPS LB | ephemeral public | ephemeral public | epehemeral public | ephemeral public
 |int TCP LB | 10.0.90.199 | 10.0.91.199 | 10.0.100.199 | 10.0.101.199
 |pub cert | my-primary.std-pub-10-0-90-0.local | my-primary.ap-pub-10-0-91-0.local | my-primary.std-prv-10-0-100-0.local | my-primary.ap-prv-10-0-101-0.local
 |priv cert | my-secondary.std-pub-10-0-90-0.local | my-secondary.ap-pub-10-0-91-0.local | my-secondary.std-prv-10-0-100-0.local | my-secondary.ap-prv-10-0-101-0.local
 
 
-## 1. and 3. Anthos Service Mesh on Standard GKE
+## Anthos Service Mesh with in-cluster control plane
 
-On the standard GKE Clusters, we deploy two istio ingress gateway services. One delivers for the services meant to be served over the public internet, and the other delivers the services meant for private consumption only (e.g. management UI only accessible to employees).
+On the standard GKE Clusters, we deploy the full in-cluster ASM with two istio ingress gateway services. One delivers for the services meant to be served over the public internet, and the other delivers the services meant for private consumption only (e.g. management UI only accessible to employees).
 
 The VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
 
@@ -196,9 +199,9 @@ Users   | HTTPS  |  | NEG        +------------------+        +------------------
 ```
 
 
-## 2. and 4. Anthos Service Mesh on Autopilot GKE
+## Anthos Service Mesh with Google managed control plane
 
-On the Autopilot GKE Clusters, we only deploy istio ingress gateway services for internal, private services. This follows the same path as above; the VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
+On the Autopilot GKE Clusters, we use the Google managed ASM control plane.  We deploy the istio ingress gateway services for internal, private services. This follows the same path as the section above; the VirtualService project unto the desired Gateway, and the Gateway use a selector to their desired istio IngressGateway service. 
 
 But for the Public End user services, instead of using VirtualService and Gateway to select an istio IngressGateway, we define a [URL map](https://cloud.google.com/load-balancing/docs/url-map-concepts) directly on the Ingress object so that it not only creates the GCP HTTPS LB, but tells the LB how to reach our public services directly via Network Endpoint Group NEG.
 
