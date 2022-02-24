@@ -9,28 +9,5 @@
 - hosts: jumpboxes
   gather_facts: false
 
-  collections:
-    - kubernetes.core
-
-  tasks:
-    - name: Ensure the default Namespace exists.
-      k8s:
-        kubeconfig: "{{remote_kubeconfig}}"
-        api_version: v1
-        kind: Namespace
-        name: default
-        state: present
-
-    - name: copy tiny-tools DS file to remote host
-      copy:
-        src: "{{playbook_dir}}/../roles/tiny-tools-all-nodes/files/tiny-tools-daemonset.yaml"
-        dest: .
-        owner: ubuntu
-        group: ubuntu
-    - name: apply tiny-tools daemonset
-      k8s:
-        kubeconfig: "{{remote_kubeconfig}}"
-        state: present
-        src: "tiny-tools-daemonset.yaml"
-        namespace: default
-
+  roles:
+    - tiny-tools-all-nodes
