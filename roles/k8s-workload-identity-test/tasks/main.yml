@@ -9,6 +9,9 @@
 # https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
 # https://cloud.google.com/blog/products/containers-kubernetes/introducing-workload-identity-better-authentication-for-your-gke-applications
 # test with bucket upload, https://medium.com/google-cloud/solving-the-workload-identity-sameness-with-iam-conditions-c02eba2b0c13
+# test with gsutil, https://medium.com/google-cloud/mapping-kubernetes-service-accounts-to-gcp-iams-using-workload-identity-b53496d543e0
+# https://debricked.com/blog/what-is-gke-workload-identity/
+
 
 - name: creates KSA 'wi-ksa' with annotation for existing GSA 'tf-creator'
   kubernetes.core.k8s:

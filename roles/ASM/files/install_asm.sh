@@ -22,7 +22,7 @@ cluster_name="$5"
 project_id="$6"
 region="$7"
 is_regional_cluster="$8"
-if [[ -z "$asm_type" || -z "$asm_version" || -z "$asm_release_channel" || -z "$cluster_type" || -z "$cluster_name" || -z "$project_id" || -z "$region" || -z "$is_regional_cluster=" ]]; then
+if [[ -z "$asm_type" || -z "$asm_version" || -z "$asm_release_channel" || -z "$cluster_type" || -z "$cluster_name" || -z "$project_id" || -z "$region" || -z "$is_regional_cluster" ]]; then
   echo "Usage: asm_type=managed|incluster asmVersion=1.11 asmReleaseChannel=regular|rapid clusterType=standard|autopilot clusterName project_id region isRegionalCluster=0|1"
   exit 1
 fi
@@ -124,6 +124,7 @@ workload_identity=$(gcloud container clusters describe $cluster_name --format="v
 echo "workload identity: $workload_identity"
 
 # check for type that indicates ASM installation has been done
+asm_already_installed=0
 if [ "incluster" = $asm_type ]; then
   kubectl get IstioOperator -n istio-system >/dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -134,14 +135,23 @@ if [ "incluster" = $asm_type ]; then
     $(exit 99)
   fi
 elif [ "managed" = "$asm_type" ]; then
-  kubectl get Controlplanerevisions -n istio-system 1>/dev/null 2>&1
+  # not good enough to validate installation, need valid object type with at least 1 result
+  kubectl get controlplanerevisions -n istio-system 1>/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo "controlplanerevisions object is valid, but we do not have installation unless count>1"
+    controlplane_count=$(kubectl get controlplanerevisions -n istio-system | wc -l)
+    echo "controlplane_count is $controlplane_count"
+    if [ $controlplane_count -eq 0 ]; then
+      $(exit 99)
+    fi
+  fi
 fi
 
 if [ $? -eq 0 ]; then
   if [ "incluster" = $asm_type ]; then
     echo "IstioOperator is already installed, therefore no need to run asmcli install"
   elif [ "managed" = "$asm_type" ]; then
-    echo "Controlplanerevisions is already installed, therefore no need to run asmcli install"
+    echo "controlplanerevisions is already installed, therefore no need to run asmcli install"
   fi
 else
   mkdir -p output-$cluster_name
@@ -163,9 +173,7 @@ else
         --use_managed_cni \
         --channel $asm_release_channel \
         --enable-all
-        # to register correctly,  <projectNum>-compute@developer.gserviceaccount.com needs roles/container.admin role
-        #--enable_cluster_roles --enable_cluster_labels --enable_gcp_components \
-        #--enable_gcp_apis --enable_gcp_iam_roles
+        # to register correctly, gcloud user needs roles/container.admin role
     set +ex
 
   elif [ "incluster" = $asm_type ]; then
@@ -180,9 +188,7 @@ else
         --output_dir output-$cluster_name \
         --ca mesh_ca \
         --enable-all
-        # to register correctly,  <projectNum>-compute@developer.gserviceaccount.com needs roles/container.admin role
-        #--enable_cluster_labels --enable_gcp_components \
-        #--enable_cluster_roles --enable_gcp_apis --enable_gcp_iam_roles
+        # to register correctly, gcloud user needs roles/container.admin role
     set +ex
 
   else
@@ -193,7 +199,9 @@ else
 fi
 
 # show revisions installed
+[ -f output-$cluster_name/istioctl ] || { echo "ERROR output-$cluster_name/istioctl does not exist when it should"; exit 3; }
 output-$cluster_name/istioctl x revision list
+
 
 if [ "incluster" = $asm_type ]; then
   echo "Need to configure in-cluster ASM"
