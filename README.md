@@ -289,7 +289,6 @@ svcaccountcopy   Copy service account json key to jumpboxes
 kubeconfig       Select KUBECONFIG
 k8s-register     Register with hub and get fleet identity
 k8s-scale        Apply balloon pod to warm up cluster
-k8s-tinytools    Apply tiny-tools Daemonset to cluster
 k8s-ASM          Install ASM on cluster
 k8s-certs        Create and load TLS certificates
 k8s-lb-tcp       Deploy Ingress Gateway for private TCP LB
@@ -302,7 +301,7 @@ delautopilot     Delete GKE public Autopilot cluster
 delprivgke       Delete GKE private standard cluster
 delprivautopilot Delete GKE private Autopilot cluster
 delvms           Delete VM instances
-delnetwork       Delete networks and Cloud NAT
+delnetworks      Delete networks and Cloud NAT
 ```
 
 

@@ -17,7 +17,7 @@
       command:
         cmd: gcloud auth activate-service-account tf-creator@{{project_id}}.iam.gserviceaccount.com --key-file=tf-creator.json
       register: activate_svc_account
-    - debug: msg="{{activate_svc_account.stdout_lines}}"
+    - debug: msg="{{activate_svc_account.stderr_lines}}"
     
     - name: set project id
       command:
@@ -27,7 +27,7 @@
       command:
         cmd: gcloud auth list
       register: gcloud_alist
-    - debug: msg="{{gcloud_alist.stdout}}"
+    - debug: msg="{{gcloud_alist.stdout_lines}}"
     
     - name: show gcloud project list as proof
       command:
