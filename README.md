@@ -1,15 +1,19 @@
-# Private GKE clusters using Terraform, exposed using Anthos Service Mesh with public/private ingress
+# Private GKE clusters, exposed using Anthos Service Mesh with public/private ingress
 
 This project creates private GKE clusters (worker nodes with private IP addresses) in four different configurations:
 
-1. Private standard GKE cluster with public endpoint
-2. Private Autopilot GKE cluster with public endpoint
-3. Private standard GKE cluster with private endpoint
-4. Private Autopilot GKE cluster with private endpoint
+1. Private standard GKE cluster with public kube-api endpoint, in-cluster ASM control plane
+2. Private Autopilot GKE cluster with public kube-api endpoint, Google managed ASM control plane
+3. Private standard GKE cluster with private kube-api endpoint, in-cluster ASM control plane
+4. Private Autopilot GKE cluster with private kube-api endpoint, Google managed ASM control plane
 
-After the clusters are built, the scripts deploy [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).
+Since these clusters are private, we expose our services to the outside world via [Anthos Service Mesh](https://cloud.google.com/service-mesh/v1.11/docs/unified-install/quickstart-asm) with either:
 
-There are two ASM entry points configured for each cluster:
+* The traditional in-cluster control plane, where you must maintain the components
+* OR a [Google managed control plane](https://cloud.google.com/service-mesh/docs/managed/configure-managed-anthos-service-mesh) where Google automatically maintains and upgrades the control plane components
+
+As recommended in the latest versions of Istio/ASM, we deploy independent [Ingress Gateway](https://cloud.google.com/service-mesh/docs/gateways).  In fact, we deploy two entry points for each cluster:
+
 1. A public HTTPS LB Ingress that exposes services to the world (your public customers)
 2. A private TCP LB that exposes services only to internal consumers (internal management tools)
 
