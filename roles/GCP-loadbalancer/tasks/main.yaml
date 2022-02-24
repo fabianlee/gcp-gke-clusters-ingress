@@ -1,12 +1,5 @@
 ---
 
-#- name: set gcloud login context with service account
-#  include_role:
-#    name: gcloud-use-serviceaccount
-#    tasks_from: main 
-
-
-
 - name: create ssl policy for load balancer
   command:
     cmd: "gcloud compute ssl-policies create {{cluster_name}}-ssl-policy --min-tls-version=1.2 --profile=MODERN"
