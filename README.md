@@ -311,5 +311,6 @@ delnetworks      Delete networks and Cloud NAT
 
 
 [diagrams created on texttik.com](https://textik.com/)
-[visual subnet calculator](https://www.davidc.net/sites/default/subnets/subnets.html)
+
+[visual subnet calculator for CIDR allocation](https://www.davidc.net/sites/default/subnets/subnets.html)
 
