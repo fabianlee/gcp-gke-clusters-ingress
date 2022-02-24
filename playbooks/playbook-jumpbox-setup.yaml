@@ -3,7 +3,7 @@
 - hosts: jumpboxes
   become: yes
   roles:
-    - minimal-jumpbox
+    - minimal-jumpbox-setup
     - kubectl-apt
     - k9s
     - helm3-apt
