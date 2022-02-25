@@ -12,22 +12,9 @@ spec:
   # 'gcloud compute ssl-policies'
   sslPolicy: {{cluster_name}}-ssl-policy
 ---
-# backend for istiod that defines health check and Cloud Armor policy
-# referenced in: roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: ingress-backendconfig
-  #namespace: "{{ingress_namespace}}"
-spec:
-  healthCheck:
-    requestPath: /healthz/ready
-    port: 15021 # defined in roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
-    type: HTTP
-  # https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress#apply_backend_service_settings
-  # for Cloud Armor policy, 'gcloud compute security-policies'
-  securityPolicy:
-    name: {{cluster_name}}-security-policy
+# BackendConfig for Cloud Armor policy is defined at backend:
+# IngressGateway: roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
+# hello when using conainer native lb: roles/helloapp/templates/golang-hello-world-web.yaml
 ---
 # https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
 apiVersion: networking.k8s.io/v1
