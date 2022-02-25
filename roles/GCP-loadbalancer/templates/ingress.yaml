@@ -36,7 +36,7 @@ metadata:
   name: my-ingress
   #namespace: "{{ingress_namespace}}"
   annotations:
-    # If the class annotation is not specified it defaults to "gce".
+    # "gce" is for public https LB. "gce-internal" is for internal https LB
     kubernetes.io/ingress.class: gce
     # name of global static IP, will default to using public ephemeral if this does not exist
     #kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
