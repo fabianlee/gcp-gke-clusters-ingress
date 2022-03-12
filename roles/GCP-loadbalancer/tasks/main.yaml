@@ -1,11 +1,12 @@
 ---
 
-- name: create ssl policy for load balancer
+- name: create ssl policy for public HTTPS load balancer
   command:
     cmd: "gcloud compute ssl-policies create {{cluster_name}}-ssl-policy --min-tls-version=1.2 --profile=MODERN"
   register: create_sslpolicy
   failed_when: create_sslpolicy.rc!=0 and not "already exists" in create_sslpolicy.stderr
 - debug: msg="{{create_sslpolicy}}"
+
 
 - name: create security-policy for Cloud Armor
   command:
@@ -26,11 +27,36 @@
   failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
 - debug: msg="{{update_output}}"
 
+- name: update security rule with RU block, test using www.locabrowser.com
+  command:
+    cmd: "gcloud compute security-policies rules create 1001 --security-policy {{cluster_name}}-security-policy --expression \"origin.region_code == 'RU'\" --action deny-403 --description \"RU country block\""
+  register: update_output
+  failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
+- debug: msg="{{update_output}}"
+
 - name: update security rule with DDOS
   command:
     cmd: "gcloud beta compute security-policies update {{cluster_name}}-security-policy --enable-layer7-ddos-defense"
   register: update_output
 - debug: msg="{{update_output}}"
+
+
+- debug: msg="ssl policy not created for internal HTTPS load balancer because it is incompatible with it"
+- debug: msg="security policy not created for internal HTTPS load balancer because Cloud Armor is incompatible with it"
+
+- name: create pre-shared cert for internal HTTPS LB
+  command:
+    cmd: "gcloud compute ssl-certificates create {{cluster_name}}-pre-shared-cert-int --certificate /tmp/my-secondary.{{cluster_name}}.local.crt --private-key /tmp/my-secondary.{{cluster_name}}.local.key --region={{region}}"
+  register: shared_cert_output
+  failed_when: shared_cert_output.rc!=0 and not "already exists" in shared_cert_output.stderr
+- debug: msg="{{shared_cert_output}}"
+
+- name: create internal static IP for internal HTTPS LB
+  command:
+    cmd: "gcloud compute addresses create {{cluster_name}}-https-int90-ip --region={{region}} --subnet {{subnet_name}} --addresses {{subnet_prefix}}.99"
+  register: int_ip_output
+  failed_when: int_ip_output.rc!=0 and not "already exists" in int_ip_output.stderr
+- debug: msg="{{int_ip_output}}"
 
 
 # use container native routing (cnr) direct to service OR send to istiod ingressgateway
@@ -48,6 +74,7 @@
     dest: /tmp/{{cluster_name}}/lb
   loop:
     - "{{file_prefix}}ingress.yaml"
+    - "ingress-int.yaml"
 
 - name: Ensure the Namespace exists
   kubernetes.core.k8s:
@@ -57,11 +84,18 @@
     name: "{{ ingress_namespace }}"
     state: present
 
-- name: apply yaml manifests
+- name: apply yaml manifests for public HTTPS LB
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
     src: /tmp/{{cluster_name}}/lb/{{file_prefix}}ingress.yaml
+    namespace: "{{ ingress_namespace }}"
+
+- name: apply yaml manifests for internal HTTPS LB
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: /tmp/{{cluster_name}}/lb/ingress-int.yaml
     namespace: "{{ ingress_namespace }}"
 
 

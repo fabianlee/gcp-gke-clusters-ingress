@@ -7,12 +7,20 @@ metadata:
     app: istio-ingressgateway-int
     istio: ingressgateway-int
   annotations:
-    # internal TCP LB without NEG
-    cloud.google.com/neg: '{"ingress": false}'
+    # internal TCP LB does not need NEG
+    #cloud.google.com/neg: '{"ingress": false}'
+
+    # internal HTTPS LB needs NEG
+    cloud.google.com/neg: '{"ingress": true}'
+
     cloud.google.com/app-protocols: '{"https":"HTTPS"}'
     cloud.google.com/load-balancer-type: "Internal"
     networking.gke.io/suppress-firewall-xpn-error: "true"
     kubernetes.io/ingress.class: istio-int
+
+    # not needed for TCP LB, but necessary for HTTPS LB
+    # without this backend health check the internal HTTPS LB will not be healthy
+    cloud.google.com/backend-config: '{"default": "ingress-backendconfig-int"}'
 spec:
   loadBalancerIP: {{subnet_prefix}}.199
   loadBalancerSourceRanges: [ 10.0.0.0/8 ]

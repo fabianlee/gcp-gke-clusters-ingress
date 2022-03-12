@@ -1,6 +1,7 @@
 cluster_type: standard
 cluster_name: std-prv-10-0-100-0
 is_regional_cluster: 0
+subnet_name: prv-10-0-100-0
 subnet_prefix: 10.0.100
 
 # for SAN certificate with custom CA

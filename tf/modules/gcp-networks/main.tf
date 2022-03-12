@@ -32,6 +32,20 @@ resource "google_compute_subnetwork" "subnetwork" {
   purpose       = each.value.purpose
 }
 
+resource "google_compute_subnetwork" "https-lb-subnetwork" {
+  provider      = google-beta
+
+  name          = "https-lb-only-subnet"
+  ip_cidr_range = var.https_lb_only_subnet_cidr
+  region        = var.subnetwork_region
+  network       = google_compute_network.vpc_network.name
+  role          = "ACTIVE"
+ 
+  # https://cloud.google.com/sdk/gcloud/reference/compute/networks/subnets/create#--purpose
+  purpose       = "INTERNAL_HTTPS_LOAD_BALANCER" # internal HTTPS LB
+  #purpose       = "REGIONAL_MANAGED_PROXY" # regional HTTPS LB
+}
+
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall
 resource "google_compute_firewall" "firewall-all-internal" {

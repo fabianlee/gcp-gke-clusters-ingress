@@ -8,6 +8,7 @@ module "gcp-gke-private-standard-cluster" {
   vpc_network_name = var.vpc_network_name
 
   cluster_name = var.cluster_name
+  cluster_version_prefix = var.cluster_version_prefix
   enable_private_endpoint = var.enable_private_endpoint
   is_regional_cluster = var.is_regional_cluster
   subnetwork_name = var.subnetwork_name

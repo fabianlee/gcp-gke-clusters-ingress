@@ -1,0 +1,63 @@
+---
+# frontend that defines redirector for http->https and TLS 1.2+ policy
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: lb-http-to-https
+  #namespace: "{{ingress_namespace}}"
+spec:
+#  redirectToHttps:
+#    enabled: true
+  # need to create ssl-policies, https://cloud.google.com/load-balancing/docs/use-ssl-policies#creating_ssl_policies
+  # 'gcloud compute ssl-policies'
+  sslPolicy: {{cluster_name}}-ssl-policy-int
+---
+# BackendConfig for Cloud Armor policy is defined at backend:
+# IngressGateway: roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
+# hello when using conainer native lb: roles/helloapp/templates/golang-hello-world-web.yaml
+---
+# https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress-int
+  #namespace: "{{ingress_namespace}}"
+  annotations:
+    # "gce" is for public https LB. "gce-internal" is for internal https LB
+    # check target proxies using: gcloud compute target-https-proxies list
+    kubernetes.io/ingress.class: gce-internal
+
+    # name of regional static IP, must exist because does not default to creating ephemeral one
+    kubernetes.io/ingress.regional-static-ip-name: {{cluster_name}}-https-int90-ip
+
+    # must be false for internal HTTPS LB
+    kubernetes.io/ingress.allow-http: "false"
+
+    # intentionally removed for internal HTTPS LB
+    # internal https lb do not support: cloud armor or ssl policies
+    # https://jayendrapatil.com/google-cloud-load-balancing-types/
+    #networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
+
+    # for certificate on internal HTTPS LB, needs regional (not global!) pre-shared cert
+    ingress.gcp.kubernetes.io/pre-shared-cert: {{cluster_name}}-pre-shared-cert-int
+spec:
+  defaultBackend:
+    service:
+      name: istio-ingressgateway-int
+      port:
+        number: 443
+
+  # secret not placed here for internal HTTPS LB, insted use annotation
+  #tls:
+  #- secretName: {{cluster_name}}-tls-secret-int
+
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: istio-ingressgateway-int
+            port:
+              number: 443

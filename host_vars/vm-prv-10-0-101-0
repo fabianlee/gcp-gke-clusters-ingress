@@ -1,6 +1,7 @@
 cluster_type: autopilot
 cluster_name: ap-prv-10-0-101-0
 is_regional_cluster: 1
+subnet_name: prv-10-0-101-0
 subnet_prefix: 10.0.101
 
 # for SAN certificate with custom CA

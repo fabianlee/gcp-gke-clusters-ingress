@@ -8,6 +8,7 @@ variable vpc_network_name {}
 ##########  private cluster specific variables #############
 
 variable cluster_name { }
+variable cluster_version_prefix { }
 
 variable enable_private_endpoint { default=false }
 
