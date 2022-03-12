@@ -3,7 +3,7 @@ variable vpc_network_name {}
 variable subnetwork_region {}
 variable firewall_internal_allow_cidr { default="10.0.0.0/8" }
 
-variable https_lb_only_subnet_cidr { default="10.0.70.0/24" }
+variable https_lb_only_subnet_cidr { default="10.0.70.0/26" }
 
 variable "subnetworks" {
   type = map

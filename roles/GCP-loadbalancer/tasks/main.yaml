@@ -51,13 +51,6 @@
   failed_when: shared_cert_output.rc!=0 and not "already exists" in shared_cert_output.stderr
 - debug: msg="{{shared_cert_output}}"
 
-- name: create internal static IP for internal HTTPS LB
-  command:
-    cmd: "gcloud compute addresses create {{cluster_name}}-https-int90-ip --region={{region}} --subnet {{subnet_name}} --addresses {{subnet_prefix}}.99"
-  register: int_ip_output
-  failed_when: int_ip_output.rc!=0 and not "already exists" in int_ip_output.stderr
-- debug: msg="{{int_ip_output}}"
-
 
 # use container native routing (cnr) direct to service OR send to istiod ingressgateway
 - set_fact:

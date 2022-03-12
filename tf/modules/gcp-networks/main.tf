@@ -85,3 +85,14 @@ resource "google_compute_firewall" "firewall-allow-ssh" {
   target_tags   = ["pubjumpbox"]
 }
 
+resource "google_compute_address" "internal_ip" {
+  for_each = var.subnetworks
+  name         = "${each.key}-int-ip"
+  address      = cidrhost(each.value.cidr,99)
+  
+  subnetwork   = google_compute_subnetwork.subnetwork[each.key].id
+  region       = var.subnetwork_region
+  address_type = "INTERNAL"
+  purpose      = "GCE_ENDPOINT"
+}
+

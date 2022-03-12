@@ -28,7 +28,7 @@ metadata:
     kubernetes.io/ingress.class: gce-internal
 
     # name of regional static IP, must exist because does not default to creating ephemeral one
-    kubernetes.io/ingress.regional-static-ip-name: {{cluster_name}}-https-int90-ip
+    kubernetes.io/ingress.regional-static-ip-name: {{subnet_name}}-int-ip
 
     # must be false for internal HTTPS LB
     kubernetes.io/ingress.allow-http: "false"
