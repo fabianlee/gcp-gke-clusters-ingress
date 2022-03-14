@@ -17,8 +17,12 @@ asm_type: managed
 asm_version: "1.12" # managed ASM available starting at 1.12
 
 # for HTTPS LB public ingress
-https_lb_container_native_routing: true
+https_lb_primary: true
+https_lb_primary_container_native_routing: true
+https_lb_secondary: true
+https_lb_secondary_container_native_routing: true
 
 # for TCP LB
-ingressgateway_primary: false
+ingressgateway_primary: true
 ingressgateway_secondary: true
+

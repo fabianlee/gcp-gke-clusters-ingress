@@ -160,6 +160,67 @@ EOT
 
 }
 
+
+resource "google_compute_ssl_policy" "ssl-policy" {
+  name            = "${var.cluster_name}-ssl-policy"
+  profile         = "MODERN"
+  min_tls_version = "TLS_1_2"
+}
+
+resource "google_compute_security_policy" "security-policy" {
+  name = "${var.cluster_name}-security-policy"
+  provider = google-beta
+
+  adaptive_protection_config {
+    layer_7_ddos_defense_config {
+      enable = true
+    }
+  }
+
+  rule {
+    action   = "deny(403)"
+    priority = "1000"
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('xss-stable')"
+      }
+    }
+    description = "XSS attack filtering"
+  }
+  rule {
+    action   = "deny(403)"
+    priority = "1001"
+    match {
+      expr {
+        expression = "evaluatePreconfiguredExpr('sqli-stable')"
+      }
+    }
+    description = "SQL injection attack filtering"
+  }
+  rule {
+    action   = "deny(403)"
+    priority = "1002"
+    match {
+      expr {
+        expression = "origin.region_code == 'RU'"
+      }
+    }
+    description = "RU country block, test using www.locabrowser.com"
+  }
+
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "default rule that must exist"
+  }
+}
+
 # Register the cluster, makes viewable in 'Anthos' section
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_membership
 # https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster

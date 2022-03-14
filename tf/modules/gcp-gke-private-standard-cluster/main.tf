@@ -267,9 +267,8 @@ resource "google_compute_security_policy" "security-policy" {
   }
 }
 
-#
-# Certificates are only on the jumpbox, so not going to run from here on local orchestrator
-# will run from ansible playbook instead (that does run on jumpbox)
+# UNUSED!!!!
+# Do not need anymore because internal HTTPS LB is using secret name just like external HTTPS LB
 #
 #resource "google_compute_ssl_certificate" "preshared-cert" {
 #  name_prefix = "${var.cluster_name}-pre-shared-cert-int"
