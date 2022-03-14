@@ -151,7 +151,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx
+        image: nginx:1.21.6-alpine # https://hub.docker.com/_/nginx/
         ports:
         - containerPort: 80
 
