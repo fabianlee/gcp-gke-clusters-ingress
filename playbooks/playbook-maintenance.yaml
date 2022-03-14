@@ -1,0 +1,13 @@
+# ansible-galaxy collection install -r requirements.yaml
+# ansible-playbook playbooks/playbook-maintenance.yaml -l vm-prv-10-0-101-0 --extra-vars remote_kubeconfig=kubeconfig-ap-prv-10-0-101-0
+---
+# installed on orchestrator
+# ansible-galaxy collection install community.kubernetes:2.0.1
+# https://galaxy.ansible.com/community/kubernetes
+# https://docs.ansible.com/ansible/latest/collections/kubernetes/core/kubectl_connection.html
+
+- hosts: jumpboxes
+  gather_facts: false
+
+  roles:
+    - nginx-maintenance

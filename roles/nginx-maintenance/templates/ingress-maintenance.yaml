@@ -1,0 +1,35 @@
+# replaces primary ingress with a maintenance page service using container native routing
+---
+# https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  #namespace: "{{ingress_namespace}}"
+  annotations:
+    # "gce" is for public https LB. "gce-internal" is for internal https LB
+    kubernetes.io/ingress.class: gce
+    # name of global static IP, will default to using public ephemeral if this does not exist
+    #kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
+    kubernetes.io/ingress.allow-http: "false"
+    networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
+spec:
+  defaultBackend:
+    service:
+      name: nginx-maintenance-service
+      port:
+        number: 8080
+
+  tls:
+  - secretName: {{cluster_name}}-tls-secret
+
+#  rules:
+#  - http:
+#      paths:
+#      - path: /*
+#        pathType: ImplementationSpecific
+#        backend:
+#          service:
+#            name: nginx-maintenance-service
+#            port:
+#              number: 8080

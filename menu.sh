@@ -56,6 +56,7 @@ menu_items=(
 # hidden menu items, available for action but not shown
 #  "k8s-tinytools,Apply tiny-tools Daemonset to cluster"
 #  "k8s-witest,Apply workload identity test"
+#  "k8s-maintenance,Apply maintenance page to primary ingress"
 
 function showMenu() {
   echo ""
@@ -514,6 +515,14 @@ while [ 1 == 1 ]; do
       [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
       set -x
       ansible-playbook playbooks/playbook-k8s-tinytools.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
+      retVal=$?
+      set +x 
+      [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"
+      ;;
+    k8s-maintenance)
+      [ -n "$MYKUBECONFIG" ] || { read -p "ERROR select a KUBECONFIG first. Press <ENTER>" dummy; continue; }
+      set -x
+      ansible-playbook playbooks/playbook-maintenance.yaml -l $MYJUMPBOX --extra-vars remote_kubeconfig=$MYKUBECONFIG
       retVal=$?
       set +x 
       [ $retVal -eq 0 ] && done_status[$answer]="OK" || done_status[$answer]="ERR"

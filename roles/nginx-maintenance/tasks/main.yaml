@@ -1,14 +1,27 @@
 ---
 
-- name: create template template
+- name: create dest dir for files
+  file:
+    path: /tmp/{{cluster_name}}/maintenance
+    state: directory
+
+- name: create nginx-maintenance service yaml
   template:
     src: "nginx-maintenance.yaml"
-    dest: /tmp/{{cluster_name}}
+    dest: /tmp/{{cluster_name}}/maintenance
 
-- name: apply nginx maintenance service
+- name: create nginx-maintenance ingress yaml
+  template:
+    src: "ingress-maintenance.yaml"
+    dest: /tmp/{{cluster_name}}/maintenance
+
+- name: apply yaml for nginx maintenance service and ingress
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
-    src: /tmp/{{cluster_name}}/nginx-maintenance.yaml
+    src: "{{item}}"
     namespace: "{{ ingress_namespace }}"
+  loop:
+    - /tmp/{{cluster_name}}/maintenance/nginx-maintenance.yaml
+    - /tmp/{{cluster_name}}/maintenance/ingress-maintenance.yaml
 

@@ -3,7 +3,7 @@
 apiVersion: networking.gke.io/v1beta1
 kind: FrontendConfig
 metadata:
-  name: cnr-lb-http-to-https
+  name: lb-http-to-https
   #namespace: "{{ingress_namespace}}"
 spec:
   redirectToHttps:
@@ -31,7 +31,7 @@ metadata:
     # name of global static IP, will default to using public ephemeral if this does not exist
     #kubernetes.io/ingress.global-static-ip-name: {{cluster_name}}-global
     kubernetes.io/ingress.allow-http: "false"
-    networking.gke.io/v1beta1.FrontendConfig: cnr-lb-http-to-https
+    networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
 spec:
 #  defaultBackend:
 #    service:
