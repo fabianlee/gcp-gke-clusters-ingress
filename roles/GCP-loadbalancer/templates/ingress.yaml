@@ -30,11 +30,11 @@ metadata:
     kubernetes.io/ingress.allow-http: "false"
     networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
 spec:
-  #defaultBackend:
-  #  service:
-  #    name: istio-ingressgateway
-  #    port:
-  #      number: 80
+#  defaultBackend:
+#    service:
+#      name: istio-ingressgateway
+#      port:
+#        number: 443
 
   tls:
   - secretName: {{cluster_name}}-tls-secret

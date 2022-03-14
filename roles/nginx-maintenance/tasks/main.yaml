@@ -7,7 +7,7 @@
 
 - name: create nginx-maintenance service yaml
   template:
-    src: "nginx-maintenance.yaml"
+    src: "nginx-maintenance-service.yaml"
     dest: /tmp/{{cluster_name}}/maintenance
 
 - name: create nginx-maintenance ingress yaml
@@ -22,6 +22,6 @@
     src: "{{item}}"
     namespace: "{{ ingress_namespace }}"
   loop:
-    - /tmp/{{cluster_name}}/maintenance/nginx-maintenance.yaml
+    - /tmp/{{cluster_name}}/maintenance/nginx-maintenance-service.yaml
     - /tmp/{{cluster_name}}/maintenance/ingress-maintenance.yaml
 

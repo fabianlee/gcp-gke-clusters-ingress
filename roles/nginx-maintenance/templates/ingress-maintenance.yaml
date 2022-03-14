@@ -14,22 +14,22 @@ metadata:
     kubernetes.io/ingress.allow-http: "false"
     networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
 spec:
-  defaultBackend:
-    service:
-      name: nginx-maintenance-service
-      port:
-        number: 8080
+#  defaultBackend:
+#    service:
+#      name: nginx-maintenance-service
+#      port:
+#        number: 8080
 
   tls:
   - secretName: {{cluster_name}}-tls-secret
 
-#  rules:
-#  - http:
-#      paths:
-#      - path: /*
-#        pathType: ImplementationSpecific
-#        backend:
-#          service:
-#            name: nginx-maintenance-service
-#            port:
-#              number: 8080
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: nginx-maintenance-service
+            port:
+              number: 8080
