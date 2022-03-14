@@ -1,14 +1,14 @@
+# backend for secondary istiod Ingress Gateway that defines health check and Cloud Armor policy
+# referenced in: istio-ingressgateway-int/service.yaml
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
   name: ingress-backendconfig-int
 spec:
   healthCheck:
-# worked for TCP LB, but not necessary for TCP LB
-#    requestPath: /healthz/ready
-#    port: 15022
-#    type: HTTP
-# However, this must exist for internal HTTPS LB
     requestPath: /healthz/ready
-    port: 15021 # from envoy standard status port
+    port: 15021 # from envoy standard status port, not its 'status' port of 15022
     type: HTTP
+  # Cloud Armor policy not compatible with Internal HTTPS LB
+  #securityPolicy:
+

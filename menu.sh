@@ -41,9 +41,9 @@ menu_items=(
   "k8s-scale,Apply balloon pod to warm up cluster"
   "k8s-ASM,Install ASM on cluster"
   "k8s-certs,Create and load TLS certificates"
+  "k8s-helloapp,Install hello apps that will be exposed by LB"
   "k8s-lb-tcp,Deploy Ingress Gateway and internal TCP LB"
   "k8s-lb-https,Deploy public and internal HTTPS LB"
-  "k8s-helloapp,Install hello apps"
   "k8s-curl,Run curl to test public and private hello endpoints"
   ""
   "delgke,Delete GKE public standard cluster"
@@ -124,6 +124,13 @@ function check_prerequisites() {
   yq --version
   jq --version
   make --version | head -n1
+
+  yq_major_version=$(yq --version | grep -Po "version \K\d?\.")
+  if [[ $yq_major_version < "4." ]]; then
+    echo "ERROR expecting yq to be at least 4.x, older versions have a different syntax"
+    echo "download newer version from https://github.com/mikefarah/yq/releases"
+    exit 99
+  fi
 
   if [ $USE_TERRAFORM -eq 1 ]; then
     echo "TERRAFORM for infrastructure"

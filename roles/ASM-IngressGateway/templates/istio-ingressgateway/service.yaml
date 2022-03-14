@@ -1,5 +1,4 @@
-# we can use internal static IP OR by setting to regional static IP we can have TCP loadbalancer (cannot be global static IP)
-# also cannot specify an annotation with the name of the regional static IP
+# ingress gateway for public services
 apiVersion: v1
 kind: Service
 metadata:
@@ -16,8 +15,10 @@ metadata:
     cloud.google.com/load-balancer-type: "Internal" # TCP LB
 
     networking.gke.io/suppress-firewall-xpn-error: "true"
-    # this TCP LB for the primary ingress is only instantiated when container native is false
-    # but without this backend health check the front-facing GCP HTTPS LB will not be healthy
+    kubernetes.io/ingress.class: istio
+
+    # this backend config is not necessary for TCP LB, but it is for HTTPS LB
+    # without this backend health check, the front-facing GCP HTTPS LB will not be healthy
     # needed whether or not using container native routing
     cloud.google.com/backend-config: '{"default": "ingress-backendconfig"}'
 spec:

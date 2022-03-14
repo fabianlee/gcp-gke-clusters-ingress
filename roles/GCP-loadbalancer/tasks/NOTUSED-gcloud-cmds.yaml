@@ -1,0 +1,59 @@
+#
+# UNUSED !!!!!
+# ssl policies and security policies for Cloud Armor are now built into terraform cluster creation
+#
+---
+
+- name: create ssl policy for public HTTPS load balancer
+  command:
+    cmd: "gcloud compute ssl-policies create {{cluster_name}}-ssl-policy --min-tls-version=1.2 --profile=MODERN"
+  register: create_sslpolicy
+  failed_when: create_sslpolicy.rc!=0 and not "already exists" in create_sslpolicy.stderr
+- debug: msg="{{create_sslpolicy}}"
+
+
+- name: create security-policy for Cloud Armor
+  command:
+    cmd: "gcloud compute security-policies create {{cluster_name}}-security-policy --description \"Cloud Armor security policy\""
+  register: create_secpol
+  failed_when: create_secpol.rc!=0 and not "already exists" in create_secpol.stderr
+
+- debug: msg="{{create_secpol}}"
+
+- name: set logging for rule
+  command:
+    cmd: "gcloud compute security-policies update {{cluster_name}}-security-policy --log-level=VERBOSE"
+
+- name: update security rule with XSS
+  command:
+    cmd: "gcloud compute security-policies rules create 1000 --security-policy {{cluster_name}}-security-policy --expression \"evaluatePreconfiguredExpr('xss-stable')\" --action deny-403 --description \"XSS attack filtering\""
+  register: update_output
+  failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
+- debug: msg="{{update_output}}"
+
+- name: update security rule with RU block, test using www.locabrowser.com
+  command:
+    cmd: "gcloud compute security-policies rules create 1001 --security-policy {{cluster_name}}-security-policy --expression \"origin.region_code == 'RU'\" --action deny-403 --description \"RU country block\""
+  register: update_output
+  failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
+- debug: msg="{{update_output}}"
+
+- name: update security rule with DDOS
+  command:
+    cmd: "gcloud beta compute security-policies update {{cluster_name}}-security-policy --enable-layer7-ddos-defense"
+  register: update_output
+- debug: msg="{{update_output}}"
+
+
+- debug: msg="ssl policy not created for internal HTTPS load balancer because it is incompatible with it"
+- debug: msg="security policy not created for internal HTTPS load balancer because Cloud Armor is incompatible with it"
+
+- name: create pre-shared cert for internal HTTPS LB
+  command:
+    cmd: "gcloud compute ssl-certificates create {{cluster_name}}-pre-shared-cert-int --certificate /tmp/my-secondary.{{cluster_name}}.local.crt --private-key /tmp/my-secondary.{{cluster_name}}.local.key --region={{region}}"
+  register: shared_cert_output
+  failed_when: shared_cert_output.rc!=0 and not "already exists" in shared_cert_output.stderr
+- debug: msg="{{shared_cert_output}}"
+
+
+

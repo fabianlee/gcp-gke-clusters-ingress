@@ -16,8 +16,10 @@ asm_type: incluster
 asm_version: "1.11" # leaves room for upgrade testing
 
 # for HTTPS LB public ingress
-https_lb_container_native_routing: false
+https_lb_primary: true
+https_lb_primary_container_native_routing: false
+https_lb_secondary: false
 
-# for TCP LB private ingress
+# for TCP LB
 ingressgateway_primary: true # needed because HTTPS LB points at service 'istio-ingressgateway'
 ingressgateway_secondary: true

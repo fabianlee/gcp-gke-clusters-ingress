@@ -61,7 +61,7 @@ vms: init
 	cd vms && $(TF) init $(INIT_FLAGS)
 	cd vms && $(TF) apply $(VMS_ARGS) $(FLAGS)
 vms-refresh:
-	cd vms && $(TF) refesh $(VMS_ARGS)
+	cd vms && $(TF) refresh $(VMS_ARGS)
 vms-output:
 	cd vms && $(TF) output -json --state=../envs/vms.tfstate | jq ".module_internal_ip.value"
 	cd vms && $(TF) output -json --state=../envs/vms.tfstate | jq ".module_public_ip.value"

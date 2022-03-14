@@ -10,6 +10,8 @@ spec:
     port: 8080
     type: HTTP
     requestPath: /healthz
+  # Cloud Armor security policy not compatible with Internal HTTPS LB
+  #securityPolicy:
 ---
 apiVersion: v1
 kind: Service

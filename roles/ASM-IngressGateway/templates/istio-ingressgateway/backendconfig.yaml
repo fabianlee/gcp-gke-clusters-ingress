@@ -1,4 +1,4 @@
-# backend for istiod that defines health check and Cloud Armor policy
+# backend for primary istiod Ingress Gateway that defines health check and Cloud Armor policy
 # referenced in: istio-ingressgateway/service.yaml
 apiVersion: cloud.google.com/v1
 kind: BackendConfig

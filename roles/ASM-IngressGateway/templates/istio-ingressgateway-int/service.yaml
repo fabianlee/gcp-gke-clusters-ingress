@@ -7,29 +7,31 @@ metadata:
     app: istio-ingressgateway-int
     istio: ingressgateway-int
   annotations:
-    # internal TCP LB does not need NEG
-    #cloud.google.com/neg: '{"ingress": false}'
-
-    # internal HTTPS LB needs NEG
+    # https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress#install_an_ingress_gateway
+    # internal TCP LB does not need NEG, but HTPPS LB does
     cloud.google.com/neg: '{"ingress": true}'
-
     cloud.google.com/app-protocols: '{"https":"HTTPS"}'
-    cloud.google.com/load-balancer-type: "Internal"
+
+    cloud.google.com/load-balancer-type: "Internal" # TCP LB
+
     networking.gke.io/suppress-firewall-xpn-error: "true"
     kubernetes.io/ingress.class: istio-int
 
-    # not needed for TCP LB, but necessary for HTTPS LB
-    # without this backend health check the internal HTTPS LB will not be healthy
-    cloud.google.com/backend-config: '{"default": "ingress-backendconfig-int"}'
+    # this backend config cannnot exist for TCP LB (TODO check again on internal HTTPS LB health without this)
+    #
+    # without this backend health check, the front-facing GCP HTTPS LB will not be healthy
+    # needed whether or not using container native routing
+    #cloud.google.com/backend-config: '{"default": "ingress-backendconfig-int"}'
 spec:
   loadBalancerIP: {{subnet_prefix}}.199
   loadBalancerSourceRanges: [ 10.0.0.0/8 ]
   ports:
   # status-port exposes a /healthz/ready endpoint that can be used with GKE Ingress health checks
+  # changing to 15022 does not change internal bind port, it is ok for value to be same as primary ingress gateway
   - name: status-port
-    port: 15022
+    port: 15021
     protocol: TCP
-    targetPort: 15022
+    targetPort: 15021
   # Any ports exposed in Gateway resources should be exposed here.
   - name: http2
     port: 80

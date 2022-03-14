@@ -1,50 +1,10 @@
 ---
 
-- name: create ssl policy for public HTTPS load balancer
-  command:
-    cmd: "gcloud compute ssl-policies create {{cluster_name}}-ssl-policy --min-tls-version=1.2 --profile=MODERN"
-  register: create_sslpolicy
-  failed_when: create_sslpolicy.rc!=0 and not "already exists" in create_sslpolicy.stderr
-- debug: msg="{{create_sslpolicy}}"
-
-
-- name: create security-policy for Cloud Armor
-  command:
-    cmd: "gcloud compute security-policies create {{cluster_name}}-security-policy --description \"Cloud Armor security policy\""
-  register: create_secpol
-  failed_when: create_secpol.rc!=0 and not "already exists" in create_secpol.stderr
-
-- debug: msg="{{create_secpol}}"
-
-- name: set logging for rule
+- name: set logging for Cloud Armor security policy rule, not exposed from terraform
   command:
     cmd: "gcloud compute security-policies update {{cluster_name}}-security-policy --log-level=VERBOSE"
 
-- name: update security rule with XSS
-  command:
-    cmd: "gcloud compute security-policies rules create 1000 --security-policy {{cluster_name}}-security-policy --expression \"evaluatePreconfiguredExpr('xss-stable')\" --action deny-403 --description \"XSS attack filtering\""
-  register: update_output
-  failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
-- debug: msg="{{update_output}}"
-
-- name: update security rule with RU block, test using www.locabrowser.com
-  command:
-    cmd: "gcloud compute security-policies rules create 1001 --security-policy {{cluster_name}}-security-policy --expression \"origin.region_code == 'RU'\" --action deny-403 --description \"RU country block\""
-  register: update_output
-  failed_when: update_output.rc!=0 and not "rules with the same priorities" in update_output.stderr
-- debug: msg="{{update_output}}"
-
-- name: update security rule with DDOS
-  command:
-    cmd: "gcloud beta compute security-policies update {{cluster_name}}-security-policy --enable-layer7-ddos-defense"
-  register: update_output
-- debug: msg="{{update_output}}"
-
-
-- debug: msg="ssl policy not created for internal HTTPS load balancer because it is incompatible with it"
-- debug: msg="security policy not created for internal HTTPS load balancer because Cloud Armor is incompatible with it"
-
-- name: create pre-shared cert for internal HTTPS LB
+- name: create pre-shared cert for internal HTTPS LB, cert is on jumpbox and not avail to terraform on orchestrator
   command:
     cmd: "gcloud compute ssl-certificates create {{cluster_name}}-pre-shared-cert-int --certificate /tmp/my-secondary.{{cluster_name}}.local.crt --private-key /tmp/my-secondary.{{cluster_name}}.local.key --region={{region}}"
   register: shared_cert_output
@@ -52,9 +12,11 @@
 - debug: msg="{{shared_cert_output}}"
 
 
-# use container native routing (cnr) direct to service OR send to istiod ingressgateway
+# use either: 1) container native routing direct to service 2) OR point at istiod ingressgateway
 - set_fact:
-    file_prefix: "{{ https_lb_container_native_routing | ternary('cnr-','') }}"
+    file_prefix_primary: "{{ https_lb_primary_container_native_routing | ternary('cnr-','') }}"
+- set_fact:
+    file_prefix_secondary: "{{ https_lb_secondary_container_native_routing | ternary('cnr-','') }}"
 
 - name: create dest dir for files
   file:
@@ -66,8 +28,8 @@
     src: "{{item}}"
     dest: /tmp/{{cluster_name}}/lb
   loop:
-    - "{{file_prefix}}ingress.yaml"
-    - "ingress-int.yaml"
+    - "{{file_prefix_primary}}ingress.yaml"
+    - "{{file_prefix_secondary}}ingress-int.yaml"
 
 - name: Ensure the Namespace exists
   kubernetes.core.k8s:
@@ -77,18 +39,18 @@
     name: "{{ ingress_namespace }}"
     state: present
 
-- name: apply yaml manifests for public HTTPS LB
+- name: apply yaml manifests for primary external HTTPS LB (if enabled)
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
-    src: /tmp/{{cluster_name}}/lb/{{file_prefix}}ingress.yaml
+    src: /tmp/{{cluster_name}}/lb/{{file_prefix_primary}}ingress.yaml
     namespace: "{{ ingress_namespace }}"
+  when: https_lb_primary
 
-- name: apply yaml manifests for internal HTTPS LB
+- name: apply yaml manifests for secondary internal HTTPS LB (if enabled)
   kubernetes.core.k8s:
     kubeconfig: "{{remote_kubeconfig}}"
     state: present
-    src: /tmp/{{cluster_name}}/lb/ingress-int.yaml
+    src: /tmp/{{cluster_name}}/lb/{{file_prefix_secondary}}ingress-int.yaml
     namespace: "{{ ingress_namespace }}"
-
-
+  when: https_lb_secondary

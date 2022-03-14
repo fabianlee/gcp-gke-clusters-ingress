@@ -2,20 +2,21 @@
 # Internal HTTPS LB are not comptible with FrontendConfig
 # you cannot do HTTP redirect, or set SSL policies
 ---
-# Cloud Armor policy in backend policy is not compatible with Internal HTTPS LB
-# So do not specify in the backing services:
-# IngressGateway: roles/ASM-IngressGateway/templates/istio-ingressgateway-int/service.yaml
-# hello when using conainer native lb: roles/helloapp/templates/golang-hello-world-web-int.yaml
+# for container native load balancing, each service has BackendConfig
+# that defines health check and security policy, so not defined here
+#
+# if this was non container-native load balancing, then
+# we would define a backend to the istiod service and would
+# add a backend to its health check (/healthz/ready) and status port
+# referenced in: roles/ASM-IngressGateway/templates/istio-ingressgateway/service.yaml
 ---
-# https://cloud.google.com/kubernetes-engine/docs/how-to/load-balance-ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: my-ingress-int
+  name: cnr-my-ingress-int
   #namespace: "{{ingress_namespace}}"
   annotations:
-    # "gce" is for public https LB. "gce-internal" is for internal https LB
-    # check target proxies using: gcloud compute target-https-proxies list
+    # If the class annotation is not specified it defaults to "gce".
     kubernetes.io/ingress.class: gce-internal
 
     # name of regional static IP, must exist because does not default to creating ephemeral one
@@ -31,24 +32,32 @@ metadata:
 
     # for certificate on internal HTTPS LB, needs regional (not global!) pre-shared cert
     ingress.gcp.kubernetes.io/pre-shared-cert: {{cluster_name}}-pre-shared-cert-int
-spec:
-  defaultBackend:
-    service:
-      name: istio-ingressgateway-int
-      port:
-        number: 443
 
-  # secret not placed here for internal HTTPS LB, insted use annotation
-  #tls:
-  #- secretName: {{cluster_name}}-tls-secret-int
+spec:
+#  defaultBackend:
+#    service:
+#      name: golang-hello-world-web-service
+#      port:
+#        number: 8080
+
+#  tls:
+#  - secretName: {{cluster_name}}-tls-secret
 
   rules:
   - http:
       paths:
-      - path: /*
+      - path: /myint/*
         pathType: ImplementationSpecific
         backend:
           service:
-            name: istio-ingressgateway-int
+            name: golang-hello-world-web-int-service
             port:
-              number: 443
+              number: 8080
+# ADDTITIONAL services could be added here
+#      - path: /myint/*
+#        pathType: ImplementationSpecific
+#        backend:
+#          service:
+#            name: golang-hello-world-web-int-service
+#            port:
+#              number: 8080
