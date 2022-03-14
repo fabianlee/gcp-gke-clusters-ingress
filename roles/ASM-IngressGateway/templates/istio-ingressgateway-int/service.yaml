@@ -17,11 +17,10 @@ metadata:
     networking.gke.io/suppress-firewall-xpn-error: "true"
     kubernetes.io/ingress.class: istio-int
 
-    # this backend config cannnot exist for TCP LB (TODO check again on internal HTTPS LB health without this)
-    #
-    # without this backend health check, the front-facing GCP HTTPS LB will not be healthy
+    # this MUST exist for internal HTTPS LB health check, or else unhealthy LB
     # needed whether or not using container native routing
-    #cloud.google.com/backend-config: '{"default": "ingress-backendconfig-int"}'
+    # there was some question initially, but this also seems to be ok with internal TCP LB (although unused)
+    cloud.google.com/backend-config: '{"default": "ingress-backendconfig-int"}'
 spec:
   loadBalancerIP: {{subnet_prefix}}.199
   loadBalancerSourceRanges: [ 10.0.0.0/8 ]

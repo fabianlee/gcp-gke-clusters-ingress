@@ -7,7 +7,7 @@ metadata:
 spec:
   healthCheck:
     requestPath: /healthz/ready
-    port: 15021 # from envoy standard status port, not its 'status' port of 15022
+    port: 15021
     type: HTTP
   # Cloud Armor policy not compatible with Internal HTTPS LB
   #securityPolicy:
