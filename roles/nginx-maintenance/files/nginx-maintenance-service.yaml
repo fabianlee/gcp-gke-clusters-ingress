@@ -1,0 +1,171 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maintenance-html-configmap
+  #namespace: default
+data:
+  maintenance.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+    
+      <title>Maintenance</title>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    
+    <script>
+    let infuture = new Date()
+    infuture.setHours(infuture.getHours() + 1);
+    infuture.setMinutes(infuture.getMinutes() + 30);
+    </script>
+    
+    </head>
+    
+    <body on>
+    
+      <div class="px-4 py-5 my-5 text-center">
+        <img class="d-block mx-auto mb-4" src="https://cdn-icons-png.flaticon.com/512/498/498970.png" alt="maintenance" height="300"/>
+        <h1 class="display-5 fw-bold">System Maintenance</h1>
+        <div class="col-lg-6 mx-auto">
+    	    <p>The system is undergoing maintenance<br/>
+    	    until <script>document.write(infuture.toUTCString())</script></p>
+        </div>
+      </div>
+    
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf-configmap
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  3;
+    # errors to file, there should not be any
+    error_log  /var/log/nginx/error.log;
+    #error_log /dev/stdout info;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      index  index.html index.htm;
+      log_format  main
+              'remote_addr:$remote_addr\t'
+              'time_local:$time_local\t'
+              'method:$request_method\t'
+              'uri:$request_uri\t'
+              'host:$host\t'
+              'status:$status\t'
+              'bytes_sent:$body_bytes_sent\t'
+              'referer:$http_referer\t'
+              'useragent:$http_user_agent\t'
+              'forwardedfor:$http_x_forwarded_for\t'
+              'request_time:$request_time';
+
+      # logs to stdout to make it more container friendly and not fill log directory
+      #access_log	/var/log/nginx/access.log main;
+      access_log /dev/stdout;
+
+      server {
+          listen       80;
+          server_name  _;
+          root         /usr/share/nginx/html;
+
+          return 503;
+          error_page 503 @maintenance;
+          location @maintenance {
+            # optimize https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/
+            sendfile on; 
+            sendfile_max_chunk 1m;
+            rewrite ^(.*)$ /maintenance.html break;
+          }
+
+      }
+    }
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: nginx-maintenance-backendconfig
+spec:
+  healthCheck:
+    checkIntervalSec: 15
+    port: 80
+    type: HTTP
+    requestPath: /
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-maintenance-service
+  #namespace: default
+  labels:
+    app: nginx-maintenance
+  annotations:
+    cloud.google.com/backend-config: '{"default": "nginx-maintenance-backendconfig"}'
+spec:
+  ports:
+  # port=available to other containers
+  - port: 8080
+    name: http
+    # targetPort=exposed from inside container
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: nginx-maintenance
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-maintenance
+  labels:
+    app: nginx-maintenance
+spec:
+  selector:
+    matchLabels:
+      app: nginx-maintenance
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-maintenance
+      # avoid istio envy sidecar if namespace is auto-injected
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          readOnly: true
+          name: nginx-maintenance-file
+
+        - mountPath: /etc/nginx
+          readOnly: true
+          name: nginx-conf
+
+        - mountPath: /var/log/nginx
+          name: log
+
+      volumes:
+      - name: nginx-maintenance-file
+        configMap:
+          name: maintenance-html-configmap
+
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf-configmap
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+
+      - name: log
+        emptyDir: {}

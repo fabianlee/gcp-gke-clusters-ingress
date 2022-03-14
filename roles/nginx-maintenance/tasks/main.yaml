@@ -1,0 +1,14 @@
+---
+
+- name: create template template
+  template:
+    src: "nginx-maintenance.yaml"
+    dest: /tmp/{{cluster_name}}
+
+- name: apply nginx maintenance service
+  kubernetes.core.k8s:
+    kubeconfig: "{{remote_kubeconfig}}"
+    state: present
+    src: /tmp/{{cluster_name}}/nginx-maintenance.yaml
+    namespace: "{{ ingress_namespace }}"
+
