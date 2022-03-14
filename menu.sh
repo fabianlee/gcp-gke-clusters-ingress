@@ -43,7 +43,7 @@ menu_items=(
   "k8s-certs,Create and load TLS certificates"
   "k8s-helloapp,Install hello apps that will be exposed by LB"
   "k8s-lb-tcp,Deploy Ingress Gateway and internal TCP LB"
-  "k8s-lb-https,Deploy public and internal HTTPS LB"
+  "k8s-lb-https,Deploy primary and secondary HTTPS LB"
   "k8s-curl,Run curl to test public and private hello endpoints"
   ""
   "delgke,Delete GKE public standard cluster"
