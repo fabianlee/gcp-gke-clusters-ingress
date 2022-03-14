@@ -75,7 +75,18 @@ data:
           server_name  _;
           root         /usr/share/nginx/html;
 
-          return 503;
+          # for kubernetes health check
+          location = /healthz {
+           add_header Content-Type text/plain;
+           return 200 'OK';
+          }
+
+          # anything else sends 503 server unavailable
+          location / {
+            return 503;
+          }
+
+          # handler for 503 errors
           error_page 503 @maintenance;
           location @maintenance {
             # optimize https://docs.nginx.com/nginx/admin-guide/web-server/serving-static-content/
@@ -83,6 +94,7 @@ data:
             sendfile_max_chunk 1m;
             rewrite ^(.*)$ /maintenance.html break;
           }
+
 
       }
     }
@@ -94,9 +106,9 @@ metadata:
 spec:
   healthCheck:
     checkIntervalSec: 15
-    port: 80
+    port: 80 # internal port
     type: HTTP
-    requestPath: /
+    requestPath: /healthz
 ---
 apiVersion: v1
 kind: Service
