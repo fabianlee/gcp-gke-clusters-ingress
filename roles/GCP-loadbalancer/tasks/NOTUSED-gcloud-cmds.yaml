@@ -48,7 +48,7 @@
 - debug: msg="ssl policy not created for internal HTTPS load balancer because it is incompatible with it"
 - debug: msg="security policy not created for internal HTTPS load balancer because Cloud Armor is incompatible with it"
 
-- name: create pre-shared cert for internal HTTPS LB
+- name: create pre-shared cert for internal HTTPS LB, not used anymore instead use spec.tls.secretName
   command:
     cmd: "gcloud compute ssl-certificates create {{cluster_name}}-pre-shared-cert-int --certificate /tmp/my-secondary.{{cluster_name}}.local.crt --private-key /tmp/my-secondary.{{cluster_name}}.local.key --region={{region}}"
   register: shared_cert_output

@@ -1,16 +1,8 @@
 ---
 
-- name: set logging for Cloud Armor security policy rule, not exposed from terraform
+- name: set logging level for Cloud Armor security policy rule, this option not exposed from terraform
   command:
     cmd: "gcloud compute security-policies update {{cluster_name}}-security-policy --log-level=VERBOSE"
-
-- name: create pre-shared cert for internal HTTPS LB, cert is on jumpbox and not avail to terraform on orchestrator
-  command:
-    cmd: "gcloud compute ssl-certificates create {{cluster_name}}-pre-shared-cert-int --certificate /tmp/my-secondary.{{cluster_name}}.local.crt --private-key /tmp/my-secondary.{{cluster_name}}.local.key --region={{region}}"
-  register: shared_cert_output
-  failed_when: shared_cert_output.rc!=0 and not "already exists" in shared_cert_output.stderr
-- debug: msg="{{shared_cert_output}}"
-
 
 # use either: 1) container native routing direct to service 2) OR point at istiod ingressgateway
 - set_fact:

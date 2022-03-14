@@ -13,7 +13,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cnr-my-ingress-int
+  name: my-ingress-int
   #namespace: "{{ingress_namespace}}"
   annotations:
     # If the class annotation is not specified it defaults to "gce".
@@ -30,8 +30,10 @@ metadata:
     # https://jayendrapatil.com/google-cloud-load-balancing-types/
     #networking.gke.io/v1beta1.FrontendConfig: lb-http-to-https
 
-    # for certificate on internal HTTPS LB, needs regional (not global!) pre-shared cert
-    ingress.gcp.kubernetes.io/pre-shared-cert: {{cluster_name}}-pre-shared-cert-int
+    # alternate way of adding certificate is regional (not global!) pre-shared-cert
+    # gcloud compute ssl-certificates create {{cluster_name}}-pre-shared-cert-int --certificate /tmp/my-secondary.{{cluster_name}}.local.crt --private-key /tmp/my-secondary.{{cluster_name}}.local.key --region={{region}}
+    # but using 'spec.tls.secretName' below works just fine
+    #ingress.gcp.kubernetes.io/pre-shared-cert: {{cluster_name}}-pre-shared-cert-int
 
 spec:
 #  defaultBackend:
@@ -40,8 +42,8 @@ spec:
 #      port:
 #        number: 8080
 
-#  tls:
-#  - secretName: {{cluster_name}}-tls-secret
+  tls:
+  - secretName: {{cluster_name}}-tls-secret-int
 
   rules:
   - http:

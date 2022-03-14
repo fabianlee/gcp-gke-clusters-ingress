@@ -19,9 +19,8 @@ echo ""
 
 echo "========== PRIMARY HTTPS LB ===================="
 {% if https_lb_primary %}
-ingress_name="{{ https_lb_primary_container_native_routing | ternary('cnr-my-ingress','my-ingress') }}"
 # have to lookup public IP because it is ephemeral
-publicIP=$(kubectl get ingress -n default $ingress_name -o=jsonpath="{.status.loadBalancer.ingress[0].ip}")
+publicIP=$(kubectl get ingress -n default my-ingress -o=jsonpath="{.status.loadBalancer.ingress[0].ip}")
 [ -n "$publicIP" ] || { echo "ERROR could not find public IP for ingress object"; exit 3; }
 
 domain=my-primary.{{cluster_name}}.local
