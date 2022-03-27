@@ -120,6 +120,7 @@ function check_prerequisites() {
   # show binary versions
   # on apt, can be upgraded with 'sudo apt install --only-upgrade google-cloud-sdk -y'
   gcloud --version | grep 'Google Cloud SDK'
+  kubectl version --short 2>/dev/null
   terraform --version | head -n 1
   ansible --version | head -n1
   yq --version
