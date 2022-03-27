@@ -7,12 +7,20 @@ region=us-east1
 source tf/envs/all.tfvars
 echo "vpc_network_name is $vpc_network_name"
 
+# check for gcloud login context
+gcloud projects list > /dev/null 2>&1
+[ $? -eq 0 ] || gcloud auth login --no-launch-browser
+gcloud auth list
+
 yqbin=$(which yq)
 [ -n "$yqbin" ] || { echo "ERROR you need yq installed to run this script"; exit 3; }
 
-echo "About to fetch the cluster versions available in us-east1, this can take a couple of minutes..."
 versions_file=/tmp/gke-${region}-versions.yaml
-[ -f "$versions_file" ] || gcloud container get-server-config --region=$region > $versions_file
+# file must exist and be of size greater than 0
+if [[ ! -f "$versions_file" || $(stat -c%s $versions_file) -eq 0 ]]; then
+  echo "About to fetch the cluster versions available in us-east1, this can take a couple of minutes..."
+  gcloud container get-server-config --region=$region | tee $versions_file
+fi
 
 default_version=$(cat $versions_file | yq ".channels[] | select (.channel==\"REGULAR\").defaultVersion")
 
