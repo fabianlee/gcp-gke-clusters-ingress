@@ -2,7 +2,7 @@
 ansible_python_interpreter: python3
 
 # general GCP project
-project_id: my-gkeproj1-16432
+project_id: my-gkeproj1-2123
 project_name: mygke-proj1
 region: us-east1
 
