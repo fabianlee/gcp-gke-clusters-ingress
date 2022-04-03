@@ -41,7 +41,7 @@ resource "google_compute_instance" "vm" {
 
   // using ssh key at project level
   metadata = {
-    enable-oslogin: "true"
+    enable-oslogin: "false" # false=allow ssh from project level metadata
   }
 
 
