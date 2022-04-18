@@ -10,7 +10,7 @@ region: us-east1
 network_name: mynetwork
 
 # GKE clusters
-cluster_version: "1.21.9-gke.1002"
+cluster_version: "1.21.10-gke.400"
 cluster_release_channel: regular
 is_regional_cluster: 0 # 1=multi-regional zonal
 node_image_type: UBUNTU_CONTAINERD # COS_CONTAINERD

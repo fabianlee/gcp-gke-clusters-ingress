@@ -37,7 +37,7 @@ echo "You selected GKE version $selected_version"
 # do replacements in files
 sed -i "s/cluster_version=.*/cluster_version=$selected_version/" global.properties
 sed -i "s/cluster_version:.*/cluster_version: \"$selected_version\"/" group_vars/all
-sed -i "s/cluster_version_prefix =.*/cluster_version_prefix = \"$selected_version\"/" tf/envs/all.tfvars
+sed -i "s/cluster_version_prefix=.*/cluster_version_prefix=\"$selected_version\"/" tf/envs/all.tfvars
 
 echo "======== RESULTS ============"
 grep ^cluster_version global.properties
