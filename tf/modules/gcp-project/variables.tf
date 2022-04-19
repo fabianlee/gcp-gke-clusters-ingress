@@ -1,6 +1,7 @@
 
 variable project {}
 
+# krmapihosting added for ACM, https://cloud.google.com/krmapihosting/docs/audit-logging
 variable project_services_list {
   type = list(string)
   default = [ 
@@ -10,6 +11,7 @@ variable project_services_list {
    "cloudresourcemanager.googleapis.com",
    "iam.googleapis.com",
    "anthos.googleapis.com"
+   "krmapihosting.googleapis.com"
   ]
 }
 
