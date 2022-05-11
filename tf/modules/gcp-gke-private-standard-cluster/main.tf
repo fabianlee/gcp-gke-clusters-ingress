@@ -1,3 +1,4 @@
+# terraform import --var-file=../envs/all.tfvars --var-file=../envs/std-pub-10-0-90-0.tfvars --state=../envs/std-pub-10-0-90-0.tfstate module.gcp-gke-private-standard-cluster.google_compute_security_policy.security-policy
 
 # network
 data "google_compute_network" "vpc" {
@@ -283,15 +284,15 @@ resource "google_compute_security_policy" "security-policy" {
 # Register the cluster, makes viewable in 'Anthos' section
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_membership
 # https://cloud.google.com/anthos/multicluster-management/connect/registering-a-cluster#register_cluster
-resource "google_gke_hub_membership" "membership" {
-  membership_id = google_container_cluster.cluster.name
-  endpoint {
-    gke_cluster {
-      resource_link = google_container_cluster.cluster.id
-    }
-  }
-  authority {
-    issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
-  }
-}
+#resource "google_gke_hub_membership" "membership" {
+#  membership_id = google_container_cluster.cluster.name
+#  endpoint {
+#    gke_cluster {
+#      resource_link = google_container_cluster.cluster.id
+#    }
+#  }
+#  authority {
+#    issuer = "https://container.googleapis.com/v1/${google_container_cluster.cluster.id}"
+#  }
+#}
 

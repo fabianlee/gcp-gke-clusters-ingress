@@ -120,9 +120,9 @@ resource "google_container_cluster" "apcluster" {
   }
 
   # conflicts with Autopilot, so removing 
-  #workload_identity_config {
-  #  workload_pool = "${var.project}.svc.id.goog"
-  #}
+  workload_identity_config {
+    workload_pool = "${var.project}.svc.id.goog"
+  }
 
   node_config {
     // Enable workload identity on this node pool.

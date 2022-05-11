@@ -1,3 +1,8 @@
+# examples of import
+# terraform import --var-file=../envs/all.tfvars --var-file=../envs/std-pub-10-0-90-0.tfvars --state=../envs/std-pub-10-0-90-0.tfstate module.gcp-gke-private-standard-cluster.google_compute_security_policy.security-policy std-pub-10-0-90-0-security-policy
+# terraform import --var-file=../envs/all.tfvars --var-file=../envs/std-pub-10-0-90-0.tfvars --state=../envs/std-pub-10-0-90-0.tfstate module.gcp-gke-private-standard-cluster.google_compute_ssl_policy.ssl-policy std-pub-10-0-90-0-ssl-policy
+# terraform import --var-file=../envs/all.tfvars --var-file=../envs/std-pub-10-0-90-0.tfvars --state=../envs/std-pub-10-0-90-0.tfstate module.gcp-gke-private-standard-cluster.google_pubsub_topic.cluster_topic std-pub-10-0-90-0
+
 
 module "gcp-gke-private-standard-cluster" {
   source = "../modules/gcp-gke-private-standard-cluster"
