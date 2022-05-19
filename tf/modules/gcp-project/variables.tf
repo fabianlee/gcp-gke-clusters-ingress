@@ -10,7 +10,7 @@ variable project_services_list {
    "gkehub.googleapis.com",
    "cloudresourcemanager.googleapis.com",
    "iam.googleapis.com",
-   "anthos.googleapis.com"
+   "anthos.googleapis.com",
    "krmapihosting.googleapis.com"
   ]
 }
