@@ -138,7 +138,7 @@ elif [ "managed" = "$asm_type" ]; then
   # not good enough to validate installation, need valid object type with at least 1 result
   kubectl get controlplanerevisions -n istio-system 1>/dev/null 2>&1
   if [ $? -eq 0 ]; then
-    echo "controlplanerevisions object is valid, but we do not have installation unless count>1"
+    echo "controlplanerevisions object is valid, but we do not have installation unless count>0"
     controlplane_count=$(kubectl get controlplanerevisions -n istio-system | wc -l)
     echo "controlplane_count is $controlplane_count"
     if [ $controlplane_count -eq 0 ]; then
