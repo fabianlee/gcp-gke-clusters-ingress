@@ -5,3 +5,4 @@ terraform.tfstate
 *.json
 *.lock.hcl
 *.lock.info
+*.pem
