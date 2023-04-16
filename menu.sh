@@ -127,7 +127,7 @@ function check_prerequisites() {
   jq --version
   make --version | head -n1
 
-  yq_major_version=$(yq --version | grep -Po "version \K\d?\.")
+  yq_major_version=$(yq --version | grep -Po "version v?\K\d?\.")
   if [[ $yq_major_version < "4." ]]; then
     echo "ERROR expecting yq to be at least 4.x, older versions have a different syntax"
     echo "download newer version from https://github.com/mikefarah/yq/releases"
