@@ -6,9 +6,10 @@
     state: present
 
 - name: get helm3 key, save in /usr/share/keyrings for newer apt deb syntax
-  shell: curl -fsSL https://baltocdn.com/helm/signing.asc | sudo tee /usr/share/keyrings/helm3.asc >/dev/null
-- name: chmod of key
-  shell: chmod ugo+r+w /usr/share/keyrings/helm3.asc
+  get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: usr/share/keyrings/helm3.asc
+    mode: ugo+rw
 
 - name: add helm3 apt repository
   apt_repository:

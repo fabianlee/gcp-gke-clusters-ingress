@@ -16,9 +16,10 @@
   shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 
 - name: get google key, save in /usr/share/keyrings for newer apt deb syntax
-  shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/google.gpg >/dev/null
-- name: chmod of key
-  shell: chmod ugo+r+w /usr/share/keyrings/google.gpg
+  get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: usr/share/keyrings/google.gpg
+    mode: ugo+rw
 
 - name: add google apt repository
   apt_repository:
