@@ -8,7 +8,7 @@
 - name: get helm3 key, save in /usr/share/keyrings for newer apt deb syntax
   get_url:
     url: https://baltocdn.com/helm/signing.asc
-    dest: usr/share/keyrings/helm3.asc
+    dest: /usr/share/keyrings/helm3.asc
     mode: ugo+rw
 
 - name: add helm3 apt repository

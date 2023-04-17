@@ -18,7 +18,7 @@
 - name: get google key, save in /usr/share/keyrings for newer apt deb syntax
   get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    dest: usr/share/keyrings/google.gpg
+    dest: /usr/share/keyrings/google.gpg
     mode: ugo+rw
 
 - name: add google apt repository
