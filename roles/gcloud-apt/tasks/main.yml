@@ -12,7 +12,7 @@
     state: present
     update_cache: yes
 
-- name: get google key, add to deprecated trusted keyring
+- name: DEPRECATED get google key, add to deprecated trusted keyring
   shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 
 - name: get google key, save in /usr/share/keyrings for newer apt deb syntax

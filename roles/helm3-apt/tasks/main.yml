@@ -1,6 +1,6 @@
 ---
 
-- name: get helm3 key, add to deprected trusted keyring
+- name: DEPRECATED get helm3 key, add to deprected trusted keyring
   apt_key:
     url: https://baltocdn.com/helm/signing.asc
     state: present
