@@ -155,6 +155,8 @@ function check_prerequisites() {
 
 ###### MAIN ###########################################
 
+# avoid gcloud warnings
+export PYTHONWARNINGS="ignore:Unverified HTTPS request"
 
 # if kubeconfig optionally specified on command line
 MYKUBECONFIG="$1"

@@ -20,7 +20,7 @@
 - name: chmod of key
   shell: chmod ugo+r+w /usr/share/keyrings/google.gpg
 
-- name: add google repository
+- name: add google apt repository
   apt_repository:
     repo: "deb [arch=amd64, signed-by=/usr/share/keyrings/google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
     state: present
@@ -32,7 +32,8 @@
 - name: install gcloud package
   package:
     name:
-      #- google-cloud-sdk
+      #- google-cloud-sdk # already on GCP VM as SNAP
+      - kubectl
       - google-cloud-sdk-gke-gcloud-auth-plugin
     state: present
     update_cache: yes

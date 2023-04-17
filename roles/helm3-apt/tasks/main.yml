@@ -1,18 +1,25 @@
 ---
 
-- name: add helm3 key to apt
+- name: get helm3 key, add to deprected trusted keyring
   apt_key:
     url: https://baltocdn.com/helm/signing.asc
     state: present
 
+- name: get helm3 key, save in /usr/share/keyrings for newer apt deb syntax
+  shell: curl -fsSL https://baltocdn.com/helm/signing.asc | sudo tee /usr/share/keyrings/helm3.asc >/dev/null
+- name: chmod of key
+  shell: chmod ugo+r+w /usr/share/keyrings/helm3.asc
+
 - name: add helm3 apt repository
   apt_repository:
-    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    repo: deb [arch=amd64, signed-by=/usr/share/keyrings/helm3.asc] https://baltocdn.com/helm/stable/debian/ all main
     state: present
     filename: helm3
+    update_cache: yes
+    mode: 0644
     validate_certs: false
 
-- name: make sure apt transport package installed
+- name: install helm apt package
   apt:
     update_cache: true
     pkg:
