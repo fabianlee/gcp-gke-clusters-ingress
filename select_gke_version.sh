@@ -44,3 +44,12 @@ grep ^cluster_version global.properties
 grep ^cluster_version group_vars/all
 grep ^cluster_version_prefix tf/envs/all.tfvars
 
+
+default_type="COS_CONTAINERD"
+echo ""
+read -p "Which GKE node type do you want (default=$default_type)? " selected_type
+[ -n "$selected_type" ] || selected_type=$default_type
+sed -i "s/node_image_type=.*/node_image_type=\"$selected_type\"/" tf/envs/all.tfvars
+echo "======== RESULTS ============"
+grep ^node_image_type tf/envs/all/tfvars
+

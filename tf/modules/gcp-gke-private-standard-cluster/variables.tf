@@ -20,7 +20,7 @@ variable secondary_range_pods_name { default = "pods" }
 variable master_ipv4_cidr_block_28 { }
 
 # terraform says repair+upgrade must be true when REGULAR
-variable cluster_version_prefix { default="1.21.5" }
+variable cluster_version_prefix { default="1.24.10" }
 variable cluster_release_channel { default="REGULAR" }
 variable node_auto_repair { default = true }
 variable node_auto_upgrade { default = true }
@@ -37,7 +37,7 @@ variable node_machine_type_zonal { default="e2-standard-4" }
 
 variable node_initial_node_count { default=1 }
 variable node_preemptible { default=true }
-variable node_image_type { default = "COS" }
+variable node_image_type { default = "COS_CONTAINERD" }
 variable node_disk_size_gb { default = 60 }
 variable node_oauth_scopes {
   type = list(string)

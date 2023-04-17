@@ -6,6 +6,9 @@
     dest: .
     mode: 0755
 
+- debug:
+    msg: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+
 - name: run ASM install script
   command:
     cmd: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}

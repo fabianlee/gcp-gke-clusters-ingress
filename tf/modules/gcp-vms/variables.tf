@@ -8,7 +8,7 @@ variable vm_network {}
 # use empty string if no subnet
 variable vm_subnetwork { default="" }
 
-variable os_image { default="ubuntu-os-cloud/ubuntu-2004-lts" }
+variable os_image { default="ubuntu-os-cloud/ubuntu-2204-lts" }
 variable machine_type { default="e2-small" }
 
 # when preemptible is true, automatic restart MUST be false

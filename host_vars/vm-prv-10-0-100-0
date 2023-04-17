@@ -13,7 +13,7 @@ cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
 balloon_replicas: 0
 
 asm_type: incluster
-asm_version: "1.11" # leaves room for upgrade testing
+asm_version: "1.17" # leaves room for upgrade testing
 
 # for HTTPS LB public ingress
 https_lb_primary: true

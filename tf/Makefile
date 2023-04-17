@@ -29,7 +29,7 @@ init:
 
 project: init
 	@echo Creating the project is a bootstrapping function done as the editor or owner of project
-	gcloud auth application-default login
+	echo gcloud auth application-default login
 	cd project && $(TF) init $(INIT_FLAGS)
 	cd project && $(TF) apply $(PROJECT_ARGS) $(FLAGS)
 project-destroy:

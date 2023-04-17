@@ -2,18 +2,18 @@
 ansible_python_interpreter: python3
 
 # general GCP project
-project_id: my-gkeproj1-10941
-project_name: mygke-proj1
+project_id: my-gkeproj1-1813
+project_name: my-gkeproj1-1813
 region: us-east1
 
 # custom VPC network
 network_name: mynetwork
 
 # GKE clusters
-cluster_version: "1.21.10-gke.400"
+cluster_version: "1.24.10-gke.2300"
 cluster_release_channel: regular
 is_regional_cluster: 0 # 1=multi-regional zonal
-node_image_type: UBUNTU_CONTAINERD # COS_CONTAINERD
+node_image_type: COS_CONTAINERD #UBUNTU_CONTAINERD # COS_CONTAINERD
 
 # ASM Anthos Service Mesh
 asm_release_channel: "rapid" # must be regular|rapid for GKE Autopilot (cannot use stable)

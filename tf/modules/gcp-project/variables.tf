@@ -24,6 +24,8 @@ variable asm_services_list {
     "monitoring.googleapis.com",
     "logging.googleapis.com",
     "cloudtrace.googleapis.com",
+    "mesh.googleapis.com",
+    "serviceusage.googleapis.com",
     "meshca.googleapis.com",
     "meshtelemetry.googleapis.com",
     "meshconfig.googleapis.com",

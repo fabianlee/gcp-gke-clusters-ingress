@@ -15,6 +15,9 @@
     dest: .
     mode: 0755
 
+- debug:
+    msg: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+
 - name: run gcloud register install script
   command:
     cmd: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}

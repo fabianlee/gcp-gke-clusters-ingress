@@ -17,6 +17,7 @@ resource "google_project" "project" {
 
 # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/google_project_service
 resource "google_project_service" "services" {
+  depends_on = [ google_project.project ]
   for_each = toset(var.project_services_list)
 
   project = var.project
@@ -26,6 +27,7 @@ resource "google_project_service" "services" {
 }
 
 resource "google_project_service" "asm-services" {
+  depends_on = [ google_project.project ]
   for_each = toset(var.asm_services_list)
 
   project = var.project
@@ -35,6 +37,7 @@ resource "google_project_service" "asm-services" {
 }
 
 resource "google_project_service" "additional-services" {
+  depends_on = [ google_project.project ]
   for_each = toset(var.additional_services_list)
 
   project = var.project

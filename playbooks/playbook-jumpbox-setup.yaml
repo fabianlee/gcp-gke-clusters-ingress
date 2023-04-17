@@ -7,6 +7,7 @@
     - kubectl-apt
     - k9s
     - helm3-apt
-    # gcloud is already on GCP VM instances
-    #- gcloud-apt
+
+    # gcloud is already on GCP VM instances, but as Snap which does not have auth plugin
+    - gcloud-apt
 
