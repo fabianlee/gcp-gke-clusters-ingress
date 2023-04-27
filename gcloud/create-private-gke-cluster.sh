@@ -19,7 +19,7 @@ subnet_name="$9"
 master_cidr="${10}"
 additional_authorized_cidr="${11}"
 region="${12}"
-is_regional_cluster="${14:-0}" # 1=is regional multi-zonal
+is_regional_cluster="${13:-0}" # 1=is regional multi-zonal
 if [[ -z "$cluster_type" || -z "$exposed_as" || -z "$cluster_name" || -z "$cluster_version" || -z "$cluster_release_channel" || -z "$image_type" || -z "$project_id" || -z "$network_name" || -z "$subnet_name" || -z "$master_cidr" || -z "$region" ]]; then
   echo "Usage: clusterType=standard|autopilot exposedAs=public|private clusterName clusterVersion clusterReleaseChannel imageType project_id networkName subnetName masterCIDR=a.b.c.d/28 additional_authorized_cidr=a.b.c.d/x regionprojectid networkName region isRegionalCluster=0|1"
   exit 1
