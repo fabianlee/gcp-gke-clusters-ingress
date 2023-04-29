@@ -110,7 +110,7 @@ resource "google_container_cluster" "cluster" {
   # ignore master version being auto-upgraded
   lifecycle {
     ignore_changes = [
-      min_master_version
+      min_master_version, labels
     ]
   }
 

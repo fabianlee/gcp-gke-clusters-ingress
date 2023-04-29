@@ -51,5 +51,5 @@ read -p "Which GKE node type do you want (default=$default_type)? " selected_typ
 [ -n "$selected_type" ] || selected_type=$default_type
 sed -i "s/node_image_type=.*/node_image_type=\"$selected_type\"/" tf/envs/all.tfvars
 echo "======== RESULTS ============"
-grep ^node_image_type tf/envs/all/tfvars
+grep ^node_image_type tf/envs/all.tfvars
 
