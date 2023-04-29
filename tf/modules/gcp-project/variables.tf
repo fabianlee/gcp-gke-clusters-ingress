@@ -27,7 +27,7 @@ variable asm_services_list {
     "mesh.googleapis.com",
     "serviceusage.googleapis.com",
     "meshca.googleapis.com",
-    "meshtelemetry.googleapis.com",
+    #"meshtelemetry.googleapis.com", # NO LONGER AVAILABLE
     "meshconfig.googleapis.com",
     "iamcredentials.googleapis.com",
     "gkeconnect.googleapis.com",
