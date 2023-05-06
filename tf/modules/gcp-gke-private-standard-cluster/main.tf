@@ -106,11 +106,13 @@ resource "google_container_cluster" "cluster" {
       recurrence = "FREQ=WEEKLY;BYDAY=TU,WE,TH,FR,SA,SU"
     }
   }
+ 
+  resource_labels = var.resource_labels
 
   # ignore master version being auto-upgraded
   lifecycle {
     ignore_changes = [
-      min_master_version, labels
+      min_master_version, resource_labels
     ]
   }
 

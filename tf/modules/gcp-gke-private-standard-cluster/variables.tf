@@ -58,3 +58,8 @@ variable node_network_tags_list {
 variable nodes_max_surge { default = 2 }
 variable nodes_max_unavailable { default = 1 }
 
+variable resource_labels {
+  type = map(string)
+  default = { foo = "bar" }
+}
+
