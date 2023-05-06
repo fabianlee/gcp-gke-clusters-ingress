@@ -36,6 +36,7 @@ variable node_machine_type_regional { default="e2-standard-4" }
 variable node_machine_type_zonal { default="e2-standard-4" }
 
 variable node_initial_node_count { default=1 }
+variable node_node_count { default=1 }
 variable node_preemptible { default=true }
 variable node_image_type { default = "COS_CONTAINERD" }
 variable node_disk_size_gb { default = 60 }

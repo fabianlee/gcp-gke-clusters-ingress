@@ -30,7 +30,6 @@ resource "google_container_cluster" "cluster" {
   name     = var.cluster_name
   location = var.is_regional_cluster ? var.region:var.zone
   min_master_version  = data.google_container_engine_versions.cluster_versions.latest_master_version
-  master_version  = data.google_container_engine_versions.cluster_versions.latest_master_version
 
   release_channel {
     channel = var.cluster_release_channel
@@ -111,10 +110,10 @@ resource "google_container_cluster" "cluster" {
   # cluster labels 
   resource_labels = var.resource_labels
 
-  # ignore master version being auto-upgraded
+  # ignore cluster level label changes
   lifecycle {
     ignore_changes = [
-      master_version, resource_labels
+      resource_labels
     ]
   }
 
@@ -158,6 +157,7 @@ resource "google_container_node_pool" "primary_nodes" {
   location = var.is_regional_cluster ? var.region:var.zone
   cluster    = google_container_cluster.cluster.id
   initial_node_count = var.node_initial_node_count
+  node_count = var.node_node_count
   version  = data.google_container_engine_versions.cluster_versions.latest_node_version
 
   node_config {
@@ -209,6 +209,7 @@ resource "google_container_node_pool" "primary_nodes" {
       version
     ]
   }
+#      node_count,
 
 }
 
