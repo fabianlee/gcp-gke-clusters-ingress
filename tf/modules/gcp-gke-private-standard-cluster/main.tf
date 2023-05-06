@@ -30,6 +30,7 @@ resource "google_container_cluster" "cluster" {
   name     = var.cluster_name
   location = var.is_regional_cluster ? var.region:var.zone
   min_master_version  = data.google_container_engine_versions.cluster_versions.latest_master_version
+  master_version  = data.google_container_engine_versions.cluster_versions.latest_master_version
 
   release_channel {
     channel = var.cluster_release_channel
@@ -106,13 +107,14 @@ resource "google_container_cluster" "cluster" {
       recurrence = "FREQ=WEEKLY;BYDAY=TU,WE,TH,FR,SA,SU"
     }
   }
- 
+
+  # cluster labels 
   resource_labels = var.resource_labels
 
   # ignore master version being auto-upgraded
   lifecycle {
     ignore_changes = [
-      min_master_version, resource_labels
+      master_version, resource_labels
     ]
   }
 
