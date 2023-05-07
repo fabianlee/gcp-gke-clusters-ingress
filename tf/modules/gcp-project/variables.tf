@@ -24,7 +24,7 @@ variable asm_services_list {
     "monitoring.googleapis.com",
     "logging.googleapis.com",
     "cloudtrace.googleapis.com",
-    "mesh.googleapis.com",
+    "mesh.googleapis.com", # bundler for meshca,meshconfig,etc: https://cloud.google.com/service-mesh/docs/managed/provision-managed-anthos-service-mesh#expandable-1
     "serviceusage.googleapis.com",
     "meshca.googleapis.com",
     #"meshtelemetry.googleapis.com", # NO LONGER AVAILABLE

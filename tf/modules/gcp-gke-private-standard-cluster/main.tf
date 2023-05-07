@@ -156,7 +156,7 @@ resource "google_container_node_pool" "primary_nodes" {
   name       = "${google_container_cluster.cluster.name}-node-pool"
   location = var.is_regional_cluster ? var.region:var.zone
   cluster    = google_container_cluster.cluster.id
-  initial_node_count = var.node_initial_node_count
+  # NOT NEEDED initial_node_count = var.node_initial_node_count
   node_count = var.node_node_count
   version  = data.google_container_engine_versions.cluster_versions.latest_node_version
 

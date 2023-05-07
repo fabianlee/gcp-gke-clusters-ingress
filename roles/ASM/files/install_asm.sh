@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-# Deploy ASM to GKE cluster
+# Deploy ASM to GKE cluster using asmcli
+# for managed ASM, there is an alternate way of installing using 'gcloud container fleet mesh update'
+# https://cloud.google.com/service-mesh/docs/managed/provision-managed-anthos-service-mesh#enable_automatic_management
 #
 # in-cluster control plane
 # https://cloud.google.com/service-mesh/docs/unified-install/install
@@ -72,9 +74,7 @@ compute.googleapis.com
 monitoring.googleapis.com
 logging.googleapis.com
 cloudtrace.googleapis.com
-meshca.googleapis.com
-meshtelemetry.googleapis.com
-meshconfig.googleapis.com
+mesh.googleapis.com
 iamcredentials.googleapis.com
 gkeconnect.googleapis.com
 gkehub.googleapis.com

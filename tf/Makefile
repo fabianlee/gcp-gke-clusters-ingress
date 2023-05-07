@@ -3,7 +3,8 @@ PROJECT := $(THISDIR)
 TF := terraform
 INIT_FLAGS :=
 # -upgrade (when provider version is upgraded)
-FLAGS := --auto-approve
+FLAGS := 
+#FLAGS := --auto-approve
 #--auto-approve (if you want changes approved without prompt)
 
 STD_DIR := gke-private-standard-cluster
