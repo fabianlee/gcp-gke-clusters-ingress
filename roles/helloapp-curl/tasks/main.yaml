@@ -10,10 +10,18 @@
     - test-curl-primary.sh
     - test-curl-secondary.sh
 
-- name: copy key and cert pairing check
+- name: copy key and cert
+  copy:
+    src: "{{item}}"
+    dest: /tmp/.
+    owner: ubuntu
+    mode: 0775
+  with_fileglob: /tmp/*.crt
+
+- name: key and cert pairing check
   copy:
     src: openssl_key_cert_check.sh
-    dest: .
+    dest: /tmp/.
     owner: ubuntu
     mode: 0775
 
