@@ -1,16 +1,36 @@
 ---
 
-- name: copy ASM installer script
+- name: copy ASM installer scripts
   copy:
-    src: install_asm.sh
+    src: "{{item}}"
     dest: .
     mode: 0755
+  loop:
+    - install_asm.sh
+    - install_managed_asm_gcloud_fleet.sh
 
-- debug:
-    msg: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+- name: BLOCK for using asmcli to install ASM in-cluster
+  block:
+    - debug:
+        msg: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+    
+    - name: run ASM in-cluster install script using asmcli
+      command:
+        cmd: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+      register: asm_install
+    - debug: msg="{{asm_install}}"
+  when: asm_type == "incluster"
 
-#- name: run ASM install script
-#  command:
-#    cmd: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
-#  register: asm_install
-#- debug: msg="{{asm_install}}"
+
+- name: BLOCK for using gcloud fleet to install managed ASM
+  block:
+    - debug:
+        msg: ./install_managed_asm_gcloud_fleet.sh {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+    
+    - name: install managed ASM using gcloud fleet
+      command:
+        cmd: ./install_managed_asm_gcloud_fleet.sh {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+      register: asm_install
+    - debug: msg="{{asm_install}}"
+  when: asm_type == "managed"
+  
