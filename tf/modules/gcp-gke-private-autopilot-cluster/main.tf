@@ -119,10 +119,10 @@ resource "google_container_cluster" "apcluster" {
     cluster_secondary_range_name = var.secondary_range_pods_name
   }
 
-  # conflicts with Autopilot, so removing 
-  workload_identity_config {
-    workload_pool = "${var.project}.svc.id.goog"
-  }
+  # not valid with Autopilot (which enables workload identity already)
+  #workload_identity_config {
+  #  workload_pool = "${var.project}.svc.id.goog"
+  #}
 
   node_config {
     // Enable workload identity on this node pool.
