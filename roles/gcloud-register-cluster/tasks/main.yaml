@@ -8,18 +8,20 @@
   command:
     cmd: gcloud config set project {{project_id}}
 
-
-- name: copy gcloud register installer script
-  copy:
-    src: gcloud_register_cluster.sh
-    dest: .
-    mode: 0755
-
-- debug:
-    msg: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
-
-- name: run gcloud register install script
-  command:
-    cmd: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
-  register: register_cluster
-- debug: msg="{{register_cluster}}"
+- name: BLOCK to register standard GKE cluster (not necessary for AutoPilot clusters)
+  block:
+    - name: copy gcloud register installer script
+      copy:
+        src: gcloud_register_cluster.sh
+        dest: .
+        mode: 0755
+    
+    - debug:
+        msg: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+    
+    - name: run gcloud register install script
+      command:
+        cmd: ./gcloud_register_cluster.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+      register: register_cluster
+    - debug: msg="{{register_cluster}}"
+  when:  asm_type == "incluster"
