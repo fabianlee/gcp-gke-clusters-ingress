@@ -136,6 +136,20 @@ else
     gcloud container clusters update $cluster_name --project $project_id $location_flag --update-labels mesh_id=proj-${project_number}
     set +x
 
+    # wait for reconciled status which indicates done
+    waiting_for_status=1
+    while [[ $waiting_for_status -eq 1 ]]; do
+      reconciled_status=$(kubectl get controlplanerevision $cplane_name -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Reconciled')].status}")
+      stalled_status=$(kubectl get controlplanerevision $cplane_name -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Stalled')].status}")
+
+      # if we see a proper reconcile or a stall, then exit wait loop
+      if [[ "$reconciled_status" == "True" || "$stalled_status" == "True" ]]; then
+        waiting_for_status=0
+      fi
+      sleep 3
+
+    done 
+
 fi
 
 # controlplanerevision should now exist at this point in script
@@ -174,6 +188,10 @@ fi
 
 
 if [ "$reconciled_status" == "True" ]; then
+  # delete webhook that continues to cause virtualservice creation to fail
+  # failed to call webhook: Post https://meshconfig.googleapis.com/v1alpha1/...
+  kubectl delete Validatingwebhookconfigurations istiod-istio-system-mcp -n istio-system
+
   # set revision label for default namespace
   for ns in default; do
     kubectl label namespace $ns istio-injection- istio.io/rev=$cplane_name --overwrite

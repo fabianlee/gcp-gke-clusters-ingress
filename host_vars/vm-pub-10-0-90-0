@@ -14,7 +14,7 @@ balloon_replicas: 0
 
 asm_type: managed
 #asm_type: incluster
-#asm_version: "1.17" # leaves room for upgrade testing
+#asm_version: "1.17"
 
 # for TCP LB 
 ingressgateway_primary: true
