@@ -101,15 +101,19 @@ workload_identity=$(gcloud container clusters describe $cluster_name --format="v
 [ -n "$workload_identity" ] || { echo "ERROR workload identity is not be enabled for this cluster, see 'gcloud container clusters describe $cluster_name $location_flag'"; exit 5; }
 echo "workload identity: $workload_identity"
 
+
 # check for type that indicates ASM installation has been done
 asm_already_installed=0
 # not good enough to validate installation, need valid object type with at least 1 result
 kubectl get controlplanerevisions -n istio-system 1>/dev/null 2>&1
 if [ $? -eq 0 ]; then
-  echo "controlplanerevisions object is valid, but we do not have installation unless count>0"
-  controlplane_count=$(kubectl get controlplanerevisions -n istio-system | wc -l)
-  echo "controlplane_count is $controlplane_count"
-  if [ $controlplane_count -eq 0 ]; then
+  echo "controlplanerevisions CRD object is valid, but find actual object now"
+
+  cplane_name=$(kubectl get controlplanerevision -n istio-system --output="jsonpath={.items[0].metadata.name}")
+  echo "control plane name: $cplane_name"
+  reconciled_status=$(kubectl get controlplanerevision $cplane_name -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Reconciled')].status}")
+
+  if [ -z "$cplane_name" ]; then
     $(exit 99)
   fi
 else
@@ -117,8 +121,8 @@ else
   $(exit 1)
 fi
 
-if [ $? -eq 0 ]; then
-  echo "controlplanerevisions is already installed, therefore no need to run asmcli install"
+if [ -n "$cplane_name" ]; then
+  echo "controlplanerevisions '$cplane_name' is already installed, therefore skipping install"
 else
 
     # using gcloud fleet installation for managed ASM (instead of asmcli)
@@ -134,17 +138,14 @@ else
 
 fi
 
-
-cplane_name=$(kubectl get controlplanerevision -n istio-system --output="jsonpath={.items[0].metadata.name}")
-echo "control plane name: $cplane_name"
-kubectl get controlplanerevision $cplane_name -n istio-system
+# controlplanerevision should now exist at this point in script
+# check status of reconciliation, which signals installation complete
+kubectl get controlplanerevision $cplane_name -n istio-system 1>/dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "ERROR with a managed ASM control plane, we would expect a controlplanerevision object"
+  echo "ERROR finding managed ASM control plane, we would expect a controlplanerevision object"
   exit 7
 else
-  echo "ASM already installed into istio-system"
-  kubectl get controlplanerevision $cplane_name -n istio-system
-  echo ""
+  echo "managed ASM already installed into istio-system"
   reconciled_status=$(kubectl get controlplanerevision $cplane_name -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Reconciled')].status}")
   stalled_status=$(kubectl get controlplanerevision $cplane_name -n istio-system -o=jsonpath="{.status.conditions[?(.type=='Stalled')].status}")
   echo "ASM control plan reconciled status: $reconciled_status (You want True)"
@@ -152,7 +153,12 @@ else
 fi
 
 # test sidecar proxy if ASM reconciled
-if [ "$reconciled_status" == "True" ]; then
+kubectl get deployment/nginx-gmanaged -n gmanaged-sidecar 2>/dev/null 1>&2
+if [[ $? -eq 0 ]]; then
+  echo "Already created gmanaged-sidecar deployment"
+elif [[ "$reconciled_status" != "True" ]]; then
+  echo "Skipping sidecard test because reconcilation of $cplane_name not complete $reconciled_status"
+elif [ "$reconciled_status" == "True" ]; then
   # https://cloud.google.com/service-mesh/docs/managed/service-mesh#managed-data-plane
   echo "creating 'gmanaged-sidecar' namespace where upgraded sidecar are automatically applied"
   kubectl create ns gmanaged-sidecar
@@ -167,14 +173,15 @@ if [ "$reconciled_status" == "True" ]; then
 fi
 
 
-# set revision label for default namespace
-for ns in default; do
-  kubectl label namespace $ns istio-injection- istio.io/rev=$cplane_name --overwrite
-done
-kubectl get ns istio-system --show-labels
-
-
-# https://cloud.google.com/service-mesh/docs/managed/optional-features#enable_cloud_tracing
+if [ "$reconciled_status" == "True" ]; then
+  # set revision label for default namespace
+  for ns in default; do
+    kubectl label namespace $ns istio-injection- istio.io/rev=$cplane_name --overwrite
+  done
+  kubectl get ns istio-system --show-labels
+fi
+  
+  # https://cloud.google.com/service-mesh/docs/managed/optional-features#enable_cloud_tracing
 echo "Enable cloud tracing..."
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
