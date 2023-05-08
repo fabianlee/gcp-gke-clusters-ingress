@@ -50,7 +50,7 @@ if [ -n "$workload_identity" ]; then
 else
 
   if [ $cluster_type = "autopilot" ]; then
-    echo "GKE Autopilot clusters should already have a workload identity.  I would not expect to read this log message"
+    echo "GKE Autopilot clusters should already have a workload identity.  I would not expect to ever reach this log message"
   else
 
     # register cluster with Anthos hub, delete any old registration first
