@@ -26,6 +26,7 @@ if [[ ! -f "$versions_file" || $(stat -c%s $versions_file) -eq 0 || "$versions_f
   gcloud container get-server-config --region=$region | tee $versions_file
   echo "DONE with fetch"
 fi
+rm $agedfile
 
 default_version=$(cat $versions_file | yq ".channels[] | select (.channel==\"REGULAR\").defaultVersion")
 
