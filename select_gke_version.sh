@@ -15,11 +15,16 @@ gcloud auth list
 yqbin=$(which yq)
 [ -n "$yqbin" ] || { echo "ERROR you need yq installed to run this script"; exit 3; }
 
+# create file that looks like it was created 1 day ago
+agedfile=$(mktemp)
+touch -d "1 days ago" $agedfile
+
 versions_file=/tmp/gke-${region}-versions.yaml
 # file must exist and be of size greater than 0
-if [[ ! -f "$versions_file" || $(stat -c%s $versions_file) -eq 0 ]]; then
+if [[ ! -f "$versions_file" || $(stat -c%s $versions_file) -eq 0 || "$versions_file" -ot "$agedfile" ]]; then
   echo "About to fetch the cluster versions available in us-east1, this can take a couple of minutes..."
   gcloud container get-server-config --region=$region | tee $versions_file
+  echo "DONE with fetch"
 fi
 
 default_version=$(cat $versions_file | yq ".channels[] | select (.channel==\"REGULAR\").defaultVersion")
