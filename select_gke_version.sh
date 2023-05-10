@@ -15,16 +15,8 @@ gcloud auth list
 yqbin=$(which yq)
 [ -n "$yqbin" ] || { echo "ERROR you need yq installed to run this script"; exit 3; }
 
-# create file that looks like it was created 1 day ago
-#agedfile=$(mktemp)
-#touch -d "1 days ago" $agedfile
 
 versions_file=/tmp/gke-${region}-versions.yaml
-# file must exist and be of size greater than 0
-#if [[ ! -f "$versions_file" || $(stat -c%s $versions_file) -eq 0 || "$versions_file" -ot "$agedfile" ]]; then
-
-# using find to test for: existence, newness (modified within day) and size>0
-# this replaces my older logic commented out above 
 find $versions_file -mtime -1 -size +0b 2>/dev/null | grep .
 if [ $? -ne 0 ]; then
   echo "About to fetch the cluster versions available in us-east1, this can take a couple of minutes..."
