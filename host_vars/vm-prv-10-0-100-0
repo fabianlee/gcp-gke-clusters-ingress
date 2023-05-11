@@ -12,8 +12,8 @@ cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
 # no need to scale standard GKE cluster
 balloon_replicas: 0
 
-asm_type: incluster
-asm_version: "1.17" # leaves room for upgrade testing
+asm_type: managed
+asm_managed_installer: asmcli
 
 # for HTTPS LB public ingress
 https_lb_primary: true

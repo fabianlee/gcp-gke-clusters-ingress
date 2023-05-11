@@ -12,14 +12,14 @@
 - name: BLOCK for using asmcli to install ASM in-cluster
   block:
     - debug:
-        msg: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+        msg: ./install_asm.sh {{asm_type}} {{asm_version|default(1.17)}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
     
     - name: run ASM in-cluster install script using asmcli
       command:
-        cmd: ./install_asm.sh {{asm_type}} {{asm_version}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
+        cmd: ./install_asm.sh {{asm_type}} {{asm_version|default(1.17)}} {{asm_release_channel}} {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
       register: asm_install
     - debug: msg="{{asm_install}}"
-  when: asm_type == "incluster"
+  when: asm_type == "incluster" or asm_managed_installer == "asmcli"
 
 
 - name: BLOCK for using gcloud fleet to install managed ASM
@@ -32,5 +32,5 @@
         cmd: ./install_managed_asm_gcloud_fleet.sh {{cluster_type}} {{cluster_name}} {{project_id}} {{region}} {{is_regional_cluster}}
       register: asm_install
     - debug: msg="{{asm_install}}"
-  when: asm_type == "managed"
-  
+  when: asm_type == "managed" and asm_managed_installer == "fleet"
+

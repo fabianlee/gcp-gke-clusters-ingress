@@ -12,7 +12,6 @@ cert_domains_secondary_ingress: ["my-secondary.{{cluster_name}}.local"]
 # no need to scale standard GKE cluster
 balloon_replicas: 0
 
-#asm_type: managed
 asm_type: incluster
 asm_version: "1.17"
 
