@@ -27,3 +27,8 @@ variable vm_scopes {
   default = ["cloud-platform"]
 }
 
+variable additional_metadata {
+  type = map(string)
+  default = null
+}
+

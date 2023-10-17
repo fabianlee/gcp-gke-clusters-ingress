@@ -1,10 +1,12 @@
 
 variable project {}
 
+# serviceusage for quota project
 # krmapihosting added for ACM, https://cloud.google.com/krmapihosting/docs/audit-logging
 variable project_services_list {
   type = list(string)
-  default = [ 
+  default = [
+   "serviceusage.services.use",
    "container.googleapis.com",
    "gkeconnect.googleapis.com",
    "gkehub.googleapis.com",

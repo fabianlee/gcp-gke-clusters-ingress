@@ -31,8 +31,12 @@ init:
 project: init
 	@echo Creating the project is a bootstrapping function done as the editor or owner of project
 	gcloud auth application-default login
+	@echo Make sure quota project id is defined
+	grep quota_project_id ~/.config/gcloud/application_default_credentials.json
 	cd project && $(TF) init $(INIT_FLAGS)
 	cd project && $(TF) apply $(PROJECT_ARGS) $(FLAGS)
+	gcloud auth application-default set-quota-project `grep ^project_id ../global.properties | cut -d= -f2`
+	gcloud config set billing/quota_project `grep ^project_id ../global.properties | cut -d= -f2`
 project-destroy:
 	cd project && $(TF) destroy $(PROJECT_ARGS) $(FLAGS)
 

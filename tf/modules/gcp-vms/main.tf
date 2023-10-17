@@ -40,10 +40,7 @@ resource "google_compute_instance" "vm" {
 
 
   // using ssh key at project level
-  metadata = {
-    enable-oslogin: "false" # false=allow ssh from project level metadata
-  }
-
+  metadata = merge( { enable-oslogin="false"}, var.additional_metadata )
 
   service_account {
     # leaving email empty means default compute engine service account will be used
